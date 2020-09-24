@@ -6,6 +6,15 @@ import pino from "pino-http"
 // local imports
 import * as config from "./config"
 import { log } from "./helper"
+import * as sequelize from "./sequelize/umzug"
+
+sequelize.umzug.pending().then((migrations) => {
+    console.log(migrations)
+    sequelize.umzug
+        .up()
+        .then(() => console.log("success"))
+        .catch((err) => console.log("failed", err))
+})
 
 const app: Express = express()
 app.use(cors())

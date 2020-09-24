@@ -27,4 +27,20 @@ Contents of `.env.sample`
 NODE_ENV='development'
 # express listening port
 PORT=8080
+# Database
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER='user'
+DB_PASS='pass'
+DB_NAME='dbname'
 ```
+
+## References
+Pincode API<br>
+[http://www.postalpincode.in/](http://www.postalpincode.in/)
+
+The Comprehensive Sequelize Cheatsheet<br>
+[https://dev.to/projectescape/the-comprehensive-sequelize-cheatsheet-3m1m](https://dev.to/projectescape/the-comprehensive-sequelize-cheatsheet-3m1m)
+
+Use Sequelize and Typescript like a pro! With/out the LEGACY decorators
+[https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472](https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472)
