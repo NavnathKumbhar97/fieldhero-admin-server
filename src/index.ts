@@ -6,15 +6,16 @@ import pino from "pino-http"
 // local imports
 import * as config from "./config"
 import { log } from "./helper"
-import * as sequelize from "./sequelize/umzug"
+import { routerV1 } from "./router"
+// import * as sequelize from "./sequelize/umzug"
 
-sequelize.umzug.pending().then((migrations) => {
-    console.log(migrations)
-    sequelize.umzug
-        .up()
-        .then(() => console.log("success"))
-        .catch((err) => console.log("failed", err))
-})
+// sequelize.umzugCustomer.pending().then((migrations) => {
+//     log.info(migrations.map((m) => m.file))
+//     sequelize.umzugCustomer
+//         .up()
+//         .then(() => log.info("success"))
+//         .catch((err) => log.error(err, "failed"))
+// })
 
 const app: Express = express()
 app.use(cors())
@@ -23,6 +24,8 @@ app.use(bodyparser.urlencoded({ extended: false }))
 app.use(helmet())
 // configure pino logging with express
 app.use(pino({ logger: log }))
+
+app.use("/api/v1", routerV1)
 
 app.get("/", (req: Request, res: Response) => {
     res.status(200).json("API Working")

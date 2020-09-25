@@ -1,6 +1,8 @@
-import { DataTypes, Sequelize } from "sequelize"
+import { Sequelize } from "sequelize"
 import * as models from "./models"
 import * as config from "../config"
+
+// sequelize instance for customer db
 const orm = new Sequelize({
     host: config.DB_HOST,
     port: config.DB_PORT,
@@ -18,8 +20,24 @@ const orm = new Sequelize({
     },
 })
 
+// Models for customer db
 const Industry = models.IndustryFactory(orm)
 const SkillSet = models.SkillSetFactory(orm)
 const Company = models.CompanyFactory(orm)
+const Candidate = models.CandidateFactory(orm)
+const CandidateCertificate = models.CandidateCertificateFactory(orm)
+const CandidateWorkHistory = models.CandidateWorkFactory(orm)
+const CandidateWorkHistorySkill = models.CandidateWorkSkillFactory(orm)
+const CandidateOtherDetails = models.CandidateOtherFactory(orm)
+const customerDB = {
+    Candidate,
+    CandidateCertificate,
+    CandidateOtherDetails,
+    CandidateWorkHistory,
+    CandidateWorkHistorySkill,
+    Company,
+    Industry,
+    SkillSet,
+}
 
-export { orm, Industry, SkillSet, Company }
+export { customerDB, orm as ormCustomer }

@@ -44,3 +44,6 @@ The Comprehensive Sequelize Cheatsheet<br>
 
 Use Sequelize and Typescript like a pro! With/out the LEGACY decorators
 [https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472](https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472)
+
+How to delete a commit in git, local and remote<br>
+[https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/](https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/)

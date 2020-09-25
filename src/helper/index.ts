@@ -1,2 +1,3 @@
 import log from "./log"
-export { log }
+import httpStatus from "./http_status"
+export { log, httpStatus }
