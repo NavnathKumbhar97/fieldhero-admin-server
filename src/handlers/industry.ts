@@ -36,10 +36,34 @@ const createIndustry = async (param: createIndustryParam) => {
     })
     return industry
 }
+interface updateIndustryParam {
+    id:number,
+    title: string
+    description: string
+    isActive: boolean
+}
+const updateIndustryById = async (param: updateIndustryParam) =>{
+    const industry = await customerDB.Industry.update(
+        {
+            title: param.title,
+            description: param.description,
+            isActive: param.isActive,
+        },
+        {
+            where:{
+                id:param.id
+            }           
+        }
+        ).catch((err) => {
+        throw err
+    })
+    return industry
+}
 
 const Industry = {
     getIndustries,
     getIndustryById,
     createIndustry,
+    updateIndustryById
 }
 export { Industry }

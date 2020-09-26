@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from "express"
+import { Router, Request, Response } from "express"
 import { Industry } from "../handlers"
 import { httpStatus } from "../helper"
 
@@ -6,7 +6,7 @@ const IndustryRouter = Router()
 
 IndustryRouter.get(
     "/industries",
-    (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response) => {
         Industry.getIndustries()
             .then((industries) => {
                 if (!industries) {
@@ -31,7 +31,7 @@ interface GetIndustryByIdParam {
 
 IndustryRouter.get(
     "/industries/:id",
-    (req: Request<GetIndustryByIdParam>, res: Response, next: NextFunction) => {
+    (req: Request<GetIndustryByIdParam>, res: Response) => {
         Industry.getIndustryById(req.params.id)
             .then((industry) => {
                 if (!industry) {
@@ -52,7 +52,7 @@ IndustryRouter.get(
 
 IndustryRouter.post(
     "/industries",
-    (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {
                 res.status(httpStatus.OK).json(industry)
@@ -66,16 +66,25 @@ IndustryRouter.post(
     }
 )
 
-// IndustryRouter.put("/industries/:id", (req, res, next) => {
-//     Industry.updateIndustryById({ id: req.params.id, ...req.body })
-//         .then((industry) =>
-//             res.status(httpStatus.OK).json(industry)
-//         )
-//         .catch((err) =>
-//             res.status(httpStatus.Bad_Request).json({
-//                 code: httpStatus.Bad_Request,
-//                 error: err
-//             })
-//         )
-// })
+IndustryRouter.put(
+    "/industries/:id",
+    (req:Request, res:Response) => {
+    Industry.
+        updateIndustryById({
+            id: req.params.id,
+            ...req.body 
+        })
+        .then((industry) =>
+            res.status(httpStatus.OK).json({
+                "Message":"Data Updated Successfully",
+                "Success":industry
+            })
+        )
+        .catch((err) =>
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err
+            })
+        )
+})
 export { IndustryRouter }
