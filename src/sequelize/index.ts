@@ -30,6 +30,13 @@ const CandidateWorkHistory = models.CandidateWorkFactory(orm)
 const CandidateWorkHistorySkill = models.CandidateWorkSkillFactory(orm)
 const CandidateOtherDetails = models.CandidateOtherFactory(orm)
 
+// Candidate, CandidateWorkHistory, CandidateCertificate
+Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
+CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId" })
+Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId" })
+CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
+
+//company
 Industry.hasMany(Company, { foreignKey: "industryId" })
 Company.belongsTo(Industry, { foreignKey: "industryId" })
 
