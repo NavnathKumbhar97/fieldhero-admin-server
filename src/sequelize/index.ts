@@ -29,6 +29,11 @@ const CandidateCertificate = models.CandidateCertificateFactory(orm)
 const CandidateWorkHistory = models.CandidateWorkFactory(orm)
 const CandidateWorkHistorySkill = models.CandidateWorkSkillFactory(orm)
 const CandidateOtherDetails = models.CandidateOtherFactory(orm)
+
+Industry.hasMany(Company, { foreignKey: "industryId" })
+Company.belongsTo(Industry, { foreignKey: "industryId" })
+
+
 const customerDB = {
     Candidate,
     CandidateCertificate,

@@ -1,9 +1,15 @@
 import { Router, Request, Response } from "express"
 import { httpStatus } from "../helper"
 import { IndustryRouter } from "./industry"
+import { SkillSetRouter } from "./skillset"
+import { CompanyRouter } from "./company"
+import { CandidateRouter} from "./candidate"
 const router = Router()
 
 router.use(IndustryRouter)
+router.use(SkillSetRouter)
+router.use(CompanyRouter)
+router.use(CandidateRouter)
 
 router.all("*", (req: Request, res: Response) => {
     res.status(httpStatus.Bad_Request).json({

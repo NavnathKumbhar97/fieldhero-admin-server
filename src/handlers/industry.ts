@@ -1,5 +1,3 @@
-import { title } from "process"
-
 import { customerDB } from "../sequelize"
 
 const getIndustries = async () => {

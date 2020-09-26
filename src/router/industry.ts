@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express"
+import { Router, Request, Response, NextFunction } from "express"
 import { Industry } from "../handlers"
 import { httpStatus } from "../helper"
 
@@ -6,10 +6,10 @@ const IndustryRouter = Router()
 
 IndustryRouter.get(
     "/industries",
-    (req: Request, res: Response) => {
+    (req: Request, res: Response, next: NextFunction) => {
         Industry.getIndustries()
             .then((industries) => {
-                if (!industries) {
+                if (!industries.length) {
                     res.status(httpStatus.OK).json({
                         Success: "Not Recored Found",
                     })
@@ -31,7 +31,7 @@ interface GetIndustryByIdParam {
 
 IndustryRouter.get(
     "/industries/:id",
-    (req: Request<GetIndustryByIdParam>, res: Response) => {
+    (req: Request<GetIndustryByIdParam>, res: Response, next: NextFunction) => {
         Industry.getIndustryById(req.params.id)
             .then((industry) => {
                 if (!industry) {
@@ -52,7 +52,7 @@ IndustryRouter.get(
 
 IndustryRouter.post(
     "/industries",
-    (req: Request, res: Response) => {
+    (req: Request, res: Response, next: NextFunction) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {
                 res.status(httpStatus.OK).json(industry)
@@ -68,7 +68,7 @@ IndustryRouter.post(
 
 IndustryRouter.put(
     "/industries/:id",
-    (req:Request, res:Response) => {
+    (req:Request, res:Response, next:NextFunction) => {
     Industry.
         updateIndustryById({
             id: req.params.id,
@@ -77,8 +77,7 @@ IndustryRouter.put(
         .then((industry) =>
             res.status(httpStatus.OK).json({
                 "Message":"Data Updated Successfully",
-                "Success":industry
-            })
+                "Success":industry})
         )
         .catch((err) =>
             res.status(httpStatus.Bad_Request).json({
