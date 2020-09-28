@@ -1,7 +1,7 @@
 import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
-    id: number,
+    id?: number,
     startDate: Date,
     endDate: Date,
     description: string,

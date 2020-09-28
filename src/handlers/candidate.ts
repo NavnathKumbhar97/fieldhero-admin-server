@@ -81,10 +81,146 @@ const createCandidate = async(param: createCandidateParam) => {
     return candidate
 }
 
+interface createCandidateTrainingCertParam {
+    type:string
+    title:string
+    issueDate:Date
+    issuedBy:string
+    description: string
+    candidateId:number
+    skillId:number
+}
+const addCandidateTrainingCert = async (param: createCandidateTrainingCertParam) =>{
+    const candidateCertificate = await customerDB.CandidateCertificate.create({
+        type: param.type,
+        title: param.title,
+        issueDate: param.issueDate,
+        issuedBy: param.issuedBy,
+        description: param.description,
+        candidateId: param.candidateId,
+        skillId: param.skillId,
+    }).catch((err) => {
+        throw err
+    })
+    return candidateCertificate
+}
+
+interface updateCandidateTrainingCertParam {
+    id:number
+    type:string
+    title:string
+    issueDate:Date
+    issuedBy:string
+    description: string
+    candidateId:number
+    skillId:number
+}
+
+const updateCandidateTrainingCertById = async (param:updateCandidateTrainingCertParam) => {
+    try {
+        let candidateCertificate = await customerDB.CandidateCertificate.findOne({ 
+            where: 
+            { id:param.id }
+        })
+        // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.type = param.type // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.title = param.title // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.issueDate = param.issueDate // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.issuedBy = param.issuedBy // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.description = param.description // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.candidateId = param.candidateId // @ts-ignore: Object is possibly 'null'.
+        candidateCertificate.skillId = param.skillId // @ts-ignore: Object is possibly 'null'.
+        let updateCandidateCertificate = await candidateCertificate.save()
+        return updateCandidateCertificate
+    } catch (error) {
+        throw error
+    }
+}
+interface removeCandidateTrainingCertParam {
+    id:number
+}
+const removeCandidateTrainingCert = async (param:removeCandidateTrainingCertParam) => {
+    const deletedRows = await customerDB.CandidateCertificate.destroy({
+        where: {
+            id:param.id
+        },
+    }).catch((ex:any) => {
+        throw ex
+    })
+    return deletedRows
+}
+
+interface createCandidateWorkHistoryParam {
+    startDate:Date
+    endDate:Date
+    description: string
+    candidateId:number
+    companyId:number
+}
+
+const addCandidateWorkHistory = async (param:createCandidateWorkHistoryParam) =>{
+    const candidateWorkHistory = await customerDB.CandidateWorkHistory.create({
+        startDate: param.startDate,
+        endDate: param.endDate,
+        description: param.description,
+        candidateId: param.candidateId,
+        companyId: param.companyId,
+    }).catch((err) => {
+        throw err
+    })
+    return candidateWorkHistory
+}
+
+interface updateCandidateWorkHistoryParam {
+    id:number
+    startDate:Date
+    endDate:Date
+    description: string
+    candidateId:number
+    companyId:number
+}
+
+const updateCandidateWorkHistoryById = async (param:updateCandidateWorkHistoryParam) => {
+    try {
+        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({ 
+            where: 
+            { id:param.id }
+        })
+        // @ts-ignore: Object is possibly 'null'.
+        candidateWorkHistory.startDate = param.startDate // @ts-ignore: Object is possibly 'null'.
+        candidateWorkHistory.endDate = param.endDate // @ts-ignore: Object is possibly 'null'.
+        candidateWorkHistory.description = param.description // @ts-ignore: Object is possibly 'null'.
+        candidateWorkHistory.candidateId = param.candidateId // @ts-ignore: Object is possibly 'null'.
+        candidateWorkHistory.companyId = param.companyId // @ts-ignore: Object is possibly 'null'.
+        let updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
+        return updateCandidateWcandidateWorkHistory
+    } catch (error) {
+        throw error
+    }
+}
+interface removeCandidateWorkHistoryParam {
+    id:number
+}
+const removeCandidateWorkHistory = async (param:removeCandidateWorkHistoryParam) =>{
+    const deletedRows = await customerDB.CandidateWorkHistory.destroy({
+        where: {
+            id:param.id
+        },
+    }).catch((ex:any) => {
+        throw ex
+    })
+    return deletedRows
+} 
 const Candidate = {
     getCandidates,
     getCandidateById,
-    createCandidate
+    createCandidate,
+    addCandidateTrainingCert,
+    updateCandidateTrainingCertById,
+    removeCandidateTrainingCert,
+    addCandidateWorkHistory,
+    updateCandidateWorkHistoryById,
+    removeCandidateWorkHistory
 }
 
 export { Candidate }
