@@ -1,11 +1,11 @@
 import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
-    id: number
+    id?: number
     totalExpMonths: number
     totalExpYears: number
     registrationStatus: string
-    candidateId: number
+    candidateId?: number
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

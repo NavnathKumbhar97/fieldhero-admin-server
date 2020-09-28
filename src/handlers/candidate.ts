@@ -1,11 +1,12 @@
-import { customerDB } from "../sequelize"
+import { customerDB, ormCustomer } from "../sequelize"
 
 const getCandidates = async () => {
     const candidates = await customerDB.Candidate.findAll({
-        // include: [
-        //     { model: orm.CandidateTrainingCert },
-        //     { model: orm.CandidateWorkHistory },
-        // ],
+        include: [
+            { model: customerDB.CandidateOtherDetails },
+            { model: customerDB.CandidateCertificate },
+            { model: customerDB.CandidateWorkHistory },
+        ],
     }).catch((ex:any) => {
         throw ex
     })
@@ -17,10 +18,11 @@ const getCandidateById = async (id:number) => {
         where: {
             id,
         },
-        // include: [
-        //     { model: orm.CandidateTrainingCert },
-        //     { model: orm.CandidateWorkHistory },
-        // ],
+        include: [
+            { model: customerDB.CandidateOtherDetails },
+            { model: customerDB.CandidateCertificate },
+            { model: customerDB.CandidateWorkHistory },
+        ],
     }).catch((ex:any) => {
         throw ex
     })
@@ -49,36 +51,52 @@ interface createCandidateParam {
     contactNo2: string,
     aadharNo: string,
     isActive: boolean,
+    totalExpMonths:number,
+    totalExpYears:number,
+    registrationStatus:string,
+    candidateId:number
 }
+const createCandidate = async(param: createCandidateParam) => {  
+    const transaction = await ormCustomer.transaction();
+    try {
+        const candidate = await customerDB.Candidate.create({
+            firstName: param.firstName,
+            middleName: param.middleName,
+            lastName: param.lastName,
+            birthDate: param.birthDate,
+            gender: param.gender,
+            perm_address: param.perm_address,
+            perm_city: param.perm_city,
+            perm_state: param.perm_state,
+            perm_country: param.perm_country,
+            perm_zip: param.perm_zip,
+            curr_address: param.curr_address,
+            curr_city: param.curr_city,
+            curr_state: param.curr_state,
+            curr_country: param.curr_country,
+            curr_zip: param.curr_zip,
+            email1: param.email1,
+            email2: param.email2,
+            contactNo1: param.contactNo1,
+            contactNo2: param.contactNo2,
+            aadharNo: param.aadharNo,
+            isActive: param.isActive,
+        },{transaction});
 
-const createCandidate = async(param: createCandidateParam) => {
-    const candidate = await customerDB.Candidate.create({
-        firstName: param.firstName,
-        middleName: param.middleName,
-        lastName: param.lastName,
-        birthDate: param.birthDate,
-        gender: param.gender,
-        perm_address: param.perm_address,
-        perm_city: param.perm_city,
-        perm_state: param.perm_state,
-        perm_country: param.perm_country,
-        perm_zip: param.perm_zip,
-        curr_address: param.curr_address,
-        curr_city: param.curr_city,
-        curr_state: param.curr_state,
-        curr_country: param.curr_country,
-        curr_zip: param.curr_zip,
-        email1: param.email1,
-        email2: param.email2,
-        contactNo1: param.contactNo1,
-        contactNo2: param.contactNo2,
-        aadharNo: param.aadharNo,
-        isActive: param.isActive,
-    }).catch((err) => {
-        throw err
-    })
+        const candidateother = await customerDB.CandidateOtherDetails.create({
+            totalExpMonths: param.totalExpMonths,
+            totalExpYears: param.totalExpYears,
+            registrationStatus: param.registrationStatus,
+            candidateId:candidate.get("id")
+        },{transaction});
 
-    return candidate
+        await transaction.commit();
+        return Object.assign({candidate,candidateother});
+        
+    } catch(err:any){
+        await transaction.rollback();
+        throw err;
+    }
 }
 
 interface createCandidateTrainingCertParam {
