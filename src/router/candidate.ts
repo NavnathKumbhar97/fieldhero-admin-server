@@ -65,6 +65,23 @@ CandidateRouter.post(
 })
 
 CandidateRouter.post(
+    "/bluckcandidates",
+    (req:Request, res:Response, next:NextFunction) => {
+    // console.log(req.body)
+    Candidate
+        .createBulckCandidate({ ...req.body })
+        .then((candidate) => { 
+            res.status(httpStatus.OK).json(candidate)
+        })
+        .catch((err) => 
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err 
+            })
+        )
+})
+
+CandidateRouter.post(
     "/candidates/:id/training-cert",
     (req:Request, res:Response, next:NextFunction) => {
     Candidate
