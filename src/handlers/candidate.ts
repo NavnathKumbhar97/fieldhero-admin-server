@@ -7,13 +7,13 @@ const getCandidates = async () => {
             { model: customerDB.CandidateCertificate },
             { model: customerDB.CandidateWorkHistory },
         ],
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return candidates
 }
 
-const getCandidateById = async (id:number) => {
+const getCandidateById = async (id: number) => {
     const candidate = await customerDB.Candidate.findOne({
         where: {
             id,
@@ -23,7 +23,7 @@ const getCandidateById = async (id:number) => {
             { model: customerDB.CandidateCertificate },
             { model: customerDB.CandidateWorkHistory },
         ],
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return candidate
@@ -33,69 +33,74 @@ interface createCandidateParam {
     firstName: string
     middleName: string
     lastName: string
-    birthDate:Date
-    gender: string,
-    perm_address: string,
-    perm_city: string,
-    perm_state: string,
-    perm_country: string,
-    perm_zip: string,
-    curr_address: string,
-    curr_city: string,
-    curr_state: string,
-    curr_country: string,
-    curr_zip: string,
-    email1: string,
-    email2: string,
-    contactNo1: string,
-    contactNo2: string,
-    aadharNo: string,
-    isActive: boolean,
-    totalExpMonths:number,
-    totalExpYears:number,
-    registrationStatus:string,
-    candidateId:number
+    birthDate: Date
+    gender: string
+    perm_address: string
+    perm_city: string
+    perm_state: string
+    perm_country: string
+    perm_zip: string
+    curr_address: string
+    curr_city: string
+    curr_state: string
+    curr_country: string
+    curr_zip: string
+    email1: string
+    email2: string
+    contactNo1: string
+    contactNo2: string
+    aadharNo: string
+    isActive: boolean
+    totalExpMonths: number
+    totalExpYears: number
+    registrationStatus: string
+    candidateId: number
 }
-const createCandidate = async(param: createCandidateParam) => {  
-    const transaction = await ormCustomer.transaction();
+const createCandidate = async (param: createCandidateParam) => {
+    const transaction = await ormCustomer.transaction()
     try {
-        const candidate = await customerDB.Candidate.create({
-            firstName: param.firstName,
-            middleName: param.middleName,
-            lastName: param.lastName,
-            birthDate: param.birthDate,
-            gender: param.gender,
-            perm_address: param.perm_address,
-            perm_city: param.perm_city,
-            perm_state: param.perm_state,
-            perm_country: param.perm_country,
-            perm_zip: param.perm_zip,
-            curr_address: param.curr_address,
-            curr_city: param.curr_city,
-            curr_state: param.curr_state,
-            curr_country: param.curr_country,
-            curr_zip: param.curr_zip,
-            email1: param.email1,
-            email2: param.email2,
-            contactNo1: param.contactNo1,
-            contactNo2: param.contactNo2,
-            aadharNo: param.aadharNo,
-            isActive: param.isActive,
-        },{transaction});
+        const candidate = await customerDB.Candidate.create(
+            {
+                firstName: param.firstName,
+                middleName: param.middleName,
+                lastName: param.lastName,
+                birthDate: param.birthDate,
+                gender: param.gender,
+                perm_address: param.perm_address,
+                perm_city: param.perm_city,
+                perm_state: param.perm_state,
+                perm_country: param.perm_country,
+                perm_zip: param.perm_zip,
+                curr_address: param.curr_address,
+                curr_city: param.curr_city,
+                curr_state: param.curr_state,
+                curr_country: param.curr_country,
+                curr_zip: param.curr_zip,
+                email1: param.email1,
+                email2: param.email2,
+                contactNo1: param.contactNo1,
+                contactNo2: param.contactNo2,
+                aadharNo: param.aadharNo,
+                isActive: param.isActive,
+            },
+            { transaction }
+        )
 
-        const candidateother = await customerDB.CandidateOtherDetails.create({
-            totalExpMonths: param.totalExpMonths,
-            totalExpYears: param.totalExpYears,
-            registrationStatus: param.registrationStatus,
-            candidateId:candidate.get("id")
-        },{transaction});
+        const candidateother = await customerDB.CandidateOtherDetails.create(
+            {
+                totalExpMonths: param.totalExpMonths,
+                totalExpYears: param.totalExpYears,
+                registrationStatus: param.registrationStatus,
+                candidateId: candidate.get("id"),
+            },
+            { transaction }
+        )
 
-        await transaction.commit();
-        return Object.assign({candidate,candidateother});
-        
-    } catch(err:any){
-        await transaction.rollback();
-        throw err;
+        await transaction.commit()
+        return Object.assign({ candidate, candidateother })
+    } catch (err: any) {
+        await transaction.rollback()
+        throw err
     }
 }
 
@@ -103,23 +108,23 @@ interface bulkCreateCandidateParam {
     firstName: string
     middleName: string
     lastName: string
-    birthDate:Date
-    gender: string,
-    perm_address: string,
-    perm_city: string,
-    perm_state: string,
-    perm_country: string,
-    perm_zip: string,
-    curr_address: string,
-    curr_city: string,
-    curr_state: string,
-    curr_country: string,
-    curr_zip: string,
-    email1: string,
-    email2: string,
-    contactNo1: string,
-    contactNo2: string,
-    aadharNo: string,
+    birthDate: Date
+    gender: string
+    perm_address: string
+    perm_city: string
+    perm_state: string
+    perm_country: string
+    perm_zip: string
+    curr_address: string
+    curr_city: string
+    curr_state: string
+    curr_country: string
+    curr_zip: string
+    email1: string
+    email2: string
+    contactNo1: string
+    contactNo2: string
+    aadharNo: string
     isActive: boolean
     // totalExpMonths:number,
     // totalExpYears:number,
@@ -127,37 +132,38 @@ interface bulkCreateCandidateParam {
     // candidateId:number
 }
 
-const createBulckCandidate = async(param:bulkCreateCandidateParam) => {
-    const transaction = await ormCustomer.transaction();
+const createBulckCandidate = async (param: Array<bulkCreateCandidateParam>) => {
+    const transaction = await ormCustomer.transaction()
     try {
-        const candidate = await customerDB.Candidate.bulkCreate([{
-            firstName: param.firstName,
-            middleName: param.middleName,
-            lastName: param.lastName,
-            birthDate: param.birthDate,
-            gender: param.gender,
-            perm_address: param.perm_address,
-            perm_city: param.perm_city,
-            perm_state: param.perm_state,
-            perm_country: param.perm_country,
-            perm_zip: param.perm_zip,
-            curr_address: param.curr_address,
-            curr_city: param.curr_city,
-            curr_state: param.curr_state,
-            curr_country: param.curr_country,
-            curr_zip: param.curr_zip,
-            email1: param.email1,
-            email2: param.email2,
-            contactNo1: param.contactNo1,
-            contactNo2: param.contactNo2,
-            aadharNo: param.aadharNo,
-            isActive: param.isActive,
-        }],{fields:['firstName','middleName','lastName','birthDate','gender',
-            'perm_address','perm_city','perm_state','perm_country','perm_zip',
-            'curr_address','curr_city','curr_state','curr_country',
-            'curr_zip','email1','email2','contactNo1','contactNo2',
-            'aadharNo'], transaction});
-
+        console.log(Object.values(param))
+        // const arrItems =param.filter(p => ({} as ))
+        const candidate = await customerDB.Candidate.bulkCreate(param, {
+            fields: [
+                "firstName",
+                "middleName",
+                "lastName",
+                "birthDate",
+                "gender",
+                "perm_address",
+                "perm_city",
+                "perm_state",
+                "perm_country",
+                "perm_zip",
+                "curr_address",
+                "curr_city",
+                "curr_state",
+                "curr_country",
+                "curr_zip",
+                "email1",
+                "email2",
+                "contactNo1",
+                "contactNo2",
+                "aadharNo",
+                "isActive",
+            ],
+            transaction,
+        })
+        console.log(candidate)
         // const candidateother = await customerDB.CandidateOtherDetails.bulkCreate([{
         //     totalExpMonths: param.totalExpMonths,
         //     totalExpYears: param.totalExpYears,
@@ -165,25 +171,27 @@ const createBulckCandidate = async(param:bulkCreateCandidateParam) => {
         //     candidateId:candidate.get("id")
         // }],{transaction});
 
-        await transaction.commit();
+        await transaction.commit()
         return candidate
         // return Object.assign({candidate,candidateother});
-        
-    } catch(err:any){
-        await transaction.rollback();
-        throw err;
+    } catch (err: any) {
+        await transaction.rollback()
+        console.log(err)
+        throw err
     }
 }
 interface createCandidateTrainingCertParam {
-    type:string
-    title:string
-    issueDate:Date
-    issuedBy:string
+    type: string
+    title: string
+    issueDate: Date
+    issuedBy: string
     description: string
-    candidateId:number
-    skillId:number
+    candidateId: number
+    skillId: number
 }
-const addCandidateTrainingCert = async (param: createCandidateTrainingCertParam) =>{
+const addCandidateTrainingCert = async (
+    param: createCandidateTrainingCertParam
+) => {
     const candidateCertificate = await customerDB.CandidateCertificate.create({
         type: param.type,
         title: param.title,
@@ -199,22 +207,25 @@ const addCandidateTrainingCert = async (param: createCandidateTrainingCertParam)
 }
 
 interface updateCandidateTrainingCertParam {
-    id:number
-    type:string
-    title:string
-    issueDate:Date
-    issuedBy:string
+    id: number
+    type: string
+    title: string
+    issueDate: Date
+    issuedBy: string
     description: string
-    candidateId:number
-    skillId:number
+    candidateId: number
+    skillId: number
 }
 
-const updateCandidateTrainingCertById = async (param:updateCandidateTrainingCertParam) => {
+const updateCandidateTrainingCertById = async (
+    param: updateCandidateTrainingCertParam
+) => {
     try {
-        let candidateCertificate = await customerDB.CandidateCertificate.findOne({ 
-            where: 
-            { id:param.id }
-        })
+        let candidateCertificate = await customerDB.CandidateCertificate.findOne(
+            {
+                where: { id: param.id },
+            }
+        )
         // @ts-ignore: Object is possibly 'null'.
         candidateCertificate.type = param.type // @ts-ignore: Object is possibly 'null'.
         candidateCertificate.title = param.title // @ts-ignore: Object is possibly 'null'.
@@ -230,28 +241,32 @@ const updateCandidateTrainingCertById = async (param:updateCandidateTrainingCert
     }
 }
 interface removeCandidateTrainingCertParam {
-    id:number
+    id: number
 }
-const removeCandidateTrainingCert = async (param:removeCandidateTrainingCertParam) => {
+const removeCandidateTrainingCert = async (
+    param: removeCandidateTrainingCertParam
+) => {
     const deletedRows = await customerDB.CandidateCertificate.destroy({
         where: {
-            id:param.id
+            id: param.id,
         },
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return deletedRows
 }
 
 interface createCandidateWorkHistoryParam {
-    startDate:Date
-    endDate:Date
+    startDate: Date
+    endDate: Date
     description: string
-    candidateId:number
-    companyId:number
+    candidateId: number
+    companyId: number
 }
 
-const addCandidateWorkHistory = async (param:createCandidateWorkHistoryParam) =>{
+const addCandidateWorkHistory = async (
+    param: createCandidateWorkHistoryParam
+) => {
     const candidateWorkHistory = await customerDB.CandidateWorkHistory.create({
         startDate: param.startDate,
         endDate: param.endDate,
@@ -265,20 +280,23 @@ const addCandidateWorkHistory = async (param:createCandidateWorkHistoryParam) =>
 }
 
 interface updateCandidateWorkHistoryParam {
-    id:number
-    startDate:Date
-    endDate:Date
+    id: number
+    startDate: Date
+    endDate: Date
     description: string
-    candidateId:number
-    companyId:number
+    candidateId: number
+    companyId: number
 }
 
-const updateCandidateWorkHistoryById = async (param:updateCandidateWorkHistoryParam) => {
+const updateCandidateWorkHistoryById = async (
+    param: updateCandidateWorkHistoryParam
+) => {
     try {
-        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({ 
-            where: 
-            { id:param.id }
-        })
+        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne(
+            {
+                where: { id: param.id },
+            }
+        )
         // @ts-ignore: Object is possibly 'null'.
         candidateWorkHistory.startDate = param.startDate // @ts-ignore: Object is possibly 'null'.
         candidateWorkHistory.endDate = param.endDate // @ts-ignore: Object is possibly 'null'.
@@ -292,18 +310,20 @@ const updateCandidateWorkHistoryById = async (param:updateCandidateWorkHistoryPa
     }
 }
 interface removeCandidateWorkHistoryParam {
-    id:number
+    id: number
 }
-const removeCandidateWorkHistory = async (param:removeCandidateWorkHistoryParam) =>{
+const removeCandidateWorkHistory = async (
+    param: removeCandidateWorkHistoryParam
+) => {
     const deletedRows = await customerDB.CandidateWorkHistory.destroy({
         where: {
-            id:param.id
+            id: param.id,
         },
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return deletedRows
-} 
+}
 const Candidate = {
     getCandidates,
     getCandidateById,
@@ -314,7 +334,7 @@ const Candidate = {
     addCandidateWorkHistory,
     updateCandidateWorkHistoryById,
     removeCandidateWorkHistory,
-    createBulckCandidate
+    createBulckCandidate,
 }
 
 export { Candidate }
