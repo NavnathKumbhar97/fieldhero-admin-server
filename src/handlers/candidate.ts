@@ -126,17 +126,15 @@ interface bulkCreateCandidateParam {
     contactNo2: string
     aadharNo: string
     isActive: boolean
-    // totalExpMonths:number,
-    // totalExpYears:number,
-    // registrationStatus:string,
-    // candidateId:number
+    totalExpMonths: number
+    totalExpYears: number
+    registrationStatus: string
+    candidateId: number
 }
 
 const createBulckCandidate = async (param: Array<bulkCreateCandidateParam>) => {
     const transaction = await ormCustomer.transaction()
     try {
-        console.log(Object.values(param))
-        // const arrItems =param.filter(p => ({} as ))
         const candidate = await customerDB.Candidate.bulkCreate(param, {
             fields: [
                 "firstName",
@@ -163,17 +161,33 @@ const createBulckCandidate = async (param: Array<bulkCreateCandidateParam>) => {
             ],
             transaction,
         })
-        console.log(candidate)
-        // const candidateother = await customerDB.CandidateOtherDetails.bulkCreate([{
-        //     totalExpMonths: param.totalExpMonths,
-        //     totalExpYears: param.totalExpYears,
-        //     registrationStatus: param.registrationStatus,
-        //     candidateId:candidate.get("id")
-        // }],{transaction});
+
+        const arrOtherDetails = candidate.map((item, ind) => {
+            const { totalExpMonths, totalExpYears, registrationStatus } = param[
+                ind
+            ]
+            return {
+                totalExpMonths,
+                totalExpYears,
+                registrationStatus,
+                candidateId: item.id,
+            }
+        })
+        const candidateother = await customerDB.CandidateOtherDetails.bulkCreate(
+            arrOtherDetails,
+            {
+                fields: [
+                    "totalExpMonths",
+                    "totalExpYears",
+                    "registrationStatus",
+                    "candidateId",
+                ],
+                transaction,
+            }
+        )
 
         await transaction.commit()
-        return candidate
-        // return Object.assign({candidate,candidateother});
+        return Object.assign({ candidate, candidateother })
     } catch (err: any) {
         await transaction.rollback()
         console.log(err)
