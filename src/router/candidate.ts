@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Candidate } from "../handlers"
 import { httpStatus } from "../helper"
+import { createCandidateValidation } from "../validation/candidate"
 
 const CandidateRouter = Router()
 
@@ -70,6 +71,7 @@ CandidateRouter.post(
 // * bulk create candidates
 CandidateRouter.post(
     "/bluckcandidates",
+    createCandidateValidation,
     (req: Request, res: Response, next: NextFunction) => {
         // console.log(req.body)
         Candidate.createBulckCandidate(req.body)
