@@ -7,13 +7,13 @@ const getCompanies = async () => {
                 model: customerDB.Industry,
             },
         ],
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return companies
 }
 
-const getCompanyById = async (id:number) => {
+const getCompanyById = async (id: number) => {
     const company = await customerDB.Company.findOne({
         where: {
             id,
@@ -23,7 +23,7 @@ const getCompanyById = async (id:number) => {
                 model: customerDB.Industry,
             },
         ],
-    }).catch((ex:any) => {
+    }).catch((ex: any) => {
         throw ex
     })
     return company
@@ -33,7 +33,7 @@ interface createCompnayParam {
     companyName: string
     description: string
     isActive: boolean
-    industryId:number
+    industryId: number
 }
 
 const createCompany = async (param: createCompnayParam) => {
@@ -49,37 +49,33 @@ const createCompany = async (param: createCompnayParam) => {
 }
 
 interface updateCompnayParam {
-    id:number
+    id: number
     companyName: string
     description: string
     isActive: boolean
-    industryId:number
+    industryId: number
 }
 
-const updatedCompanyById = async (param:updateCompnayParam) => {
-    try {
-        let company = await customerDB.Company.findOne({ 
-            where: 
-            { id:param.id }
-        })
-        // @ts-ignore: Object is possibly 'null'.
-        company.companyName = param.companyName // @ts-ignore: Object is possibly 'null'.
-        company.description = param.description // @ts-ignore: Object is possibly 'null'.
-        company.isActive = param.isActive // @ts-ignore: Object is possibly 'null'.
-        company.industryId = param.industryId // @ts-ignore: Object is possibly 'null'.
-        let updatedSkill = await company.save()
-        return updatedSkill
-    } catch (error) {
-        throw error
+const updatedCompanyById = async (param: updateCompnayParam) => {
+    const company = await customerDB.Company.findOne({
+        where: { id: param.id },
+    })
+    let updatedSkill = null
+    if (company) {
+        company.companyName = param.companyName
+        company.description = param.description
+        company.isActive = param.isActive
+        company.industryId = param.industryId
+        updatedSkill = await company.save()
     }
+    return updatedSkill
 }
-
 
 const Company = {
     getCompanies,
     getCompanyById,
     createCompany,
-    updatedCompanyById
+    updatedCompanyById,
 }
 
 export { Company }

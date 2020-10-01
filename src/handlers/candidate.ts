@@ -234,25 +234,21 @@ interface updateCandidateTrainingCertParam {
 const updateCandidateTrainingCertById = async (
     param: updateCandidateTrainingCertParam
 ) => {
-    try {
-        let candidateCertificate = await customerDB.CandidateCertificate.findOne(
-            {
-                where: { id: param.id },
-            }
-        )
-        // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.type = param.type // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.title = param.title // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.issueDate = param.issueDate // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.issuedBy = param.issuedBy // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.description = param.description // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.candidateId = param.candidateId // @ts-ignore: Object is possibly 'null'.
-        candidateCertificate.skillId = param.skillId // @ts-ignore: Object is possibly 'null'.
-        let updateCandidateCertificate = await candidateCertificate.save()
-        return updateCandidateCertificate
-    } catch (error) {
-        throw error
+    const candidateCertificate = await customerDB.CandidateCertificate.findOne({
+        where: { id: param.id },
+    })
+    let updateCandidateCertificate = null
+    if (candidateCertificate) {
+        candidateCertificate.type = param.type
+        candidateCertificate.title = param.title
+        candidateCertificate.issueDate = param.issueDate
+        candidateCertificate.issuedBy = param.issuedBy
+        candidateCertificate.description = param.description
+        candidateCertificate.candidateId = param.candidateId
+        candidateCertificate.skillId = param.skillId
+        updateCandidateCertificate = await candidateCertificate.save()
     }
+    return updateCandidateCertificate
 }
 interface removeCandidateTrainingCertParam {
     id: number
@@ -305,23 +301,19 @@ interface updateCandidateWorkHistoryParam {
 const updateCandidateWorkHistoryById = async (
     param: updateCandidateWorkHistoryParam
 ) => {
-    try {
-        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne(
-            {
-                where: { id: param.id },
-            }
-        )
-        // @ts-ignore: Object is possibly 'null'.
-        candidateWorkHistory.startDate = param.startDate // @ts-ignore: Object is possibly 'null'.
-        candidateWorkHistory.endDate = param.endDate // @ts-ignore: Object is possibly 'null'.
-        candidateWorkHistory.description = param.description // @ts-ignore: Object is possibly 'null'.
-        candidateWorkHistory.candidateId = param.candidateId // @ts-ignore: Object is possibly 'null'.
-        candidateWorkHistory.companyId = param.companyId // @ts-ignore: Object is possibly 'null'.
-        let updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
-        return updateCandidateWcandidateWorkHistory
-    } catch (error) {
-        throw error
+    const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
+        where: { id: param.id },
+    })
+    let updateCandidateWcandidateWorkHistory = null
+    if (candidateWorkHistory) {
+        candidateWorkHistory.startDate = param.startDate
+        candidateWorkHistory.endDate = param.endDate
+        candidateWorkHistory.description = param.description
+        candidateWorkHistory.candidateId = param.candidateId
+        candidateWorkHistory.companyId = param.companyId
+        updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
     }
+    return updateCandidateWcandidateWorkHistory
 }
 interface removeCandidateWorkHistoryParam {
     id: number
