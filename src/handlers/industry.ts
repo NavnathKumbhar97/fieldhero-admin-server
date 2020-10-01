@@ -25,14 +25,23 @@ interface createIndustryParam {
 }
 
 const createIndustry = async (param: createIndustryParam) => {
-    const industry = await customerDB.Industry.create({
-        title: param.title,
-        description: param.description,
-        isActive: param.isActive,
-    }).catch((err) => {
-        throw err
+    const findIndustry = await customerDB.Industry.findOne({
+        where:{
+            title:param.title
+        }
     })
-    return industry
+    if(findIndustry) {
+        return null;
+    } else {
+        const industry = await customerDB.Industry.create({
+            title: param.title,
+            description: param.description,
+            isActive: param.isActive,
+        }).catch((err) => {
+            throw err
+        })
+        return industry
+    }
 }
 interface updateIndustryParam {
     id:number,

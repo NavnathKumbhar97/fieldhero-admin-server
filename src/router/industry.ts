@@ -55,7 +55,10 @@ IndustryRouter.post(
     (req: Request, res: Response, next: NextFunction) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {
-                res.status(httpStatus.OK).json(industry)
+                if(industry == null) {
+                    res.status(httpStatus.Conflict).json({"Success":"Industry Already Exits"})
+                }
+                res.status(httpStatus.Created).json(industry)
             })
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
