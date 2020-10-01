@@ -132,7 +132,7 @@ interface bulkCreateCandidateParam {
     candidateId: number
 }
 
-const createBulckCandidate = async (param: Array<bulkCreateCandidateParam>) => {
+const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
     const transaction = await ormCustomer.transaction()
     try {
         const candidate = await customerDB.Candidate.bulkCreate(param, {
@@ -348,7 +348,7 @@ const Candidate = {
     addCandidateWorkHistory,
     updateCandidateWorkHistoryById,
     removeCandidateWorkHistory,
-    createBulckCandidate,
+    createBulkCandidate,
 }
 
 export { Candidate }

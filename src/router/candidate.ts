@@ -70,11 +70,11 @@ CandidateRouter.post(
 
 // * bulk create candidates
 CandidateRouter.post(
-    "/bluckcandidates",
+    "/bulkcandidates",
     createCandidateValidation,
     (req: Request, res: Response, next: NextFunction) => {
         // console.log(req.body)
-        Candidate.createBulckCandidate(req.body)
+        Candidate.createBulkCandidate(req.body)
             .then((candidate) => {
                 res.status(httpStatus.OK).json(candidate)
             })
