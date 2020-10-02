@@ -1,7 +1,19 @@
+import { where } from "sequelize"
 import { customerDB } from "../sequelize"
 
-const getIndustries = async () => {
-    const industries = await customerDB.Industry.findAll().catch((ex: any) => {
+
+const getIndustries = async (all:any) => {
+    let whereStatement = {}
+    if(all == '*') {
+        whereStatement = [1,0]
+    } else {
+        whereStatement = 1
+    }
+    const industries = await customerDB.Industry.findAll({   
+        where: {
+            isActive: whereStatement
+        }
+    }).catch((ex: any) => {
         throw ex
     })
     return industries

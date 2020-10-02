@@ -9,7 +9,7 @@ const IndustryRouter = Router()
 IndustryRouter.get(
     "/industries",
     (req: Request, res: Response, next: NextFunction) => {
-        Industry.getIndustries()
+        Industry.getIndustries(req.query.all)
             .then((industries) => {
                 if (!industries.length) {
                     res.status(httpStatus.OK).json({
