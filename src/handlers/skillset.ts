@@ -24,14 +24,23 @@ interface createSkillSetParam {
 }
 
 const createSkillSet = async (param: createSkillSetParam) => {
-    const createdSkillSet = await customerDB.SkillSet.create({
-        title: param.title,
-        description: param.description,
-        isActive: param.isActive,
-    }).catch((ex) => {
-        throw ex
+    const findSkillSet = await customerDB.SkillSet.findOne({
+        where:{
+            title:param.title
+        }
     })
-    return createdSkillSet
+    if(findSkillSet){
+        return null;
+    } else{
+        const createdSkillSet = await customerDB.SkillSet.create({
+            title: param.title,
+            description: param.description,
+            isActive: param.isActive,
+        }).catch((ex) => {
+            throw ex
+        })
+        return createdSkillSet
+    }
 }
 
 interface updateSkillSetParam {

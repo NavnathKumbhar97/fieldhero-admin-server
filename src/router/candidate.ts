@@ -6,6 +6,8 @@ import { createCandidateValidation } from "../validation/candidate"
 const CandidateRouter = Router()
 
 // Candidate
+
+// * Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
     (req: Request, res: Response, next: NextFunction) => {
@@ -29,7 +31,8 @@ CandidateRouter.get(
 interface GetCandidateByIdParam {
     id: number
 }
-// * fetch candidate by id
+
+// * Fetch Candidate by Id
 CandidateRouter.get(
     "/candidates/:id",
     (
@@ -87,6 +90,7 @@ CandidateRouter.post(
     }
 )
 
+// * Create Candidate Trainig-Cerf  
 CandidateRouter.post(
     "/candidates/:id/training-cert",
     (req: Request, res: Response, next: NextFunction) => {
@@ -105,7 +109,7 @@ CandidateRouter.post(
             )
     }
 )
-
+// * Update Candidate Trainig-Cerf  
 CandidateRouter.put(
     "/candidates/:id/training-cert/:certId",
     (req: Request, res: Response, next: NextFunction) => {
@@ -126,7 +130,7 @@ CandidateRouter.put(
 interface RemoveCandidateByIdParam {
     certId: number
 }
-
+//* Delete Candiate Traninig Cert  
 CandidateRouter.delete(
     "/candidates/:id/training-cert/:certId",
     (
@@ -150,6 +154,7 @@ CandidateRouter.delete(
     }
 )
 
+//* Create Candiate Work History
 CandidateRouter.post(
     "/candidates/:id/work-history",
     (req: Request, res: Response, next: NextFunction) => {
@@ -167,6 +172,7 @@ CandidateRouter.post(
     }
 )
 
+//* Update Candiate WorkHistory
 CandidateRouter.put(
     "/candidates/:id/work-history/:workId",
     (req: Request, res: Response, next: NextFunction) => {
@@ -189,7 +195,7 @@ CandidateRouter.put(
 interface RemoveCandidateWorkHistoryByIdParam {
     workId: number
 }
-
+// Delete Candidate Work History 
 CandidateRouter.delete(
     "/candidates/:id/work-history/:workId",
     (

@@ -37,15 +37,24 @@ interface createCompnayParam {
 }
 
 const createCompany = async (param: createCompnayParam) => {
-    const industry = await customerDB.Company.create({
-        companyName: param.companyName,
-        description: param.description,
-        isActive: param.isActive,
-        industryId: param.industryId,
-    }).catch((err) => {
-        throw err
+    const Compnay = await customerDB.Company.findOne({
+        where:{
+            companyName:param.companyName
+        }
     })
-    return industry
+    if(Company){
+        return null;
+    } else {
+        const company = await customerDB.Company.create({
+            companyName: param.companyName,
+            description: param.description,
+            isActive: param.isActive,
+            industryId: param.industryId,
+        }).catch((err) => {
+            throw err
+        })
+        return company
+    }
 }
 
 interface updateCompnayParam {
@@ -60,15 +69,15 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
     const company = await customerDB.Company.findOne({
         where: { id: param.id },
     })
-    let updatedSkill = null
+    let updatedCompany = null
     if (company) {
         company.companyName = param.companyName
         company.description = param.description
         company.isActive = param.isActive
         company.industryId = param.industryId
-        updatedSkill = await company.save()
+        updatedCompany = await company.save()
     }
-    return updatedSkill
+    return updatedCompany
 }
 
 const Company = {

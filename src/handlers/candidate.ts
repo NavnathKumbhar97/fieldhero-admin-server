@@ -1,3 +1,4 @@
+import { METHODS } from "http"
 import { customerDB, ormCustomer } from "../sequelize"
 
 const getCandidates = async () => {
@@ -56,6 +57,7 @@ interface createCandidateParam {
     registrationStatus: string
     candidateId: number
 }
+
 const createCandidate = async (param: createCandidateParam) => {
     const transaction = await ormCustomer.transaction()
     try {

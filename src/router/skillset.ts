@@ -5,6 +5,8 @@ import { httpStatus } from "../helper"
 const SkillSetRouter = Router()
 
 // SkillSet
+
+//* Fetch All Skills Sets
 SkillSetRouter.get("/skills", (req:Request, res:Response, next:NextFunction) => {
     SkillSet
         .getSkillSets()
@@ -27,6 +29,7 @@ SkillSetRouter.get("/skills", (req:Request, res:Response, next:NextFunction) => 
 interface GetSkillSetByIdParam {
     id: number
 }
+//* Fetch Skills Set By Id 
 SkillSetRouter.get(
     "/skills/:id", 
     (req:Request<GetSkillSetByIdParam>, res:Response, next:NextFunction) => {
@@ -42,13 +45,17 @@ SkillSetRouter.get(
     )
 })
 
+// Create Skills Sets
 SkillSetRouter.post(
     "/skills",
     (req:Request, res:Response, next:NextFunction) => {
     SkillSet
         .createSkillSet({ ...req.body })
         .then((skill) => {
-            res.status(httpStatus.OK).json(skill)
+            if(skill == null ){
+                res.status(httpStatus.Conflict).json({"Success":"SkillSet Already Exits"})
+            }
+            res.status(httpStatus.Created).json(skill)
         })
         .catch((err) => 
             res.status(httpStatus.Bad_Request).json({
@@ -56,8 +63,10 @@ SkillSetRouter.post(
                 error: err 
             })
         )
-})
+    }
+)
 
+// Update skills Set Recored 
 SkillSetRouter.put(
     "/skills/:id",
     (req:Request, res:Response, next:NextFunction) => {
@@ -72,6 +81,7 @@ SkillSetRouter.put(
                 error: err
             })
         )
-})
+    }
+)
 
 export { SkillSetRouter }

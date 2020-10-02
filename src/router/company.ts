@@ -5,6 +5,7 @@ import { Company } from "../handlers"
 const CompanyRouter = Router()
 
 // Company
+//* Fetch All Company List
 CompanyRouter.get(
     "/companies",
     (req:Request, res:Response, next:NextFunction) => {
@@ -29,7 +30,7 @@ CompanyRouter.get(
 interface GetCompanyByIdParam {
     id: number
 }
-
+//* Fetch Company By Id
 CompanyRouter.get(
     "/companies/:id",
     (req:Request<GetCompanyByIdParam>, res:Response, next:NextFunction) => {
@@ -46,13 +47,16 @@ CompanyRouter.get(
         )
 })
 
-
+//* Create Company
 CompanyRouter.post(
     "/companies",
     (req:Request, res:Response, next:NextFunction) => {
     Company.createCompany({ ...req.body })
         .then((company) => {
-            res.status(httpStatus.OK).json(company)
+            if(company == null ){
+                res.status(httpStatus.Conflict).json({"Success":"Company Already Exits"})
+            }
+            res.status(httpStatus.Created).json(company)
         })
         .catch((err) => {
             console.log(err)
@@ -63,6 +67,7 @@ CompanyRouter.post(
         })
 })
 
+// Update Compnay 
 CompanyRouter.put(
     "/companies/:id",
     (req:Request, res:Response, next:NextFunction) => {

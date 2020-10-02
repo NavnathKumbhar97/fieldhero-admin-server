@@ -3,7 +3,9 @@ import { Industry } from "../handlers"
 import { httpStatus } from "../helper"
 
 const IndustryRouter = Router()
+// Industry
 
+//* Fetch all Industry
 IndustryRouter.get(
     "/industries",
     (req: Request, res: Response, next: NextFunction) => {
@@ -28,7 +30,7 @@ IndustryRouter.get(
 interface GetIndustryByIdParam {
     id: number
 }
-
+//* Fetch Industry By Id
 IndustryRouter.get(
     "/industries/:id",
     (req: Request<GetIndustryByIdParam>, res: Response, next: NextFunction) => {
@@ -50,6 +52,7 @@ IndustryRouter.get(
     }
 )
 
+//* Create Industry 
 IndustryRouter.post(
     "/industries",
     (req: Request, res: Response, next: NextFunction) => {
@@ -68,7 +71,7 @@ IndustryRouter.post(
             )
     }
 )
-
+//* Update Industry
 IndustryRouter.put(
     "/industries/:id",
     (req:Request, res:Response, next:NextFunction) => {
@@ -88,5 +91,7 @@ IndustryRouter.put(
                 error: err
             })
         )
-})
+    }
+)
+
 export { IndustryRouter }
