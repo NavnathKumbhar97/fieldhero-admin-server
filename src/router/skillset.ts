@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { SkillSet } from "../handlers"
 import { httpStatus } from "../helper"
+import { createSkillSetValidation } from "../validation/skillset"
 
 const SkillSetRouter = Router()
 
@@ -48,6 +49,7 @@ SkillSetRouter.get(
 // Create Skills Sets
 SkillSetRouter.post(
     "/skills",
+    createSkillSetValidation,
     (req:Request, res:Response, next:NextFunction) => {
     SkillSet
         .createSkillSet({ ...req.body })

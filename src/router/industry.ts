@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Industry } from "../handlers"
 import { httpStatus } from "../helper"
+import { createIndustryValidation } from "../validation/industry"
 
 const IndustryRouter = Router()
 // Industry
@@ -55,6 +56,7 @@ IndustryRouter.get(
 //* Create Industry 
 IndustryRouter.post(
     "/industries",
+    createIndustryValidation,
     (req: Request, res: Response, next: NextFunction) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {

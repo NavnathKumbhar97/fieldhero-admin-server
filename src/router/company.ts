@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { httpStatus } from "../helper"
 import { Company } from "../handlers"
-
+import { createCompanyValidation } from "../validation/company"
 const CompanyRouter = Router()
 
 // Company
@@ -50,6 +50,7 @@ CompanyRouter.get(
 //* Create Company
 CompanyRouter.post(
     "/companies",
+    createCompanyValidation,
     (req:Request, res:Response, next:NextFunction) => {
     Company.createCompany({ ...req.body })
         .then((company) => {

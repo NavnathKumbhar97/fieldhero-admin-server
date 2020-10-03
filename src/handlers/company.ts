@@ -37,12 +37,12 @@ interface createCompnayParam {
 }
 
 const createCompany = async (param: createCompnayParam) => {
-    const Compnay = await customerDB.Company.findOne({
+    const findCompnay = await customerDB.Company.findOne({
         where:{
             companyName:param.companyName
         }
     })
-    if(Company){
+    if(findCompnay){
         return null;
     } else {
         const company = await customerDB.Company.create({
