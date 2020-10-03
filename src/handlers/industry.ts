@@ -80,12 +80,14 @@ const updateIndustryById = async (param: updateIndustryParam) =>{
     return industry
 }
 
-const deleteIndustryById = async (id:any) => {
+const deleteIndustryById = async (id:number) => {
+    console.log(id, '========')
     const industry = await customerDB.Industry.findOne({
         where:{
-            id
+            id:id
         }
     })
+    console.log(industry,'$$$$$$$$');
     let deleteIndustry = null
     if(industry) {
         industry.isActive = false;

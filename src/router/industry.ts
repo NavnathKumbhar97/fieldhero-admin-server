@@ -96,15 +96,15 @@ IndustryRouter.put(
         )
     }
 )
-
+interface DeleteIndustryByIdParam {
+    id: number
+}
 //* Delete Industry
 IndustryRouter.delete(
     "/industries/:id",
-    (req: Request, res: Response, next: NextFunction) => {
+    (req: Request<DeleteIndustryByIdParam>, res: Response, next: NextFunction) => {
     Industry.
-        deleteIndustryById({
-            id: req.params.id,
-        })
+        deleteIndustryById(req.params.id)
         .then((industry) =>
         res.status(httpStatus.OK).json({
             "Message":"Row Delete Successfully",

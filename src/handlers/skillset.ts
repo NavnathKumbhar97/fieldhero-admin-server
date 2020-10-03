@@ -1,3 +1,4 @@
+import { number } from "joi"
 import { customerDB } from "../sequelize"
 
 const getSkillSets = async (all:any) => {
@@ -74,7 +75,7 @@ const updateSkillSetById = async (param: updateSkillSetParam) => {
     return updatedSkill
 }
 
-const deleteSkillSetById = async (id:any) => {
+const deleteSkillSetById = async (id:number) => {
     const skillSet = await customerDB.SkillSet.findOne({
         where:{
             id

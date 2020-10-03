@@ -86,14 +86,14 @@ SkillSetRouter.put(
         )
     }
 )
-
+interface DeleteSkillSetByIdParam {
+    id: number
+}
 SkillSetRouter.delete(
     "/skills/:id",
-    (req: Request, res: Response, next: NextFunction) => {
+    (req: Request<DeleteSkillSetByIdParam>, res: Response, next: NextFunction) => {
     SkillSet.
-        deleteSkillSetById({
-            id: req.params.id,
-        })
+        deleteSkillSetById(req.params.id)
         .then((skill) =>
         res.status(httpStatus.OK).json({
             "Message":"Row Delete Successfully",
