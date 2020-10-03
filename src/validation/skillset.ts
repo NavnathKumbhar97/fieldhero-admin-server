@@ -1,18 +1,18 @@
 import Joi from "joi"
 import { Request, Response, NextFunction } from "express"
 
-const createSkillSet = Joi.object().keys({
+const skillSet = Joi.object().keys({
     title: Joi.string().max(45).required(),
     description: Joi.string().max(100).allow(''),
 })
 
-const createSkillSetValidation = async (req: Request,res: Response,next: NextFunction)=>{
+const skillSetValidation = async (req: Request,res: Response,next: NextFunction)=>{
     const options = {
         abortEarly: false, // include all errors
         allowUnknown: true, // ignore unknown props
         stripUnknown: true, // remove unknown props
     }
-    const { error, value } = await createSkillSet.validate(req.body, options)
+    const { error, value } = await skillSet.validate(req.body, options)
     if (error) {
         res.json({
             status: 400,
@@ -30,4 +30,4 @@ const createSkillSetValidation = async (req: Request,res: Response,next: NextFun
     }
 }
 
-export { createSkillSetValidation }
+export { skillSetValidation }

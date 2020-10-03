@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { httpStatus } from "../helper"
 import { Company } from "../handlers"
-import { createCompanyValidation } from "../validation/company"
+import { companyValidation } from "../validation/company"
 const CompanyRouter = Router()
 
 // Company
@@ -10,7 +10,7 @@ CompanyRouter.get(
     "/companies",
     (req:Request, res:Response, next:NextFunction) => {
     Company
-        .getCompanies()
+        .getCompanies(req.query.all)
         .then((companies) => {
             if(!companies.length){
                 res.status(httpStatus.OK).json({
@@ -50,7 +50,7 @@ CompanyRouter.get(
 //* Create Company
 CompanyRouter.post(
     "/companies",
-    createCompanyValidation,
+    companyValidation,
     (req:Request, res:Response, next:NextFunction) => {
     Company.createCompany({ ...req.body })
         .then((company) => {
@@ -71,6 +71,7 @@ CompanyRouter.post(
 // Update Compnay 
 CompanyRouter.put(
     "/companies/:id",
+    companyValidation,
     (req:Request, res:Response, next:NextFunction) => {
     Company.updatedCompanyById({ id: req.params.id, ...req.body })
         .then((company) => 

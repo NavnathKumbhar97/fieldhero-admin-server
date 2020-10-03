@@ -1,12 +1,21 @@
 import { customerDB } from "../sequelize"
 
-const getCompanies = async () => {
+const getCompanies = async (all:any) => {
+    let whereCondition = {}
+    if(all == '*') {
+        whereCondition = [0,1]
+    } else {
+        whereCondition = 1
+    }
     const companies = await customerDB.Company.findAll({
         include: [
             {
                 model: customerDB.Industry,
             },
         ],
+        where: {
+            isActive: whereCondition
+        }
     }).catch((ex: any) => {
         throw ex
     })

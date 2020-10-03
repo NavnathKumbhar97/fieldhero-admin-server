@@ -1,7 +1,17 @@
 import { customerDB } from "../sequelize"
 
-const getSkillSets = async () => {
-    const skillSets = await customerDB.SkillSet.findAll().catch((ex: any) => {
+const getSkillSets = async (all:any) => {
+    let whereCondition = {}
+    if(all == '*') {
+        whereCondition = [0,1]
+    } else {
+        whereCondition = 1
+    }
+    const skillSets = await customerDB.SkillSet.findAll({
+        where:{
+            isActive: whereCondition
+        }
+    }).catch((ex: any) => {
         throw ex
     })
     return skillSets
@@ -64,11 +74,27 @@ const updateSkillSetById = async (param: updateSkillSetParam) => {
     return updatedSkill
 }
 
+const deleteSkillSetById = async (id:any) => {
+    const skillSet = await customerDB.SkillSet.findOne({
+        where:{
+            id
+        }
+    })
+    let deleteSkillSet = null
+    if(skillSet) {
+        skillSet.isActive = false;
+        deleteSkillSet = await skillSet.save()
+    }
+    return deleteSkillSet
+}
+
+
 const SkillSet = {
     getSkillSets,
     getSkillSetById,
     createSkillSet,
     updateSkillSetById,
+    deleteSkillSetById
 }
 
 export { SkillSet }

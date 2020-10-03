@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Industry } from "../handlers"
 import { httpStatus } from "../helper"
-import { createIndustryValidation } from "../validation/industry"
+import { industryValidation } from "../validation/industry"
 
 const IndustryRouter = Router()
 // Industry
@@ -56,7 +56,7 @@ IndustryRouter.get(
 //* Create Industry 
 IndustryRouter.post(
     "/industries",
-    createIndustryValidation,
+    industryValidation,
     (req: Request, res: Response, next: NextFunction) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {
@@ -76,6 +76,7 @@ IndustryRouter.post(
 //* Update Industry
 IndustryRouter.put(
     "/industries/:id",
+    industryValidation,
     (req:Request, res:Response, next:NextFunction) => {
     Industry.
         updateIndustryById({
@@ -96,4 +97,25 @@ IndustryRouter.put(
     }
 )
 
+//* Delete Industry
+IndustryRouter.delete(
+    "/industries/:id",
+    (req: Request, res: Response, next: NextFunction) => {
+    Industry.
+        deleteIndustryById({
+            id: req.params.id,
+        })
+        .then((industry) =>
+        res.status(httpStatus.OK).json({
+            "Message":"Row Delete Successfully",
+            "Success":industry})
+        )
+        .catch((err) =>
+        res.status(httpStatus.Bad_Request).json({
+            code: httpStatus.Bad_Request,
+            error: err
+            })
+        )
+    }
+)
 export { IndustryRouter }

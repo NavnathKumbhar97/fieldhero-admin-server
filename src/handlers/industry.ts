@@ -3,15 +3,15 @@ import { customerDB } from "../sequelize"
 
 
 const getIndustries = async (all:any) => {
-    let whereStatement = {}
+    let whereCondition = {}
     if(all == '*') {
-        whereStatement = [1,0]
+        whereCondition = [0,1]
     } else {
-        whereStatement = 1
+        whereCondition = 1
     }
     const industries = await customerDB.Industry.findAll({   
         where: {
-            isActive: whereStatement
+            isActive: whereCondition
         }
     }).catch((ex: any) => {
         throw ex
@@ -80,10 +80,25 @@ const updateIndustryById = async (param: updateIndustryParam) =>{
     return industry
 }
 
+const deleteIndustryById = async (id:any) => {
+    const industry = await customerDB.Industry.findOne({
+        where:{
+            id
+        }
+    })
+    let deleteIndustry = null
+    if(industry) {
+        industry.isActive = false;
+        deleteIndustry = await industry.save()
+    }
+    return deleteIndustry
+}
+
 const Industry = {
     getIndustries,
     getIndustryById,
     createIndustry,
-    updateIndustryById
+    updateIndustryById,
+    deleteIndustryById
 }
 export { Industry }

@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { SkillSet } from "../handlers"
 import { httpStatus } from "../helper"
-import { createSkillSetValidation } from "../validation/skillset"
+import { skillSetValidation } from "../validation/skillset"
 
 const SkillSetRouter = Router()
 
@@ -10,7 +10,7 @@ const SkillSetRouter = Router()
 //* Fetch All Skills Sets
 SkillSetRouter.get("/skills", (req:Request, res:Response, next:NextFunction) => {
     SkillSet
-        .getSkillSets()
+        .getSkillSets(req.query.all)
         .then((skills) => {
             if (!skills.length) {
                 res.status(httpStatus.OK).json({
@@ -49,7 +49,7 @@ SkillSetRouter.get(
 // Create Skills Sets
 SkillSetRouter.post(
     "/skills",
-    createSkillSetValidation,
+    skillSetValidation,
     (req:Request, res:Response, next:NextFunction) => {
     SkillSet
         .createSkillSet({ ...req.body })
@@ -71,6 +71,7 @@ SkillSetRouter.post(
 // Update skills Set Recored 
 SkillSetRouter.put(
     "/skills/:id",
+    skillSetValidation,
     (req:Request, res:Response, next:NextFunction) => {
     SkillSet
         .updateSkillSetById({ id: req.params.id, ...req.body })
@@ -86,4 +87,24 @@ SkillSetRouter.put(
     }
 )
 
+SkillSetRouter.delete(
+    "/skills/:id",
+    (req: Request, res: Response, next: NextFunction) => {
+    SkillSet.
+        deleteSkillSetById({
+            id: req.params.id,
+        })
+        .then((skill) =>
+        res.status(httpStatus.OK).json({
+            "Message":"Row Delete Successfully",
+            "Success":skill})
+        )
+        .catch((err) =>
+        res.status(httpStatus.Bad_Request).json({
+            code: httpStatus.Bad_Request,
+            error: err
+            })
+        )
+    }
+)
 export { SkillSetRouter }
