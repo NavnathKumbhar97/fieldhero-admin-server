@@ -7,7 +7,7 @@ const CandidateRouter = Router()
 
 // Candidate
 
-// * Fetch all Candidate
+//* Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
     (req: Request, res: Response, next: NextFunction) => {
@@ -32,7 +32,7 @@ interface GetCandidateByIdParam {
     id: number
 }
 
-// * Fetch Candidate by Id
+//* Fetch Candidate by Id
 CandidateRouter.get(
     "/candidates/:id",
     (
@@ -53,11 +53,10 @@ CandidateRouter.get(
     }
 )
 
-// * create candidate
+//* create candidate
 CandidateRouter.post(
     "/candidates",
     (req: Request, res: Response, next: NextFunction) => {
-        // console.log(req.body)
         Candidate.createCandidate({ ...req.body })
             .then((candidate) => {
                 res.status(httpStatus.OK).json(candidate)
@@ -71,7 +70,27 @@ CandidateRouter.post(
     }
 )
 
-// * bulk create candidates
+//* Update candiate
+CandidateRouter.put(
+    "/candidates/:id",
+    (req:Request, res:Response, next:NextFunction) => {
+    Candidate
+        .updateCandidateById({ 
+            id: req.params.id,
+            ...req.body
+        })
+        .then((candidate) => {
+            res.status(httpStatus.OK).json(candidate)
+        })
+        .catch((err) => 
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err
+            })
+        )
+})
+
+//* bulk create candidates
 CandidateRouter.post(
     "/bulkcandidates",
     createCandidateValidation,

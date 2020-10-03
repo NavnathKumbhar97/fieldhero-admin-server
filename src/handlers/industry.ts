@@ -31,6 +31,7 @@ const getIndustryById = async (id: number) => {
 }
 
 interface createIndustryParam {
+    method:string
     title: string
     description: string
     isActive: boolean
