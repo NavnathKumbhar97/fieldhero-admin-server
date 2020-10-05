@@ -89,6 +89,7 @@ SkillSetRouter.put(
 interface DeleteSkillSetByIdParam {
     id: number
 }
+// Delete skillSet 
 SkillSetRouter.delete(
     "/skills/:id",
     (req: Request<DeleteSkillSetByIdParam>, res: Response, next: NextFunction) => {

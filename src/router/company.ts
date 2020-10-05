@@ -85,5 +85,28 @@ CompanyRouter.put(
         )
     }
 )
+interface DeleteCompnayByIdParam {
+    id: number
+}
+
+//Delete Company
+CompanyRouter.delete(
+    "/companies/:id",
+    (req: Request<DeleteCompnayByIdParam>, res: Response, next: NextFunction) => {
+    Company.
+        deleteCompanyById(req.params.id)
+        .then((Company) =>
+        res.status(httpStatus.OK).json({
+            "Message":"Row Delete Successfully",
+            "Success":Company})
+        )
+        .catch((err) =>
+        res.status(httpStatus.Bad_Request).json({
+            code: httpStatus.Bad_Request,
+            error: err
+            })
+        )
+    }
+)
 
 export { CompanyRouter }

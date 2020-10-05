@@ -89,11 +89,25 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
     return updatedCompany
 }
 
+const deleteCompanyById = async (id:number) => {
+    const Company = await customerDB.Company.findOne({
+        where:{
+            id:id
+        }
+    })
+    let deleteCompany = null
+    if(Company) {
+        Company.isActive = false;
+        deleteCompany = await Company.save()
+    }
+    return deleteCompany
+}
 const Company = {
     getCompanies,
     getCompanyById,
     createCompany,
     updatedCompanyById,
+    deleteCompanyById
 }
 
 export { Company }
