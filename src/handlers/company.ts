@@ -88,7 +88,6 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
     }
     return updatedCompany
 }
-
 const deleteCompanyById = async (id:number) => {
     const Company = await customerDB.Company.findOne({
         where:{

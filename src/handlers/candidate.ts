@@ -1,4 +1,3 @@
-import { METHODS } from "http"
 import { customerDB, ormCustomer } from "../sequelize"
 
 const getCandidates = async () => {
