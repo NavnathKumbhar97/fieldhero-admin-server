@@ -59,7 +59,7 @@ CandidateRouter.post(
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.createCandidate({ ...req.body })
             .then((candidate) => {
-                res.status(httpStatus.OK).json(candidate)
+                res.status(httpStatus.Created).json(candidate)
             })
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
@@ -118,7 +118,7 @@ CandidateRouter.post(
             candidate: req.params.id,
         })
             .then((cert) => {
-                res.status(httpStatus.OK).json(cert)
+                res.status(httpStatus.Created).json(cert)
             })
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
@@ -181,7 +181,7 @@ CandidateRouter.post(
             ...req.body,
             candidate: req.params.id,
         })
-            .then((workHistory) => res.status(httpStatus.OK).json(workHistory))
+            .then((workHistory) => res.status(httpStatus.Created).json(workHistory))
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
                     code: httpStatus.Bad_Request,

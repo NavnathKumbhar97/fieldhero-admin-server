@@ -1,4 +1,3 @@
-import { number } from "joi"
 import { customerDB } from "../sequelize"
 
 const getSkillSets = async (all:any) => {
