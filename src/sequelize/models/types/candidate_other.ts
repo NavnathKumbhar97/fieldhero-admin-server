@@ -6,6 +6,7 @@ interface Attributes {
     totalExpYears: number
     registrationStatus: string
     candidateId?: number
+    profileImage?: string
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

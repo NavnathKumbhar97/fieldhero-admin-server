@@ -28,5 +28,10 @@ export const CandidateOtherFactory = (orm: Sequelize): CandidateOtherModel => {
             },
             allowNull: false,
         },
+        profileImage: {
+            type: DataTypes.STRING(200),
+            allowNull: true,
+            defaultValue: null
+        },
     })
 }

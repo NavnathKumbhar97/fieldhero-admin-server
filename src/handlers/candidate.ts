@@ -106,7 +106,7 @@ const createCandidate = async (param: createCandidateParam) => {
 }
 
 interface updateCandidateParam {
-    id:number
+    id: number
     firstName: string
     middleName: string
     lastName: string
@@ -140,45 +140,51 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         const candidateInfo = await customerDB.Candidate.findOne({
             where: { id: param.id },
         })
-        let updateCandidate = null;
-        if(candidateInfo){
-                candidateInfo.firstName = param.firstName,
-                candidateInfo.middleName = param.middleName,
-                candidateInfo.lastName = param.lastName,
-                candidateInfo.birthDate = param.birthDate,
-                candidateInfo.gender = param.gender,
-                candidateInfo.perm_address = param.perm_address,
-                candidateInfo.perm_city = param.perm_city,
-                candidateInfo.perm_state = param.perm_state,
-                candidateInfo.perm_country = param.perm_country,
-                candidateInfo.perm_zip = param.perm_zip,
-                candidateInfo.curr_address = param.curr_address,
-                candidateInfo.curr_city = param.curr_city,
-                candidateInfo.curr_state = param.curr_state,
-                candidateInfo.curr_country = param.curr_country,
-                candidateInfo.curr_zip = param.curr_zip,
-                candidateInfo.email1 = param.email1,
-                candidateInfo.email2 = param.email2,
-                candidateInfo.contactNo1 = param.contactNo1,
-                candidateInfo.contactNo2 = param.contactNo2,
-                candidateInfo.aadharNo = param.aadharNo,
-                candidateInfo.isActive = param.isActive,
-                updateCandidate = await candidateInfo.save()
+        let updateCandidate = null
+        if (candidateInfo) {
+            ;(candidateInfo.firstName = param.firstName),
+                (candidateInfo.middleName = param.middleName),
+                (candidateInfo.lastName = param.lastName),
+                (candidateInfo.birthDate = param.birthDate),
+                (candidateInfo.gender = param.gender),
+                (candidateInfo.perm_address = param.perm_address),
+                (candidateInfo.perm_city = param.perm_city),
+                (candidateInfo.perm_state = param.perm_state),
+                (candidateInfo.perm_country = param.perm_country),
+                (candidateInfo.perm_zip = param.perm_zip),
+                (candidateInfo.curr_address = param.curr_address),
+                (candidateInfo.curr_city = param.curr_city),
+                (candidateInfo.curr_state = param.curr_state),
+                (candidateInfo.curr_country = param.curr_country),
+                (candidateInfo.curr_zip = param.curr_zip),
+                (candidateInfo.email1 = param.email1),
+                (candidateInfo.email2 = param.email2),
+                (candidateInfo.contactNo1 = param.contactNo1),
+                (candidateInfo.contactNo2 = param.contactNo2),
+                (candidateInfo.aadharNo = param.aadharNo),
+                (candidateInfo.isActive = param.isActive),
+                (updateCandidate = await candidateInfo.save())
         }
-        { transaction }
-
-        const candidateOtherDetailsInfo = await customerDB.CandidateOtherDetails.findOne({
-            where: { candidateId: param.id },
-        })
-        let updateCandidateOtherDetails = null;
-        if(candidateOtherDetailsInfo) {
-            candidateOtherDetailsInfo.totalExpMonths= param.totalExpMonths,
-            candidateOtherDetailsInfo.totalExpYears= param.totalExpYears,
-            candidateOtherDetailsInfo.registrationStatus= param.registrationStatus,
-            updateCandidateOtherDetails = await candidateOtherDetailsInfo.save()
-
+        {
+            transaction
         }
-        { transaction }
+
+        const candidateOtherDetailsInfo = await customerDB.CandidateOtherDetails.findOne(
+            {
+                where: { candidateId: param.id },
+            }
+        )
+        let updateCandidateOtherDetails = null
+        if (candidateOtherDetailsInfo) {
+            ;(candidateOtherDetailsInfo.totalExpMonths = param.totalExpMonths),
+                (candidateOtherDetailsInfo.totalExpYears = param.totalExpYears),
+                (candidateOtherDetailsInfo.registrationStatus =
+                    param.registrationStatus),
+                (updateCandidateOtherDetails = await candidateOtherDetailsInfo.save())
+        }
+        {
+            transaction
+        }
 
         await transaction.commit()
         return Object.assign({ updateCandidate, updateCandidateOtherDetails })
@@ -187,7 +193,6 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         throw err
     }
 }
-
 
 interface bulkCreateCandidateParam {
     firstName: string
