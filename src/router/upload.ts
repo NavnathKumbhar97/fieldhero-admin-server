@@ -44,14 +44,6 @@ interface CanidateProfileByIdParam {
 UploadRouter.post(
     '/upload-profile/:id', upload.single('image'), 
     (req:Request, res:Response, next:NextFunction) => {
-        const file = req.file;        
-        if (!file) {
-            res.status(httpStatus.Bad_Request).json({
-                "status": "failed",
-                "message" : "Please upload file"
-            });
-        } 
-        
         try {
             const file = req.file;        
             if (!file) {
@@ -70,7 +62,13 @@ UploadRouter.post(
                 error: error
             })
         }
-  
+        // const file = req.file;        
+        // if (!file) {
+        //     res.status(httpStatus.Bad_Request).json({
+        //         "status": "failed",
+        //         "message" : "Please upload file"
+        //     });
+        // } 
         // else {
         //     UploadImage.
         //     updateCandiateProfileById(
