@@ -11,7 +11,7 @@ const CandidateRouter = Router()
 CandidateRouter.get(
     "/candidates",
     (req: Request, res: Response, next: NextFunction) => {
-        Candidate.getCandidates()
+        Candidate.getCandidates(req.query.all)
             .then((candidates) => {
                 if (!candidates.length) {
                     res.status(httpStatus.OK).json({

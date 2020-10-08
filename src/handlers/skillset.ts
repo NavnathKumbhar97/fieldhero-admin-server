@@ -62,7 +62,7 @@ interface updateSkillSetParam {
 
 const updateSkillSetById = async (param: updateSkillSetParam) => {
     const skill = await customerDB.SkillSet.findOne({
-        where: { id: param.id },
+        where: { id: param.id }
     })
     let updatedSkill = null
     if (skill) {

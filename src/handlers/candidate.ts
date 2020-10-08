@@ -1,12 +1,21 @@
 import { customerDB, ormCustomer } from "../sequelize"
 
-const getCandidates = async () => {
+const getCandidates = async (all:any) => {
+    let whereCondition = {}
+    if(all == '*') {
+        whereCondition = [0,1]
+    } else {
+        whereCondition = 1
+    }
     const candidates = await customerDB.Candidate.findAll({
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
             { model: customerDB.CandidateWorkHistory },
         ],
+        where: {
+            isActive: whereCondition
+        }
     }).catch((ex: any) => {
         throw ex
     })
