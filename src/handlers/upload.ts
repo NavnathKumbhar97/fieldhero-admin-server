@@ -1,20 +1,26 @@
+import fs from "fs"
+import path from "path"
 import { customerDB } from "../sequelize"
+import { Candidate } from "./candidate"
 
-
-const updateCandiateProfileById = async (id:number, profileImage:string) => {
-    const CandiateProfile = await customerDB.CandidateOtherDetails.findOne({
+const updateCandidateProfileById = async (id: number, profileImage: string) => {
+    let CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
         where: { candidateId: id },
     })
-    let updatedCandiateProfile = null
-    if (CandiateProfile) {
-        CandiateProfile.profileImage = profileImage
-        updatedCandiateProfile = await CandiateProfile.save()
+    let updatedCandidateProfile = null
+    if (CandidateProfile) {
+        let imagePath = CandidateProfile.profileImage
+        fs.unlink(path.join(process.cwd(), imagePath || ""), (err) => {
+            return err;
+        })
+        CandidateProfile.profileImage = profileImage
+        updatedCandidateProfile = await CandidateProfile.save()
     }
-    return updatedCandiateProfile
+    return updatedCandidateProfile
 }
 
 const UploadImage = {
-    updateCandiateProfileById,
+    updateCandidateProfileById,
 }
 
 export { UploadImage }

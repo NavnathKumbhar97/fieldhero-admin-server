@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     destination: (req: Request, file: any, cb: any) => {
         let p = `public/uploads/candidates/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
-            fs.mkdirSync(p, { recursive: true })
+            fs.mkdirSync(p, { recursive: true })            
         }
         cb(null, p)
     },
@@ -20,7 +20,7 @@ const storage = multer.diskStorage({
         let datetimestamp = Date.now()
         const newFilename = `${file.fieldname}-${
             req.params.id
-        }-${datetimestamp}.${path.extname(file.originalname)}`
+        }-${datetimestamp}${path.extname(file.originalname)}`
         cb(null, newFilename)
     },
 })
@@ -39,9 +39,6 @@ const fileFilter = (req: Request, file: any, cb: any) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter })
 
-interface CanidateProfileByIdParam {
-    id: number
-}
 
 //Upload route
 
@@ -49,24 +46,6 @@ UploadRouter.post(
     "/upload-profile/:id",
     upload.single("image"),
     (req: Request, res: Response, next: NextFunction) => {
-        // try {
-        //     const file = req.file
-        //     if (!file) {
-        //         res.status(httpStatus.Bad_Request).json({
-        //             status: "failed",
-        //             message: "Please upload file",
-        //         })
-        //     }
-        //     return res.status(httpStatus.Created).json({
-        //         message: "File uploded successfully",
-        //         data: file,
-        //     })
-        // } catch (error) {
-        //     res.status(httpStatus.Bad_Request).json({
-        //         code: httpStatus.Bad_Request,
-        //         error: error,
-        //     })
-        // }
         const file = req.file
         if (!file) {
             res.status(httpStatus.Bad_Request).json({
@@ -74,12 +53,11 @@ UploadRouter.post(
                 message: "Please upload file",
             })
         } else {
-            console.log(req.params)
-            UploadImage.updateCandiateProfileById(
+            let path = req.file.destination+'/'+req.file.filename;            
+            UploadImage.updateCandidateProfileById(
                 parseInt(req.params.id),
-                req.file.destination
-            )
-                .then((image) => res.status(httpStatus.OK).json(image))
+                path
+            ).then((image) => res.status(httpStatus.OK).json(image))
                 .catch((err) =>
                     res.status(httpStatus.Bad_Request).json({
                         code: httpStatus.Bad_Request,
@@ -91,3 +69,4 @@ UploadRouter.post(
 )
 
 export { UploadRouter }
+
