@@ -1,3 +1,4 @@
+import { number, string } from "joi"
 import { customerDB, ormCustomer } from "../sequelize"
 
 const getCandidates = async (all:any) => {
@@ -232,7 +233,7 @@ interface bulkCreateCandidateParam {
 }
 
 const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
-    const transaction = await ormCustomer.transaction()
+    let transaction = await ormCustomer.transaction()
     try {
         const candidate = await customerDB.Candidate.bulkCreate(param, {
             fields: [
@@ -371,21 +372,87 @@ interface createCandidateWorkHistoryParam {
     description: string
     candidateId: number
     companyId: number
+    skillId:any
+    workHistoryId:any
 }
 
 const addCandidateWorkHistory = async (
-    param: createCandidateWorkHistoryParam
-) => {
-    const candidateWorkHistory = await customerDB.CandidateWorkHistory.create({
-        startDate: param.startDate,
-        endDate: param.endDate,
-        description: param.description,
-        candidateId: param.candidateId,
-        companyId: param.companyId,
-    }).catch((err) => {
+        param: createCandidateWorkHistoryParam
+    ) => {
+    let transaction = await ormCustomer.transaction()
+    try{
+        let skillsSetArray = []
+        let skills:any = []
+        let newSkills:any = []
+
+        skillsSetArray = param.skillId;
+        skillsSetArray.map((items:any)=>{
+            if(typeof(items)=='number'){
+                skills.push(items);
+            } else {
+                newSkills.push(items)
+            }
+        })
+        const NewskillsArrayObject = newSkills.map((item:any)=> {
+            return {title:item};
+        })
+        const skillSet = await customerDB.SkillSet.bulkCreate(
+            NewskillsArrayObject,{
+                fields: [
+                    "id",
+                    "title",
+                ],
+                transaction
+            }
+        )
+
+        const candidateWorkHistory = await customerDB.CandidateWorkHistory.create({
+            startDate: param.startDate,
+            endDate: param.endDate,
+            description: param.description,
+            candidateId: param.candidateId,
+            companyId: param.companyId,     
+        },{
+            fields: [
+                "startDate",
+                "endDate",
+                "description",
+                "candidateId",
+                "companyId"
+            ],
+            transaction
+        })
+        let getSkillId = skillSet.map((item) => {
+            return {
+                skillId: item.id,
+                workHistoryId:candidateWorkHistory.id
+            }
+        })
+        let skillsArrayObject = skills.map((item:any)=> {
+            return { 
+                skillId:item,
+                workHistoryId:candidateWorkHistory.id
+            };
+        })
+        let workHistorySkill = [...skillsArrayObject,...getSkillId]
+
+        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
+            workHistorySkill,
+            {
+                fields: [
+                    "skillId",
+                    "workHistoryId"
+                ],
+                transaction,
+            }
+        )
+        await transaction.commit()
+        return Object.assign({ skillSet,candidateWorkHistory,candidateWorkHistorySkill })     
+    } catch(err:any) {
+        await transaction.rollback()
+        console.log(err)
         throw err
-    })
-    return candidateWorkHistory
+    }
 }
 
 interface updateCandidateWorkHistoryParam {

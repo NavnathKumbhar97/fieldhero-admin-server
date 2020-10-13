@@ -42,6 +42,11 @@ CandidateOtherDetails.belongsTo(Candidate, {foreignKey: "candidateId"})
 Industry.hasMany(Company, { foreignKey: "industryId" })
 Company.belongsTo(Industry, { foreignKey: "industryId" })
 
+//SkillSet CandidateWorkHistory 
+SkillSet.hasMany(CandidateWorkHistorySkill,{ foreignKey: "skillId" })
+CandidateWorkHistorySkill.belongsTo(SkillSet, { foreignKey: "skillId" })
+CandidateWorkHistory.hasMany(CandidateWorkHistorySkill, { foreignKey: "workHistoryId" })
+CandidateWorkHistorySkill.belongsTo(CandidateWorkHistory, { foreignKey: "workHistoryId" })
 
 const customerDB = {
     Candidate,
