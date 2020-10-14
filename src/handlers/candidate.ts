@@ -1,10 +1,11 @@
 import { number, string } from "joi"
 import { customerDB, ormCustomer } from "../sequelize"
+import { log } from "../helper"
 
-const getCandidates = async (all:any) => {
+const getCandidates = async (all: any) => {
     let whereCondition = {}
-    if(all == '*') {
-        whereCondition = [0,1]
+    if (all == "*") {
+        whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
@@ -15,8 +16,8 @@ const getCandidates = async (all:any) => {
             { model: customerDB.CandidateWorkHistory },
         ],
         where: {
-            isActive: whereCondition
-        }
+            isActive: whereCondition,
+        },
     }).catch((ex: any) => {
         throw ex
     })
@@ -152,28 +153,28 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         })
         let updateCandidate = null
         if (candidateInfo) {
-            ;(candidateInfo.firstName = param.firstName),
-                (candidateInfo.middleName = param.middleName),
-                (candidateInfo.lastName = param.lastName),
-                (candidateInfo.birthDate = param.birthDate),
-                (candidateInfo.gender = param.gender),
-                (candidateInfo.perm_address = param.perm_address),
-                (candidateInfo.perm_city = param.perm_city),
-                (candidateInfo.perm_state = param.perm_state),
-                (candidateInfo.perm_country = param.perm_country),
-                (candidateInfo.perm_zip = param.perm_zip),
-                (candidateInfo.curr_address = param.curr_address),
-                (candidateInfo.curr_city = param.curr_city),
-                (candidateInfo.curr_state = param.curr_state),
-                (candidateInfo.curr_country = param.curr_country),
-                (candidateInfo.curr_zip = param.curr_zip),
-                (candidateInfo.email1 = param.email1),
-                (candidateInfo.email2 = param.email2),
-                (candidateInfo.contactNo1 = param.contactNo1),
-                (candidateInfo.contactNo2 = param.contactNo2),
-                (candidateInfo.aadharNo = param.aadharNo),
-                (candidateInfo.isActive = param.isActive),
-                (updateCandidate = await candidateInfo.save())
+            candidateInfo.firstName = param.firstName
+            candidateInfo.middleName = param.middleName
+            candidateInfo.lastName = param.lastName
+            candidateInfo.birthDate = param.birthDate
+            candidateInfo.gender = param.gender
+            candidateInfo.perm_address = param.perm_address
+            candidateInfo.perm_city = param.perm_city
+            candidateInfo.perm_state = param.perm_state
+            candidateInfo.perm_country = param.perm_country
+            candidateInfo.perm_zip = param.perm_zip
+            candidateInfo.curr_address = param.curr_address
+            candidateInfo.curr_city = param.curr_city
+            candidateInfo.curr_state = param.curr_state
+            candidateInfo.curr_country = param.curr_country
+            candidateInfo.curr_zip = param.curr_zip
+            candidateInfo.email1 = param.email1
+            candidateInfo.email2 = param.email2
+            candidateInfo.contactNo1 = param.contactNo1
+            candidateInfo.contactNo2 = param.contactNo2
+            candidateInfo.aadharNo = param.aadharNo
+            candidateInfo.isActive = param.isActive
+            updateCandidate = await candidateInfo.save()
         }
         {
             transaction
@@ -186,11 +187,13 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         )
         let updateCandidateOtherDetails = null
         if (candidateOtherDetailsInfo) {
-            ;(candidateOtherDetailsInfo.totalExpMonths = param.totalExpMonths),
-                (candidateOtherDetailsInfo.totalExpYears = param.totalExpYears),
-                (candidateOtherDetailsInfo.registrationStatus =
-                    param.registrationStatus),
-                (updateCandidateOtherDetails = await candidateOtherDetailsInfo.save())
+            if (param.totalExpMonths)
+                candidateOtherDetailsInfo.totalExpMonths = param.totalExpMonths
+            if (param.totalExpYears)
+                candidateOtherDetailsInfo.totalExpYears = param.totalExpYears
+            candidateOtherDetailsInfo.registrationStatus =
+                param.registrationStatus
+            updateCandidateOtherDetails = await candidateOtherDetailsInfo.save()
         }
         {
             transaction
@@ -200,6 +203,8 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         return Object.assign({ updateCandidate, updateCandidateOtherDetails })
     } catch (err: any) {
         await transaction.rollback()
+        // console.log(err)
+        log.error(err, "Error while updateCandidateById")
         throw err
     }
 }
@@ -372,83 +377,85 @@ interface createCandidateWorkHistoryParam {
     description: string
     candidateId: number
     companyId: number
-    skillId:any
-    workHistoryId:any
+    skillId: any
+    workHistoryId: any
 }
 
 const addCandidateWorkHistory = async (
-        param: createCandidateWorkHistoryParam
-    ) => {
+    param: createCandidateWorkHistoryParam
+) => {
     let transaction = await ormCustomer.transaction()
-    try{
+    try {
         let skillsSetArray = []
-        let skills:any = []
-        let newSkills:any = []
+        let skills: any = []
+        let newSkills: any = []
 
-        skillsSetArray = param.skillId;
-        skillsSetArray.map((items:any)=>{
-            if(typeof(items)=='number'){
-                skills.push(items);
+        skillsSetArray = param.skillId
+        skillsSetArray.map((items: any) => {
+            if (typeof items == "number") {
+                skills.push(items)
             } else {
                 newSkills.push(items)
             }
         })
-        const NewskillsArrayObject = newSkills.map((item:any)=> {
-            return {title:item};
+        const NewskillsArrayObject = newSkills.map((item: any) => {
+            return { title: item }
         })
         const skillSet = await customerDB.SkillSet.bulkCreate(
-            NewskillsArrayObject,{
-                fields: [
-                    "id",
-                    "title",
-                ],
-                transaction
+            NewskillsArrayObject,
+            {
+                fields: ["id", "title"],
+                transaction,
             }
         )
 
-        const candidateWorkHistory = await customerDB.CandidateWorkHistory.create({
-            startDate: param.startDate,
-            endDate: param.endDate,
-            description: param.description,
-            candidateId: param.candidateId,
-            companyId: param.companyId,     
-        },{
-            fields: [
-                "startDate",
-                "endDate",
-                "description",
-                "candidateId",
-                "companyId"
-            ],
-            transaction
-        })
-        let getSkillId = skillSet.map((item) => {
-            return {
-                skillId: item.id,
-                workHistoryId:candidateWorkHistory.id
-            }
-        })
-        let skillsArrayObject = skills.map((item:any)=> {
-            return { 
-                skillId:item,
-                workHistoryId:candidateWorkHistory.id
-            };
-        })
-        let workHistorySkill = [...skillsArrayObject,...getSkillId]
-
-        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
-            workHistorySkill,
+        const candidateWorkHistory = await customerDB.CandidateWorkHistory.create(
+            {
+                startDate: param.startDate,
+                endDate: param.endDate,
+                description: param.description,
+                candidateId: param.candidateId,
+                companyId: param.companyId,
+            },
             {
                 fields: [
-                    "skillId",
-                    "workHistoryId"
+                    "startDate",
+                    "endDate",
+                    "description",
+                    "candidateId",
+                    "companyId",
                 ],
                 transaction,
             }
         )
+        let getSkillId = skillSet.map((item) => {
+            return {
+                skillId: item.id,
+                workHistoryId: candidateWorkHistory.id,
+            }
+        })
+        let skillsArrayObject = skills.map((item: any) => {
+            return {
+                skillId: item,
+                workHistoryId: candidateWorkHistory.id,
+            }
+        })
+        let workHistorySkill = [...skillsArrayObject, ...getSkillId]
+
+        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
+            workHistorySkill,
+            {
+                fields: ["skillId", "workHistoryId"],
+                transaction,
+            }
+        )
         await transaction.commit()
-        return Object.assign({ skillSet,candidateWorkHistory,candidateWorkHistorySkill })     
-    } catch(err:any) {
+        return Object.assign({
+            skillSet,
+            candidateWorkHistory,
+            candidateWorkHistorySkill,
+        })
+    } catch (err: any) {
         await transaction.rollback()
         console.log(err)
         throw err
