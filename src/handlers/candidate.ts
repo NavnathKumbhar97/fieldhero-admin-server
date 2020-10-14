@@ -32,7 +32,7 @@ const getCandidateById = async (id: number) => {
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
-            { model: customerDB.CandidateWorkHistory },
+            { model: customerDB.CandidateWorkHistory},
         ],
     }).catch((ex: any) => {
         throw ex
@@ -503,6 +503,34 @@ const removeCandidateWorkHistory = async (
     })
     return deletedRows
 }
+
+const getCandidatesWorkHistory = async(id:number)=>{
+    const candidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll({
+        include: [
+            { model: customerDB.CandidateWorkHistorySkill },
+        ],
+        where: {
+            candidateId:id,
+        },
+    }).catch((ex: any) => {
+        throw ex
+    })
+    return candidatesWorkHistory
+}
+
+const getCandidateTrainingCert = async(id:number)=>{
+    const candidatesWorkHistory = await customerDB.CandidateCertificate.findAll({
+        include: [
+            { model: customerDB.SkillSet },
+        ],
+        where: {
+            candidateId:id,
+        },
+    }).catch((ex: any) => {
+        throw ex
+    })
+    return candidatesWorkHistory
+}
 const Candidate = {
     getCandidates,
     getCandidateById,
@@ -515,6 +543,8 @@ const Candidate = {
     updateCandidateWorkHistoryById,
     removeCandidateWorkHistory,
     createBulkCandidate,
+    getCandidatesWorkHistory,
+    getCandidateTrainingCert
 }
 
 export { Candidate }

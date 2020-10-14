@@ -108,6 +108,22 @@ CandidateRouter.post(
             )
     }
 )
+// * get Candidate Trainig-Cerf  
+CandidateRouter.get(
+    "/candidates/:id/training-cert",
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.getCandidateTrainingCert(parseInt(req.params.id))
+            .then((cert) => {
+                res.status(httpStatus.Created).json(cert)
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
+    }
+)
 
 // * Create Candidate Trainig-Cerf  
 CandidateRouter.post(
@@ -173,6 +189,27 @@ CandidateRouter.delete(
     }
 )
 
+//* get Candidate work history 
+CandidateRouter.get(
+    "/candidates/:id/work-history",
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.getCandidatesWorkHistory(parseInt(req.params.id))
+            .then((candidatesWorkHistory) => {
+                if (!candidatesWorkHistory.length) {
+                    res.status(httpStatus.OK).json({
+                        Success: "Not Recored Found",
+                    })
+                }
+                res.status(httpStatus.OK).json(candidatesWorkHistory)
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
+    }
+)
 //* Create Candiate Work History
 CandidateRouter.post(
     "/candidates/:id/work-history",
@@ -214,7 +251,8 @@ CandidateRouter.put(
 interface RemoveCandidateWorkHistoryByIdParam {
     workId: number
 }
-// Delete Candidate Work History 
+
+//* Delete Candidate Work History 
 CandidateRouter.delete(
     "/candidates/:id/work-history/:workId",
     (
@@ -237,4 +275,6 @@ CandidateRouter.delete(
             )
     }
 )
+
+
 export { CandidateRouter }
