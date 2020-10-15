@@ -1,4 +1,5 @@
 import { customerDB } from "../sequelize"
+import {log} from "../helper"
 
 const getSkillSets = async (all:any) => {
     let whereCondition = {}
@@ -11,8 +12,10 @@ const getSkillSets = async (all:any) => {
         where:{
             isActive: whereCondition
         }
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getSkillSets")
+        //console.log(err)
+        throw err;
     })
     return skillSets
 }
@@ -21,8 +24,11 @@ const getSkillSetById = async (id: number) => {
         where: {
             id,
         },
-    }).catch((ex) => {
-        throw ex
+    }).catch((err) => {
+        log.error(err, "Error while getSkillSetById")
+        //console.log(err)
+        throw err;
+        
     })
     return skillSet
 }
@@ -46,8 +52,10 @@ const createSkillSet = async (param: createSkillSetParam) => {
             title: param.title,
             description: param.description,
             isActive: param.isActive,
-        }).catch((ex) => {
-            throw ex
+        }).catch((err:any) => {
+            log.error(err, "Error while createSkillSet")
+            //console.log(err)
+            throw err;
         })
         return createdSkillSet
     }
@@ -70,8 +78,13 @@ const updateSkillSetById = async (param: updateSkillSetParam) => {
         skill.description = param.description
         skill.isActive = param.isActive
         updatedSkill = await skill.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while updateSkillSetById")
+            //console.log(err)
+            throw err;   
+        })
+        return updatedSkill
     }
-    return updatedSkill
 }
 
 const deleteSkillSetById = async (id:number) => {
@@ -84,8 +97,13 @@ const deleteSkillSetById = async (id:number) => {
     if(skillSet) {
         skillSet.isActive = false;
         deleteSkillSet = await skillSet.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while deleteSkillSetById")
+            //console.log(err)
+            throw err;   
+        })
+        return deleteSkillSet
     }
-    return deleteSkillSet
 }
 
 

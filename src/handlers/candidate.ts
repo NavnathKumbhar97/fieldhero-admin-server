@@ -18,8 +18,10 @@ const getCandidates = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getCandidates")
+        //console.log(err)
+        throw err
     })
     return candidates
 }
@@ -34,8 +36,10 @@ const getCandidateById = async (id: number) => {
             { model: customerDB.CandidateCertificate },
             { model: customerDB.CandidateWorkHistory},
         ],
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getCandidateById")
+        //console.log(err)
+        throw err
     })
     return candidate
 }
@@ -112,6 +116,8 @@ const createCandidate = async (param: createCandidateParam) => {
         return Object.assign({ candidate, candidateother })
     } catch (err: any) {
         await transaction.rollback()
+        log.error(err, "Error while createCandidate")
+        //console.log(err)
         throw err
     }
 }
@@ -295,7 +301,8 @@ const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
         return Object.assign({ candidate, candidateother })
     } catch (err: any) {
         await transaction.rollback()
-        console.log(err)
+        log.error(err, "Error while bluckCreateCandidate")
+        //console.log(err)
         throw err
     }
 }
@@ -330,7 +337,9 @@ const addCandidateTrainingCert = async (
         description: param.description,
         candidateId: param.candidateId,
         skillId: getskillId,
-    }).catch((err) => {
+    }).catch((err:any) => {
+        log.error(err, "Error while addCandidateTrainingCert")
+        //console.log(err);
         throw err
     })
     return candidateCertificate
@@ -363,8 +372,13 @@ const updateCandidateTrainingCertById = async (
         candidateCertificate.candidateId = param.candidateId
         candidateCertificate.skillId = param.skillId
         updateCandidateCertificate = await candidateCertificate.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while updateCandidateTrainingCertById")
+            //console.log(err)
+            throw err        
+        })
+        return updateCandidateCertificate
     }
-    return updateCandidateCertificate
 }
 interface removeCandidateTrainingCertParam {
     id: number
@@ -376,8 +390,10 @@ const removeCandidateTrainingCert = async (
         where: {
             id: param.id,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while removeCandidateTrainingCert")
+        //console.log(err)
+        throw err
     })
     return deletedRows
 }
@@ -468,7 +484,8 @@ const addCandidateWorkHistory = async (
         })
     } catch (err: any) {
         await transaction.rollback()
-        console.log(err)
+        log.error(err, "Error while addCandidateWorkHistory")
+        //console.log(err)
         throw err
     }
 }
@@ -484,7 +501,7 @@ interface updateCandidateWorkHistoryParam {
 
 const updateCandidateWorkHistoryById = async (
     param: updateCandidateWorkHistoryParam
-) => {
+    )=>{
     const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
         where: { id: param.id },
     })
@@ -496,9 +513,16 @@ const updateCandidateWorkHistoryById = async (
         candidateWorkHistory.candidateId = param.candidateId
         candidateWorkHistory.companyId = param.companyId
         updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while updateCandidateWorkHistoryById")
+            //console.log(err)
+            throw err;
+        })
+        return updateCandidateWcandidateWorkHistory
     }
-    return updateCandidateWcandidateWorkHistory
 }
+
+
 interface removeCandidateWorkHistoryParam {
     id: number
 }
@@ -509,8 +533,10 @@ const removeCandidateWorkHistory = async (
         where: {
             id: param.id,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while removeCandidateWorkHistory")
+        //console.log(err);
+        throw err
     })
     return deletedRows
 }
@@ -523,8 +549,10 @@ const getCandidatesWorkHistory = async(id:number)=>{
         where: {
             candidateId:id,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while removeCandidateWorkHistory")
+        //console.log(err)
+        throw err
     })
     return candidatesWorkHistory
 }
@@ -537,8 +565,10 @@ const getCandidateTrainingCert = async(id:number)=>{
         where: {
             candidateId:id,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while removeCandidateWorkHistory")
+        //(err)
+        throw err
     })
     return candidatesWorkHistory
 }

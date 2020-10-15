@@ -1,4 +1,5 @@
 import { customerDB } from "../sequelize"
+import { log } from "../helper"
 
 const getCompanies = async (all:any) => {
     let whereCondition = {}
@@ -16,8 +17,10 @@ const getCompanies = async (all:any) => {
         where: {
             isActive: whereCondition
         }
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getCompanies")
+        //console.log(err)
+        throw err
     })
     return companies
 }
@@ -32,8 +35,10 @@ const getCompanyById = async (id: number) => {
                 model: customerDB.Industry,
             },
         ],
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getCompanyById")
+        //console.log(err)
+        throw err
     })
     return company
 }
@@ -60,6 +65,8 @@ const createCompany = async (param: createCompnayParam) => {
             isActive: param.isActive,
             industryId: param.industryId,
         }).catch((err) => {
+            log.error(err, "Error while createCompany")
+            //console.log(err)
             throw err
         })
         return company
@@ -85,8 +92,13 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
         company.isActive = param.isActive
         company.industryId = param.industryId
         updatedCompany = await company.save()
+            .catch((err:any)=>{
+                log.error(err, "Error while updatedCompany")
+                //console.log(err)
+                throw err;
+        })
+        return updatedCompany
     }
-    return updatedCompany
 }
 const deleteCompanyById = async (id:number) => {
     const Company = await customerDB.Company.findOne({
@@ -98,8 +110,13 @@ const deleteCompanyById = async (id:number) => {
     if(Company) {
         Company.isActive = false;
         deleteCompany = await Company.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while deleteCompanyById")
+            //console.log(err)
+            throw err;
+        })
+        return deleteCompany
     }
-    return deleteCompany
 }
 const Company = {
     getCompanies,

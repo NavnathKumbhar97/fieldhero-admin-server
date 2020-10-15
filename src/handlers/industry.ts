@@ -1,6 +1,6 @@
 import { where } from "sequelize"
 import { customerDB } from "../sequelize"
-
+import { log } from "../helper"
 
 const getIndustries = async (all:any) => {
     let whereCondition = {}
@@ -13,8 +13,10 @@ const getIndustries = async (all:any) => {
         where: {
             isActive: whereCondition
         }
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getIndustries")
+        //console.log(err)
+        throw err
     })
     return industries
 }
@@ -24,8 +26,10 @@ const getIndustryById = async (id: number) => {
         where: {
             id,
         },
-    }).catch((ex: any) => {
-        throw ex
+    }).catch((err: any) => {
+        log.error(err, "Error while getIndustryById")
+        //console.log(err)
+        throw err
     })
     return industry
 }
@@ -51,6 +55,8 @@ const createIndustry = async (param: createIndustryParam) => {
             description: param.description,
             isActive: param.isActive,
         }).catch((err) => {
+            log.error(err, "Error while createIndustry")
+            //console.log(err)
             throw err
         })
         return industry
@@ -75,8 +81,10 @@ const updateIndustryById = async (param: updateIndustryParam) =>{
             }           
         }
         ).catch((err) => {
-        throw err
-    })
+            log.error(err, "Error while updateIndustryById")
+            //console.log(err)
+            throw err
+        })
     return industry
 }
 
@@ -90,6 +98,11 @@ const deleteIndustryById = async (id:number) => {
     if(industry) {
         industry.isActive = false;
         deleteIndustry = await industry.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while deleteIndustryById")
+            //console.log(err)
+            throw err
+        })
     }
     return deleteIndustry
 }

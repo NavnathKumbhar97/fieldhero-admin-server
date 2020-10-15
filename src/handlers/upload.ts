@@ -1,7 +1,7 @@
 import fs from "fs"
 import path from "path"
 import { customerDB } from "../sequelize"
-import { Candidate } from "./candidate"
+import { log } from "../helper"
 
 const updateCandidateProfileById = async (id: number, profileImage: string) => {
     let CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
@@ -15,6 +15,11 @@ const updateCandidateProfileById = async (id: number, profileImage: string) => {
         })
         CandidateProfile.profileImage = profileImage
         updatedCandidateProfile = await CandidateProfile.save()
+        .catch((err:any)=>{
+            log.error(err, "Error while update profile")
+            //console.log(err)
+            throw err;
+        })
     }
     return updatedCandidateProfile
 }
