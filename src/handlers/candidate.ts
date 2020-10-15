@@ -306,11 +306,22 @@ interface createCandidateTrainingCertParam {
     issuedBy: string
     description: string
     candidateId: number
-    skillId: number
+    skillId: any
 }
+
 const addCandidateTrainingCert = async (
     param: createCandidateTrainingCertParam
-) => {
+    ) => {
+    let getskillId:any;  
+    if(typeof(param.skillId) !== "number") {
+        // @ts-ignore
+        let newSkillset = await customerDB.SkillSet.create({
+            title:param.skillId
+        })
+        getskillId = newSkillset.id;
+    } else {
+        getskillId = param.skillId
+    }
     const candidateCertificate = await customerDB.CandidateCertificate.create({
         type: param.type,
         title: param.title,
@@ -318,7 +329,7 @@ const addCandidateTrainingCert = async (
         issuedBy: param.issuedBy,
         description: param.description,
         candidateId: param.candidateId,
-        skillId: param.skillId,
+        skillId: getskillId,
     }).catch((err) => {
         throw err
     })
