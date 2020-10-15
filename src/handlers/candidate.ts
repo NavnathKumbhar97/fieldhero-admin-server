@@ -1,6 +1,7 @@
 import { number, string } from "joi"
 import { customerDB, ormCustomer } from "../sequelize"
 import { log } from "../helper"
+import { Model } from "sequelize"
 
 const getCandidates = async (all: any) => {
     let whereCondition = {}
@@ -13,7 +14,12 @@ const getCandidates = async (all: any) => {
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
-            { model: customerDB.CandidateWorkHistory },
+            { model: customerDB.CandidateWorkHistory,
+                include:[{   
+                    model: customerDB.Company,
+                    required: false
+                }]
+            },
         ],
         where: {
             isActive: whereCondition,

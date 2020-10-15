@@ -38,6 +38,10 @@ CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasOne(CandidateOtherDetails, {foreignKey: "candidateId"})
 CandidateOtherDetails.belongsTo(Candidate, {foreignKey: "candidateId"})
 
+//CandidateWorkHistory
+CandidateWorkHistory.hasMany(Company, { foreignKey: "companyId" })
+Company.belongsTo(CandidateWorkHistory, {foreignKey: "companyId"})
+
 //company
 Industry.hasMany(Company, { foreignKey: "industryId" })
 Company.belongsTo(Industry, { foreignKey: "industryId" })
