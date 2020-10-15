@@ -150,6 +150,7 @@ CandidateRouter.put(
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.updateCandidateTrainingCertById({
             id: req.params.certId,
+            candidate: req.params.id,
             ...req.body,
         })
             .then((cert) => res.status(httpStatus.OK).json(cert))
@@ -234,6 +235,7 @@ CandidateRouter.put(
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.updateCandidateWorkHistoryById({
             id: req.params.workId,
+            candidate: req.params.id,
             ...req.body,
         })
             .then((updatedWorkHistory) =>

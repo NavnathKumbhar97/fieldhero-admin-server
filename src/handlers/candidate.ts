@@ -312,7 +312,7 @@ interface createCandidateTrainingCertParam {
     issueDate: Date
     issuedBy: string
     description: string
-    candidateId: number
+    candidate: number
     skillId: any
 }
 
@@ -335,7 +335,7 @@ const addCandidateTrainingCert = async (
         issueDate: param.issueDate,
         issuedBy: param.issuedBy,
         description: param.description,
-        candidateId: param.candidateId,
+        candidateId: param.candidate,
         skillId: getskillId,
     }).catch((err:any) => {
         log.error(err, "Error while addCandidateTrainingCert")
@@ -352,7 +352,7 @@ interface updateCandidateTrainingCertParam {
     issueDate: Date
     issuedBy: string
     description: string
-    candidateId: number
+    candidate: number
     skillId: number
 }
 
@@ -369,7 +369,7 @@ const updateCandidateTrainingCertById = async (
         candidateCertificate.issueDate = param.issueDate
         candidateCertificate.issuedBy = param.issuedBy
         candidateCertificate.description = param.description
-        candidateCertificate.candidateId = param.candidateId
+        candidateCertificate.candidateId = param.candidate
         candidateCertificate.skillId = param.skillId
         updateCandidateCertificate = await candidateCertificate.save()
         .catch((err:any)=>{
@@ -494,7 +494,7 @@ interface updateCandidateWorkHistoryParam {
     startDate: Date
     endDate: Date
     description: string
-    candidateId: number
+    candidate: number
     companyId: number
 }
 
@@ -509,7 +509,7 @@ const updateCandidateWorkHistoryById = async (
         candidateWorkHistory.startDate = param.startDate
         candidateWorkHistory.endDate = param.endDate
         candidateWorkHistory.description = param.description
-        candidateWorkHistory.candidateId = param.candidateId
+        candidateWorkHistory.candidateId = param.candidate
         candidateWorkHistory.companyId = param.companyId
         updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
         .catch((err:any)=>{
