@@ -402,10 +402,10 @@ interface createCandidateWorkHistoryParam {
     startDate: Date
     endDate: Date
     description: string
-    candidateId: number
     companyId: number
     skillId: any
     workHistoryId: any
+    candidate:number
 }
 
 const addCandidateWorkHistory = async (
@@ -435,13 +435,12 @@ const addCandidateWorkHistory = async (
                 transaction,
             }
         )
-
         const candidateWorkHistory = await customerDB.CandidateWorkHistory.create(
             {
                 startDate: param.startDate,
                 endDate: param.endDate,
                 description: param.description,
-                candidateId: param.candidateId,
+                candidateId: param.candidate,
                 companyId: param.companyId,
             },
             {
