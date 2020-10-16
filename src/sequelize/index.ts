@@ -35,26 +35,34 @@ Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
 CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId" })
 CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
-Candidate.hasOne(CandidateOtherDetails, {foreignKey: "candidateId"})
-CandidateOtherDetails.belongsTo(Candidate, {foreignKey: "candidateId"})
+Candidate.hasOne(CandidateOtherDetails, { foreignKey: "candidateId" })
+CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId" })
 
 //CandidateWorkHistory
-CandidateWorkHistory.hasMany(Company, { foreignKey: "companyId" })
-Company.belongsTo(CandidateWorkHistory, {foreignKey: "companyId"})
+CandidateWorkHistory.belongsTo(Company, {
+    foreignKey: "companyId",
+})
+Company.hasMany(CandidateWorkHistory, {
+    foreignKey: "companyId",
+})
 
 //company
 Industry.hasMany(Company, { foreignKey: "industryId" })
 Company.belongsTo(Industry, { foreignKey: "industryId" })
 
-// Skill Set 
-SkillSet.hasMany(CandidateCertificate,{ foreignKey: "skillId" })
+// Skill Set
+SkillSet.hasMany(CandidateCertificate, { foreignKey: "skillId" })
 CandidateCertificate.belongsTo(SkillSet, { foreignKey: "skillId" })
 
-// CandidateWorkHistory 
-SkillSet.hasMany(CandidateWorkHistorySkill,{ foreignKey: "skillId" })
+// CandidateWorkHistory
+SkillSet.hasMany(CandidateWorkHistorySkill, { foreignKey: "skillId" })
 CandidateWorkHistorySkill.belongsTo(SkillSet, { foreignKey: "skillId" })
-CandidateWorkHistory.hasMany(CandidateWorkHistorySkill, { foreignKey: "workHistoryId" })
-CandidateWorkHistorySkill.belongsTo(CandidateWorkHistory, { foreignKey: "workHistoryId" })
+CandidateWorkHistory.hasMany(CandidateWorkHistorySkill, {
+    foreignKey: "workHistoryId",
+})
+CandidateWorkHistorySkill.belongsTo(CandidateWorkHistory, {
+    foreignKey: "workHistoryId",
+})
 
 const customerDB = {
     Candidate,

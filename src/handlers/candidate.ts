@@ -14,11 +14,14 @@ const getCandidates = async (all: any) => {
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
-            { model: customerDB.CandidateWorkHistory,
-                include:[{   
-                    model: customerDB.Company,
-                    required: false
-                }]
+            {
+                model: customerDB.CandidateWorkHistory,
+                include: [
+                    {
+                        model: customerDB.Company,
+                        required: false,
+                    },
+                ],
             },
         ],
         where: {
@@ -40,7 +43,10 @@ const getCandidateById = async (id: number) => {
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
-            { model: customerDB.CandidateWorkHistory},
+            {
+                model: customerDB.CandidateWorkHistory,
+                include: [{ model: customerDB.Company }],
+            },
         ],
     }).catch((err: any) => {
         log.error(err, "Error while getCandidateById")
@@ -324,14 +330,14 @@ interface createCandidateTrainingCertParam {
 
 const addCandidateTrainingCert = async (
     param: createCandidateTrainingCertParam
-    ) => {
-    let getskillId:any;  
-    if(typeof(param.skillId) !== "number") {
+) => {
+    let getskillId: any
+    if (typeof param.skillId !== "number") {
         // @ts-ignore
         let newSkillset = await customerDB.SkillSet.create({
-            title:param.skillId
+            title: param.skillId,
         })
-        getskillId = newSkillset.id;
+        getskillId = newSkillset.id
     } else {
         getskillId = param.skillId
     }
@@ -343,7 +349,7 @@ const addCandidateTrainingCert = async (
         description: param.description,
         candidateId: param.candidate,
         skillId: getskillId,
-    }).catch((err:any) => {
+    }).catch((err: any) => {
         log.error(err, "Error while addCandidateTrainingCert")
         //console.log(err);
         throw err
@@ -377,12 +383,13 @@ const updateCandidateTrainingCertById = async (
         candidateCertificate.description = param.description
         candidateCertificate.candidateId = param.candidate
         candidateCertificate.skillId = param.skillId
-        updateCandidateCertificate = await candidateCertificate.save()
-        .catch((err:any)=>{
-            log.error(err, "Error while updateCandidateTrainingCertById")
-            //console.log(err)
-            throw err        
-        })
+        updateCandidateCertificate = await candidateCertificate
+            .save()
+            .catch((err: any) => {
+                log.error(err, "Error while updateCandidateTrainingCertById")
+                //console.log(err)
+                throw err
+            })
         return updateCandidateCertificate
     }
 }
@@ -411,7 +418,7 @@ interface createCandidateWorkHistoryParam {
     companyId: number
     skillId: any
     workHistoryId: any
-    candidate:number
+    candidate: number
 }
 
 const addCandidateWorkHistory = async (
@@ -506,7 +513,7 @@ interface updateCandidateWorkHistoryParam {
 
 const updateCandidateWorkHistoryById = async (
     param: updateCandidateWorkHistoryParam
-    )=>{
+) => {
     const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
         where: { id: param.id },
     })
@@ -517,16 +524,16 @@ const updateCandidateWorkHistoryById = async (
         candidateWorkHistory.description = param.description
         candidateWorkHistory.candidateId = param.candidate
         candidateWorkHistory.companyId = param.companyId
-        updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
-        .catch((err:any)=>{
-            log.error(err, "Error while updateCandidateWorkHistoryById")
-            //console.log(err)
-            throw err;
-        })
+        updateCandidateWcandidateWorkHistory = await candidateWorkHistory
+            .save()
+            .catch((err: any) => {
+                log.error(err, "Error while updateCandidateWorkHistoryById")
+                //console.log(err)
+                throw err
+            })
         return updateCandidateWcandidateWorkHistory
     }
 }
-
 
 interface removeCandidateWorkHistoryParam {
     id: number
@@ -546,15 +553,18 @@ const removeCandidateWorkHistory = async (
     return deletedRows
 }
 
-const getCandidatesWorkHistory = async(id:number)=>{
-    const candidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll({
-        include: [
-            { model: customerDB.CandidateWorkHistorySkill },
-        ],
-        where: {
-            candidateId:id,
-        },
-    }).catch((err: any) => {
+const getCandidatesWorkHistory = async (id: number) => {
+    const candidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll(
+        {
+            include: [
+                { model: customerDB.CandidateWorkHistorySkill },
+                { model: customerDB.Company },
+            ],
+            where: {
+                candidateId: id,
+            },
+        }
+    ).catch((err: any) => {
         log.error(err, "Error while removeCandidateWorkHistory")
         //console.log(err)
         throw err
@@ -562,15 +572,15 @@ const getCandidatesWorkHistory = async(id:number)=>{
     return candidatesWorkHistory
 }
 
-const getCandidateTrainingCert = async(id:number)=>{
-    const candidatesWorkHistory = await customerDB.CandidateCertificate.findAll({
-        include: [
-            { model: customerDB.SkillSet },
-        ],
-        where: {
-            candidateId:id,
-        },
-    }).catch((err: any) => {
+const getCandidateTrainingCert = async (id: number) => {
+    const candidatesWorkHistory = await customerDB.CandidateCertificate.findAll(
+        {
+            include: [{ model: customerDB.SkillSet }],
+            where: {
+                candidateId: id,
+            },
+        }
+    ).catch((err: any) => {
         log.error(err, "Error while removeCandidateWorkHistory")
         //(err)
         throw err
@@ -590,7 +600,7 @@ const Candidate = {
     removeCandidateWorkHistory,
     createBulkCandidate,
     getCandidatesWorkHistory,
-    getCandidateTrainingCert
+    getCandidateTrainingCert,
 }
 
 export { Candidate }
