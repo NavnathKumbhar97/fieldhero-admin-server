@@ -56,13 +56,65 @@ const getCandidateById = async (id: number) => {
     return candidate
 }
 
+// Delete All Candidate
+
+const deleteAllCandiate = async() => {
+    let transaction = await ormCustomer.transaction()
+    try {
+        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy({
+            truncate : true,
+            force: true,
+            transaction,
+            
+        })
+        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy({
+            truncate: true,
+            transaction
+        });
+   
+      
+        console.log(deleteSkillsWorkHistory,deleteCandiateWorkHistroy)
+        // const deleteCandiateCertificate =await customerDB.CandidateCertificate.destroy({
+        //     truncate:true,
+        //     cascade: true,
+        //     transaction
+        // })
+
+        // const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy({
+        //     truncate:true,
+        //     cascade: true,
+        //     transaction
+        // })
+
+        // const deleteCandiateInfo = await customerDB.Candidate.destroy({
+        //     cascade: true,
+        //     transaction
+        // })
+        await transaction.commit()
+        return Object.assign({ 
+            deleteSkillsWorkHistory,
+            deleteCandiateWorkHistroy,
+            // deleteCandiateOtherDetails,
+            // deleteCandiateCertificate,
+            // deleteCandiateInfo
+        })
+    } catch(err){
+        await transaction.rollback()
+        log.error(err, "Error while deleteCandiate")
+        //console.log(err)
+        throw err
+    }
+}
+
+// Delete Candiate By Id
 const deleteCandiateById = async (id: number) => {
     let transaction = await ormCustomer.transaction()
     try {
         const getCandiateDetails = await customerDB.Candidate.findOne({
             where:{
                 id:id
-            }
+            },
+            transaction
         })
         let candidateId = getCandiateDetails?.id
         const getCandidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll({
@@ -657,6 +709,7 @@ const Candidate = {
     getCandidateById,
     createCandidate,
     updateCandidateById,
+    deleteAllCandiate,
     deleteCandiateById,
     addCandidateTrainingCert,
     updateCandidateTrainingCertById,
