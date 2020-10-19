@@ -90,6 +90,25 @@ CandidateRouter.put(
         )
 })
 
+// Delete Candiate 
+CandidateRouter.delete(
+    "/candidates/:id",
+    (req:Request, res:Response, next:NextFunction) => {
+        Candidate
+        .deleteCandiateById(parseInt(req.params.id))
+        .then((candidate) => {
+            res.status(httpStatus.OK).json(candidate)
+        })
+        .catch((err) => 
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err
+            })
+        )
+    }
+)
+
+
 //* bulk create candidates
 CandidateRouter.post(
     "/bulkcandidates",
