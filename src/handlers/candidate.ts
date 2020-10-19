@@ -71,90 +71,54 @@ const deleteCandiateById = async (id: number) => {
             },
             transaction
         })
-        console.log(getCandidatesWorkHistory,'%$%$%$%$%$%')
-        // const deleteCandiateCertificate = await customerDB.CandidateCertificate.destroy({
-        //     where:{
-        //         candidateId:candidateId
-        //     },
-        //     transaction
-        // })
-
-        // const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy({
-        //     where:{
-        //         candidateId:candidateId 
-        //     },
-        //     transaction
-        // })
-
-        // const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy({
-        //     where:{
-        //         candidateId:candidateId
-        //     },
-        //     transaction
-        // })
-
-        // const deleteCandiateInfo = await customerDB.Candidate.destroy({
-        //     where:{
-        //         id:id
-        //     },
-        //     transaction
-        // })
-        // await transaction.commit()
-        // return Object.assign({ 
-        //     //deleteCandiateWorkHistroy,
-        //     deleteCandiateOtherDetails,
-        //     deleteCandiateCertificate,
-        //     deleteCandiateInfo
-        // })
+        let getCandidatesWorkHistoryArray = getCandidatesWorkHistory.map((item) => {
+                    return item.id
+        })
+        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy({
+            where:{
+                //@ts-ignore
+                workHistoryId:getCandidatesWorkHistoryArray
+            },
+            transaction
+        })
+        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy({
+            where:{
+                candidateId:candidateId 
+            },
+            transaction
+        })
+        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy({
+            where:{
+                candidateId:candidateId
+            },
+            transaction
+        })
+        const deleteCandiateCertificate = await customerDB.CandidateCertificate.destroy({
+            where:{
+                candidateId:candidateId
+            },
+            transaction
+        })
+        const deleteCandiateInfo = await customerDB.Candidate.destroy({
+            where:{
+                id:id
+            },
+            transaction
+        })
+        await transaction.commit()
+        return Object.assign({ 
+            deleteSkillsWorkHistory,
+            deleteCandiateWorkHistroy,
+            deleteCandiateOtherDetails,
+            deleteCandiateCertificate,
+            deleteCandiateInfo
+        })
     } catch(err){
         await transaction.rollback()
         log.error(err, "Error while deleteCandiateById")
         //console.log(err)
         throw err
     }
-
-    //const deleteCandidate = await customerDB.Candidate.destroy({  
-        //@ts-ignore
-        // include:[
-        //     {
-        //         model:customerDB.CandidateCertificate.destroy({
-        //             where:{
-        //                 candidateId:id
-        //             }
-        //         }),   
-        //     },
-        //     {
-        //         model:customerDB.CandidateWorkHistory.destroy({
-        //             where:{
-        //                 candidateId:id
-        //             }
-        //         }),
-                
-        //     },
-        //     {
-        //         model:customerDB.CandidateOtherDetails.destroy({
-        //             where:{
-        //                 candidateId:id
-        //             }
-        //         }),   
-        //     }
-        // ],
-        // where: {
-        //     id:id
-        // },
-        // truncate: false,
-        //@ts-ignore
-        // include: [
-        //     {model:customerDB.CandidateCertificate},
-        //     {model:customerDB.CandidateOtherDetails},
-        //     {model:customerDB.CandidateWorkHistory}
-        // ]
-    // }).catch((err: any) => {
-    //     log.error(err, "Error while deleteCandiateById")
-    //     //console.log(err);
-    //     throw err
-    // })
-    //return deleteCandidate
 }
 
 interface createCandidateParam {
