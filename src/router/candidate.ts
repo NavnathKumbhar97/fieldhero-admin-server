@@ -73,59 +73,56 @@ CandidateRouter.post(
 //* Update candiate
 CandidateRouter.put(
     "/candidates/:id",
-    (req:Request, res:Response, next:NextFunction) => {
-    Candidate
-        .updateCandidateById({ 
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.updateCandidateById({
             id: req.params.id,
-            ...req.body
+            ...req.body,
         })
-        .then((candidate) => {
-            res.status(httpStatus.OK).json(candidate)
-        })
-        .catch((err) => 
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err
+            .then((candidate) => {
+                res.status(httpStatus.OK).json(candidate)
             })
-        )
-})
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
+    }
+)
 
-// Delete CandiateById
+// * Delete CandiateById
 CandidateRouter.delete(
     "/candidates/:id",
-    (req:Request, res:Response, next:NextFunction) => {
-        Candidate
-        .deleteCandiateById(parseInt(req.params.id))
-        .then((candidate) => {
-            res.status(httpStatus.OK).json(candidate)
-        })
-        .catch((err) => 
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.deleteCandiateById(parseInt(req.params.id))
+            .then((candidate) => {
+                res.status(httpStatus.OK).json(candidate)
             })
-        )
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
 )
 
-// Delete truncate All Candidate 
+// * Delete truncate All Candidate
 CandidateRouter.delete(
     "/candidates",
-    (req:Request, res:Response, next:NextFunction) => {
-        Candidate
-        .deleteAllCandiate()
-        .then((candidate) => {
-            res.status(httpStatus.OK).json(candidate)
-        })
-        .catch((err) => 
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.deleteAllCandiate()
+            .then((candidate) => {
+                res.status(httpStatus.OK).json(candidate)
             })
-        )
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
 )
-
 
 //* bulk create candidates
 CandidateRouter.post(
@@ -145,7 +142,7 @@ CandidateRouter.post(
             )
     }
 )
-// * get Candidate Trainig-Cerf  
+// * get Candidate Trainig-Cerf
 CandidateRouter.get(
     "/candidates/:id/training-cert",
     (req: Request, res: Response, next: NextFunction) => {
@@ -162,7 +159,7 @@ CandidateRouter.get(
     }
 )
 
-// * Create Candidate Trainig-Cerf  
+// * Create Candidate Trainig-Cerf
 CandidateRouter.post(
     "/candidates/:id/training-cert",
     (req: Request, res: Response, next: NextFunction) => {
@@ -181,7 +178,7 @@ CandidateRouter.post(
             )
     }
 )
-// * Update Candidate Trainig-Cerf  
+// * Update Candidate Trainig-Cerf
 CandidateRouter.put(
     "/candidates/:id/training-cert/:certId",
     (req: Request, res: Response, next: NextFunction) => {
@@ -203,7 +200,7 @@ CandidateRouter.put(
 interface RemoveCandidateByIdParam {
     certId: number
 }
-//* Delete Candiate Traninig Cert  
+//* Delete Candiate Traninig Cert
 CandidateRouter.delete(
     "/candidates/:id/training-cert/:certId",
     (
@@ -227,18 +224,15 @@ CandidateRouter.delete(
     }
 )
 
-//* get Candidate work history 
+//* get Candidate work history
 CandidateRouter.get(
     "/candidates/:id/work-history",
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.getCandidatesWorkHistory(parseInt(req.params.id))
             .then((candidatesWorkHistory) => {
                 if (!candidatesWorkHistory.length) {
-                    res.status(httpStatus.OK).json({
-                        Success: "Not Recored Found",
-                    })
-                }
-                res.status(httpStatus.OK).json(candidatesWorkHistory)
+                    res.sendStatus(httpStatus.No_Content)
+                } else res.status(httpStatus.OK).json(candidatesWorkHistory)
             })
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
@@ -256,7 +250,9 @@ CandidateRouter.post(
             ...req.body,
             candidate: req.params.id,
         })
-            .then((workHistory) => res.status(httpStatus.Created).json(workHistory))
+            .then((workHistory) =>
+                res.status(httpStatus.Created).json(workHistory)
+            )
             .catch((err) =>
                 res.status(httpStatus.Bad_Request).json({
                     code: httpStatus.Bad_Request,
@@ -291,7 +287,7 @@ interface RemoveCandidateWorkHistoryByIdParam {
     workId: number
 }
 
-//* Delete Candidate Work History 
+//* Delete Candidate Work History
 CandidateRouter.delete(
     "/candidates/:id/work-history/:workId",
     (
@@ -314,6 +310,5 @@ CandidateRouter.delete(
             )
     }
 )
-
 
 export { CandidateRouter }
