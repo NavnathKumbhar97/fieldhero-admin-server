@@ -43,7 +43,7 @@ export const CandidateCertificateFactory = (
                 model: "skill_set_master",
                 key: "id",
             },
-            allowNull: false,
+            allowNull: true,
         },
     })
 }

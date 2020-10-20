@@ -34,20 +34,18 @@ const CandidateOtherDetails = models.CandidateOtherFactory(orm)
 Candidate.hasMany(CandidateWorkHistory, 
     { foreignKey: "candidateId" },
 )
-CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId", onDelete:'CASCADE' })
-Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId", onDelete:'CASCADE' })
-CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId", onDelete:'CASCADE' })
-Candidate.hasOne(CandidateOtherDetails, { foreignKey: "candidateId", onDelete:'CASCADE' })
-CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId", onDelete:'CASCADE' })
+CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId" })
+Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId" })
+CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
+Candidate.hasOne(CandidateOtherDetails, { foreignKey: "candidateId" })
+CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId" })
 
 //CandidateWorkHistory
 CandidateWorkHistory.belongsTo(Company, {
-    foreignKey: "companyId",
-    onDelete:'CASCADE'
+    foreignKey: "companyId"
 })
 Company.hasMany(CandidateWorkHistory, {
-    foreignKey: "companyId",
-    onDelete:'CASCADE'
+    foreignKey: "companyId"
 })
 
 //company

@@ -61,19 +61,26 @@ const getCandidateById = async (id: number) => {
 const deleteAllCandiate = async() => {
     let transaction = await ormCustomer.transaction()
     try {
-        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy({
-            truncate : true,
+        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }); //<---- Do not check referential constraints
+
+        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate({
+            // cascade: true,
+            // truncate: true,
             force: true,
-            transaction,
-            
-        })
-        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy({
-            truncate: true,
             transaction
         });
-   
-      
-        console.log(deleteSkillsWorkHistory,deleteCandiateWorkHistroy)
+
+        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.truncate({
+            // cascade: true,
+            // truncate: true,
+            force: true,
+            transaction,       
+        })
+
+        console.log(
+           deleteSkillsWorkHistory,
+            deleteCandiateWorkHistroy
+        )
         // const deleteCandiateCertificate =await customerDB.CandidateCertificate.destroy({
         //     truncate:true,
         //     cascade: true,
@@ -90,6 +97,8 @@ const deleteAllCandiate = async() => {
         //     cascade: true,
         //     transaction
         // })
+        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true }); //<---- Do not check referential constraints
+
         await transaction.commit()
         return Object.assign({ 
             deleteSkillsWorkHistory,
@@ -447,16 +456,21 @@ interface createCandidateTrainingCertParam {
 
 const addCandidateTrainingCert = async (
     param: createCandidateTrainingCertParam
-) => {
-    let getskillId: any
-    if (typeof param.skillId !== "number") {
-        // @ts-ignore
-        let newSkillset = await customerDB.SkillSet.create({
-            title: param.skillId,
-        })
-        getskillId = newSkillset.id
-    } else {
-        getskillId = param.skillId
+) => {    
+    let getskillId:any;
+    if(param.skillId == undefined || param.skillId == null){
+        getskillId = null;
+    } else{
+        console.log("go to else condition")
+        if (typeof param.skillId !== "number" ) {
+            // @ts-ignore
+            let newSkillset = await customerDB.SkillSet.create({
+                title: param.skillId,
+            })
+            getskillId = newSkillset.id
+        } else {
+            getskillId = param.skillId
+        }
     }
     const candidateCertificate = await customerDB.CandidateCertificate.create({
         type: param.type,
