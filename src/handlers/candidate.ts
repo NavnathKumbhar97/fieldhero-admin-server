@@ -57,55 +57,38 @@ const getCandidateById = async (id: number) => {
 }
 
 // Delete All Candidate
-
 const deleteAllCandiate = async() => {
     let transaction = await ormCustomer.transaction()
     try {
-        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true }); //<---- Do not check referential constraints
-
+        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true, transaction });
+        // await ormCustomer.sync({force:true});
         const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate({
-            // cascade: true,
-            // truncate: true,
-            force: true,
             transaction
         });
-
+        
         const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.truncate({
-            // cascade: true,
-            // truncate: true,
-            force: true,
-            transaction,       
+            transaction     
+        })
+        const deleteCandiateCertificate =await customerDB.CandidateCertificate.truncate({
+            transaction
         })
 
-        console.log(
-           deleteSkillsWorkHistory,
-            deleteCandiateWorkHistroy
-        )
-        // const deleteCandiateCertificate =await customerDB.CandidateCertificate.destroy({
-        //     truncate:true,
-        //     cascade: true,
-        //     transaction
-        // })
+        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.truncate({
+            transaction
+        })
 
-        // const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy({
-        //     truncate:true,
-        //     cascade: true,
-        //     transaction
-        // })
-
-        // const deleteCandiateInfo = await customerDB.Candidate.destroy({
-        //     cascade: true,
-        //     transaction
-        // })
-        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true }); //<---- Do not check referential constraints
+        const deleteCandiateInfo = await customerDB.Candidate.truncate({
+            transaction
+        })
+        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true,transaction }); //<---- Do not check referential constraints
 
         await transaction.commit()
         return Object.assign({ 
             deleteSkillsWorkHistory,
             deleteCandiateWorkHistroy,
-            // deleteCandiateOtherDetails,
-            // deleteCandiateCertificate,
-            // deleteCandiateInfo
+            deleteCandiateOtherDetails,
+            deleteCandiateCertificate,
+            deleteCandiateInfo
         })
     } catch(err){
         await transaction.rollback()
