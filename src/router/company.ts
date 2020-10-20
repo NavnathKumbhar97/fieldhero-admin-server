@@ -13,9 +13,7 @@ CompanyRouter.get(
         .getCompanies(req.query.all)
         .then((companies) => {
             if(!companies.length){
-                res.status(httpStatus.OK).json({
-                    Success: "Not Recored Found",
-                }) 
+                res.status(httpStatus.No_Content)
             }
             res.status(httpStatus.OK).json(companies)
         })

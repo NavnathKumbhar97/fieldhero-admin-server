@@ -30,11 +30,9 @@ const getCompanyById = async (id: number) => {
         where: {
             id,
         },
-        include: [
-            {
-                model: customerDB.Industry,
-            },
-        ],
+        include: [{
+            model: customerDB.Industry,
+        }],
     }).catch((err: any) => {
         log.error(err, "Error while getCompanyById")
         //console.log(err)

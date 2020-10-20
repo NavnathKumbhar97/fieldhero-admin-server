@@ -13,9 +13,7 @@ IndustryRouter.get(
         Industry.getIndustries(req.query.all)
             .then((industries) => {
                 if (!industries.length) {
-                    res.status(httpStatus.OK).json({
-                        Success: "Not Recored Found",
-                    })
+                    res.status(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(industries)
             })
@@ -38,9 +36,7 @@ IndustryRouter.get(
         Industry.getIndustryById(req.params.id)
             .then((industry) => {
                 if (!industry) {
-                    res.status(httpStatus.OK).json({
-                        Success: "Not Recored Found",
-                    })
+                    res.status(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(industry)
             })

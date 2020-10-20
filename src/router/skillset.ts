@@ -13,9 +13,7 @@ SkillSetRouter.get("/skills", (req:Request, res:Response, next:NextFunction) => 
         .getSkillSets(req.query.all)
         .then((skills) => {
             if (!skills.length) {
-                res.status(httpStatus.OK).json({
-                    Success: "Not Recored Found",
-                })
+                res.status(httpStatus.No_Content)
             }
             res.status(httpStatus.OK).json(skills)
         })
