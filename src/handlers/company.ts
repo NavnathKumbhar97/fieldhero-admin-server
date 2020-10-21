@@ -1,6 +1,8 @@
 import { customerDB } from "../sequelize"
 import { log } from "../helper"
-
+/*
+ * get All Companies Details
+ */
 const getCompanies = async (all:any) => {
     let whereCondition = {}
     if(all == '*') {
@@ -24,7 +26,9 @@ const getCompanies = async (all:any) => {
     })
     return companies
 }
-
+/*
+ * get Compnay Details By details
+ */
 const getCompanyById = async (id: number) => {
     const company = await customerDB.Company.findOne({
         where: {
@@ -40,7 +44,9 @@ const getCompanyById = async (id: number) => {
     })
     return company
 }
-
+/*
+ * Create Compnay Details
+ */
 interface createCompnayParam {
     companyName: string
     description: string
@@ -70,7 +76,9 @@ const createCompany = async (param: createCompnayParam) => {
         return company
     }
 }
-
+/*
+ * Update Compnay Details
+ */
 interface updateCompnayParam {
     id: number
     companyName: string
@@ -98,6 +106,11 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
         return updatedCompany
     }
 }
+
+/*
+ * Delete Compnay Details
+ */
+
 const deleteCompanyById = async (id:number) => {
     const Company = await customerDB.Company.findOne({
         where:{

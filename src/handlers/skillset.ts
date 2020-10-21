@@ -1,6 +1,8 @@
 import { customerDB } from "../sequelize"
 import {log} from "../helper"
-
+/*
+ * Get All SkillSets Details
+ */
 const getSkillSets = async (all:any) => {
     let whereCondition = {}
     if(all == '*') {
@@ -19,6 +21,10 @@ const getSkillSets = async (all:any) => {
     })
     return skillSets
 }
+
+/*
+ * Get SkillSets Details By Id
+ */
 const getSkillSetById = async (id: number) => {
     const skillSet = await customerDB.SkillSet.findOne({
         where: {
@@ -32,7 +38,9 @@ const getSkillSetById = async (id: number) => {
     })
     return skillSet
 }
-
+/*
+ * Create SkillSets Details
+ */
 interface createSkillSetParam {
     title: string
     description: string
@@ -60,7 +68,9 @@ const createSkillSet = async (param: createSkillSetParam) => {
         return createdSkillSet
     }
 }
-
+/*
+ * Update SkillSets Details
+ */
 interface updateSkillSetParam {
     id: number
     title: string
@@ -87,6 +97,9 @@ const updateSkillSetById = async (param: updateSkillSetParam) => {
     }
 }
 
+/*
+ * Deleted SkillSets Details
+ */
 const deleteSkillSetById = async (id:number) => {
     const skillSet = await customerDB.SkillSet.findOne({
         where:{

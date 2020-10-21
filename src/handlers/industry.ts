@@ -1,7 +1,9 @@
 import { where } from "sequelize"
 import { customerDB } from "../sequelize"
 import { log } from "../helper"
-
+/*
+ * get All Industries Details
+ */
 const getIndustries = async (all:any) => {
     let whereCondition = {}
     if(all == '*') {
@@ -20,7 +22,9 @@ const getIndustries = async (all:any) => {
     })
     return industries
 }
-
+/*
+ * get All Industry Details By Id
+ */
 const getIndustryById = async (id: number) => {
     const industry = await customerDB.Industry.findOne({
         where: {
@@ -33,7 +37,9 @@ const getIndustryById = async (id: number) => {
     })
     return industry
 }
-
+/*
+ * Create Industry Details
+ */
 interface createIndustryParam {
     method:string
     title: string
@@ -62,6 +68,10 @@ const createIndustry = async (param: createIndustryParam) => {
         return industry
     }
 }
+
+/*
+ * Update Industry Details
+ */
 interface updateIndustryParam {
     id:number,
     title: string
@@ -87,7 +97,9 @@ const updateIndustryById = async (param: updateIndustryParam) =>{
         })
     return industry
 }
-
+/*
+ * Delete Industry Details
+ */
 const deleteIndustryById = async (id:number) => {
     const industry = await customerDB.Industry.findOne({
         where:{

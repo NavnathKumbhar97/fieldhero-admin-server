@@ -2,7 +2,9 @@ import fs from "fs"
 import path from "path"
 import { customerDB } from "../sequelize"
 import { log } from "../helper"
-
+/*
+ * Upload Candiate Profile By Id
+ */
 const updateCandidateProfileById = async (id: number, profileImage: string) => {
     let CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
         where: { candidateId: id },

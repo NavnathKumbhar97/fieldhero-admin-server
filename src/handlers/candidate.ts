@@ -2,6 +2,11 @@ import { number, string } from "joi"
 import { customerDB, ormCustomer } from "../sequelize"
 import { log } from "../helper"
 import { Model } from "sequelize"
+import { Interface } from "readline"
+
+/*
+ * get All Get Candidates 
+ */
 
 const getCandidates = async (all: any) => {
     let whereCondition = {}
@@ -35,6 +40,10 @@ const getCandidates = async (all: any) => {
     return candidates
 }
 
+/*
+ * get All Get Candidates By Id
+ */
+
 const getCandidateById = async (id: number) => {
     const candidate = await customerDB.Candidate.findOne({
         where: {
@@ -56,12 +65,13 @@ const getCandidateById = async (id: number) => {
     return candidate
 }
 
-// Delete All Candidate
+/*
+ * Delete All Candidate truncate
+ */
 const deleteAllCandiate = async() => {
     let transaction = await ormCustomer.transaction()
     try {
         await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true, transaction });
-        // await ormCustomer.sync({force:true});
         const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate({
             transaction
         });
@@ -81,7 +91,7 @@ const deleteAllCandiate = async() => {
             transaction
         })
         await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true,transaction }); //<---- Do not check referential constraints
-
+        
         await transaction.commit()
         return Object.assign({ 
             deleteSkillsWorkHistory,
@@ -98,7 +108,9 @@ const deleteAllCandiate = async() => {
     }
 }
 
-// Delete Candiate By Id
+/*
+ * Delete All Candidate By Id
+ */
 const deleteCandiateById = async (id: number) => {
     let transaction = await ormCustomer.transaction()
     try {
@@ -164,7 +176,9 @@ const deleteCandiateById = async (id: number) => {
         throw err
     }
 }
-
+/*
+ * Create Candidate 
+ */
 interface createCandidateParam {
     firstName: string
     middleName: string
@@ -242,7 +256,9 @@ const createCandidate = async (param: createCandidateParam) => {
         throw err
     }
 }
-
+/*
+ * Update Candidate 
+ */
 interface updateCandidateParam {
     id: number
     firstName: string
@@ -335,7 +351,9 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         throw err
     }
 }
-
+/*
+ * bulk Candidate  
+ */
 interface bulkCreateCandidateParam {
     firstName: string
     middleName: string
@@ -427,6 +445,10 @@ const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
         throw err
     }
 }
+
+/*
+ * create Candidate Traning certificate
+ */
 interface createCandidateTrainingCertParam {
     type: string
     title: string
@@ -470,7 +492,28 @@ const addCandidateTrainingCert = async (
     })
     return candidateCertificate
 }
-
+/*
+ * get Candidate Traning certificate By Id
+ */
+const getCandidateTrainingCertById = async(id:number,certId:number)=>{
+    const candidateCertificate = await customerDB.CandidateCertificate.findOne({
+        include: [
+            { model: customerDB.SkillSet }
+        ],
+        where: { 
+            id:certId,
+            candidateId:id
+        },
+    }).catch((err: any) => {
+        log.error(err, "Error while getCandidateTrainingCertById")
+        //console.log(err);
+        throw err
+    })
+    return candidateCertificate;
+}
+/*
+ * update Candidate Traning certificate By Id
+ */
 interface updateCandidateTrainingCertParam {
     id: number
     type: string
@@ -507,6 +550,10 @@ const updateCandidateTrainingCertById = async (
         return updateCandidateCertificate
     }
 }
+/*
+ * remove Candidate Traning certificate By Id
+ */
+
 interface removeCandidateTrainingCertParam {
     id: number
 }
@@ -524,7 +571,31 @@ const removeCandidateTrainingCert = async (
     })
     return deletedRows
 }
+/*
+ * get Candidate workHistory By Id
+ */
 
+const getCandidateWorkHistoryById = async(id:number,workId:number) => {
+    const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
+        where: { 
+            id:workId,
+            candidateId:id,
+        },
+        include: [
+            { model: customerDB.CandidateWorkHistorySkill },
+            { model: customerDB.Company },
+        ],
+    }).catch((err:any)=>{
+        log.error(err, "Error while getCandidateWorkHistoryById")
+        //console.log(err)
+        throw err
+    })
+    return candidateWorkHistory
+
+}
+/*
+ * create Candidate workHistory By Id
+ */
 interface createCandidateWorkHistoryParam {
     startDate: Date
     endDate: Date
@@ -615,7 +686,9 @@ const addCandidateWorkHistory = async (
         throw err
     }
 }
-
+/*
+ * update Candidate workHistory By Id
+ */
 interface updateCandidateWorkHistoryParam {
     id: number
     startDate: Date
@@ -648,7 +721,9 @@ const updateCandidateWorkHistoryById = async (
         return updateCandidateWcandidateWorkHistory
     }
 }
-
+/*
+ * remove Candidate workHistory By Id
+ */
 interface removeCandidateWorkHistoryParam {
     id: number
 }
@@ -666,7 +741,9 @@ const removeCandidateWorkHistory = async (
     })
     return deletedRows
 }
-
+/*
+ * get Candidate workHistory By Id
+ */
 const getCandidatesWorkHistory = async (id: number) => {
     const candidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll(
         {
@@ -686,8 +763,12 @@ const getCandidatesWorkHistory = async (id: number) => {
     return candidatesWorkHistory
 }
 
+/*
+ * get Candidate Traning Certificate
+ */
+
 const getCandidateTrainingCert = async (id: number) => {
-    const candidatesWorkHistory = await customerDB.CandidateCertificate.findAll(
+    const candidatesCertificate = await customerDB.CandidateCertificate.findAll(
         {
             include: [{ model: customerDB.SkillSet }],
             where: {
@@ -695,11 +776,11 @@ const getCandidateTrainingCert = async (id: number) => {
             },
         }
     ).catch((err: any) => {
-        log.error(err, "Error while removeCandidateWorkHistory")
+        log.error(err, "Error while getCandidateTrainingCert")
         //(err)
         throw err
     })
-    return candidatesWorkHistory
+    return candidatesCertificate
 }
 const Candidate = {
     getCandidates,
@@ -717,6 +798,8 @@ const Candidate = {
     createBulkCandidate,
     getCandidatesWorkHistory,
     getCandidateTrainingCert,
+    getCandidateTrainingCertById,
+    getCandidateWorkHistoryById
 }
 
 export { Candidate }

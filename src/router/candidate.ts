@@ -156,7 +156,23 @@ CandidateRouter.get(
             )
     }
 )
-
+// * get Candidate Tranining-cref By Id
+CandidateRouter.get(
+    "/candidates/:id/training-cert/:certId",
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.
+        getCandidateTrainingCertById(parseInt(req.params.id),parseInt(req.params.certId))
+        .then((cert) => {
+            res.status(httpStatus.Created).json(cert)
+        })
+        .catch((err) =>
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err,
+            })
+        )
+    }
+) 
 // * Create Candidate Trainig-Cerf
 CandidateRouter.post(
     "/candidates/:id/training-cert",
@@ -240,6 +256,25 @@ CandidateRouter.get(
             )
     }
 )
+//* get Candiate  work History By Id 
+CandidateRouter.get(
+    "/candidates/:id/work-history/:workId",
+    (req: Request, res: Response, next: NextFunction) => {
+        Candidate.
+        getCandidateWorkHistoryById(parseInt(req.params.id),parseInt(req.params.workId))
+        .then((cert) => {
+            res.status(httpStatus.Created).json(cert)
+        })
+        .catch((err) =>
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: err,
+            })
+        )
+    }
+) 
+
+
 //* Create Candiate Work History
 CandidateRouter.post(
     "/candidates/:id/work-history",
