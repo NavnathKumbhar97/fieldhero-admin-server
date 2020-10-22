@@ -35,6 +35,9 @@ CompanyRouter.get(
     Company
         .getCompanyById(req.params.id)
         .then((company) => {
+            if(company == null){
+                res.sendStatus(httpStatus.No_Content);
+            }
             res.status(httpStatus.OK).json(company)
         })
         .catch((err) => 

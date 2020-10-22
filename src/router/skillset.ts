@@ -35,6 +35,9 @@ SkillSetRouter.get(
     SkillSet
         .getSkillSetById(req.params.id)
         .then((skill) => {
+            if(skill == null){
+                res.sendStatus(httpStatus.No_Content)
+            }
             res.status(httpStatus.OK).json(skill)
         })
         .catch((err) => res.status(httpStatus.Bad_Request).json({ 

@@ -35,8 +35,8 @@ IndustryRouter.get(
     (req: Request<GetIndustryByIdParam>, res: Response, next: NextFunction) => {
         Industry.getIndustryById(req.params.id)
             .then((industry) => {
-                if (!industry) {
-                    res.status(httpStatus.No_Content)
+                if (industry == null) {
+                    res.sendStatus(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(industry)
             })

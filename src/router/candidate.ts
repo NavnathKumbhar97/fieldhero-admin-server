@@ -40,6 +40,9 @@ CandidateRouter.get(
     ) => {
         Candidate.getCandidateById(req.params.id)
             .then((candidate) => {
+                if(candidate == null){
+                    res.sendStatus(httpStatus.No_Content)
+                }
                 res.status(httpStatus.OK).json(candidate)
             })
             .catch((err) =>
