@@ -163,7 +163,10 @@ CandidateRouter.get(
         Candidate.
         getCandidateTrainingCertById(parseInt(req.params.id),parseInt(req.params.certId))
         .then((cert) => {
-            res.status(httpStatus.Created).json(cert)
+            if(cert == null) {
+                res.sendStatus(httpStatus.No_Content)
+            }
+            res.status(httpStatus.OK).json(cert)
         })
         .catch((err) =>
             res.status(httpStatus.Bad_Request).json({
@@ -262,8 +265,11 @@ CandidateRouter.get(
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.
         getCandidateWorkHistoryById(parseInt(req.params.id),parseInt(req.params.workId))
-        .then((cert) => {
-            res.status(httpStatus.Created).json(cert)
+        .then((candidatesWorkHistory) => {
+            if(candidatesWorkHistory == null){
+                res.sendStatus(httpStatus.No_Content)
+            }
+            res.status(httpStatus.OK).json(candidatesWorkHistory)
         })
         .catch((err) =>
             res.status(httpStatus.Bad_Request).json({

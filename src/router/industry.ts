@@ -13,7 +13,7 @@ IndustryRouter.get(
         Industry.getIndustries(req.query.all)
             .then((industries) => {
                 if (!industries.length) {
-                    res.status(httpStatus.No_Content)
+                    res.sendStatus(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(industries)
             })

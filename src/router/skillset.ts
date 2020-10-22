@@ -13,7 +13,7 @@ SkillSetRouter.get("/skills", (req:Request, res:Response, next:NextFunction) => 
         .getSkillSets(req.query.all)
         .then((skills) => {
             if (!skills.length) {
-                res.status(httpStatus.No_Content)
+                res.sendStatus(httpStatus.No_Content)
             }
             res.status(httpStatus.OK).json(skills)
         })

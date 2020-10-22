@@ -8,12 +8,12 @@ const CompanyRouter = Router()
 //* Fetch All Company List
 CompanyRouter.get(
     "/companies",
-    (req:Request, res:Response, next:NextFunction) => {
+    (req:Request, res:Response, next:NextFunction) => {    
     Company
         .getCompanies(req.query.all)
         .then((companies) => {
             if(!companies.length){
-                res.status(httpStatus.No_Content)
+                res.sendStatus(httpStatus.No_Content)
             }
             res.status(httpStatus.OK).json(companies)
         })
