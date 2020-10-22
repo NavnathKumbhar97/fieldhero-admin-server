@@ -14,7 +14,7 @@ CandidateRouter.get(
         Candidate.getCandidates(req.query.all)
             .then((candidates) => {
                 if (!candidates.length) {
-                    res.status(httpStatus.No_Content)
+                    res.sendStatus(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(candidates)
             })
