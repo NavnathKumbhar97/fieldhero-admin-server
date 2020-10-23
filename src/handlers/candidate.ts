@@ -466,7 +466,6 @@ const addCandidateTrainingCert = async (
     if(param.skillId == undefined || param.skillId == null){
         getskillId = null;
     } else{
-        console.log("go to else condition")
         if (typeof param.skillId !== "number" ) {
             // @ts-ignore
             let newSkillset = await customerDB.SkillSet.create({
@@ -531,6 +530,20 @@ const updateCandidateTrainingCertById = async (
     const candidateCertificate = await customerDB.CandidateCertificate.findOne({
         where: { id: param.id },
     })
+    let getskillId:any;
+    if(param.skillId == undefined || param.skillId == null){
+        getskillId = null;
+    } else{
+        if (typeof param.skillId !== "number" ) {
+            // @ts-ignore
+            let newSkillset = await customerDB.SkillSet.create({
+                title: param.skillId,
+            })
+            getskillId = newSkillset.id
+        } else {
+            getskillId = param.skillId
+        }
+    }
     let updateCandidateCertificate = null
     if (candidateCertificate) {
         candidateCertificate.type = param.type
@@ -539,7 +552,7 @@ const updateCandidateTrainingCertById = async (
         candidateCertificate.issuedBy = param.issuedBy
         candidateCertificate.description = param.description
         candidateCertificate.candidateId = param.candidate
-        candidateCertificate.skillId = param.skillId
+        candidateCertificate.skillId = getskillId
         updateCandidateCertificate = await candidateCertificate
             .save()
             .catch((err: any) => {
