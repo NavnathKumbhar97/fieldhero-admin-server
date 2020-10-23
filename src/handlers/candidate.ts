@@ -696,29 +696,91 @@ interface updateCandidateWorkHistoryParam {
     description: string
     candidate: number
     companyId: number
+    skillId: any
 }
 
 const updateCandidateWorkHistoryById = async (
     param: updateCandidateWorkHistoryParam
 ) => {
-    const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
-        where: { id: param.id },
-    })
-    let updateCandidateWcandidateWorkHistory = null
-    if (candidateWorkHistory) {
-        candidateWorkHistory.startDate = param.startDate
-        candidateWorkHistory.endDate = param.endDate
-        candidateWorkHistory.description = param.description
-        candidateWorkHistory.candidateId = param.candidate
-        candidateWorkHistory.companyId = param.companyId
-        updateCandidateWcandidateWorkHistory = await candidateWorkHistory
-            .save()
-            .catch((err: any) => {
-                log.error(err, "Error while updateCandidateWorkHistoryById")
-                //console.log(err)
-                throw err
-            })
-        return updateCandidateWcandidateWorkHistory
+    let transaction = await ormCustomer.transaction()
+    try{
+        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
+            where: { id: param.id },
+        })
+
+        const deleteCandidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.destroy({
+            where:{
+                workHistoryId:param.id
+            },
+            transaction
+        })
+
+        let skillsSetArray = []
+        let skills: any = []
+        let newSkills: any = []
+
+        skillsSetArray = param.skillId
+        skillsSetArray.map((items: any) => {
+            if (typeof items == "number") {
+                skills.push(items)
+            } else {
+                newSkills.push(items)
+            }
+        })
+        const NewskillsArrayObject = newSkills.map((item: any) => {
+            return { title: item }
+        })
+        const skillSet = await customerDB.SkillSet.bulkCreate(
+            NewskillsArrayObject,
+            {
+                fields: ["id", "title"],
+                transaction,
+            }
+        )
+
+        let updateCandidateWcandidateWorkHistory = null
+        if (candidateWorkHistory) {
+            candidateWorkHistory.startDate = param.startDate
+            candidateWorkHistory.endDate = param.endDate
+            candidateWorkHistory.description = param.description
+            candidateWorkHistory.candidateId = param.candidate
+            candidateWorkHistory.companyId = param.companyId
+            updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()            
+        }
+        {
+            transaction
+        }
+        let getSkillId = skillSet.map((item) => {
+            return {
+                skillId: item.id,
+                workHistoryId:candidateWorkHistory?.id
+            }
+        })
+        let skillsArrayObject = skills.map((item: any) => {
+            return {
+                skillId: item,
+                workHistoryId: candidateWorkHistory?.id,
+            }
+        })
+        let workHistorySkill = [...skillsArrayObject, ...getSkillId]
+        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
+            workHistorySkill,
+            {
+                fields: ["skillId", "workHistoryId"],
+                transaction,
+            }
+        )
+        await transaction.commit()
+        return Object.assign({
+            skillSet,
+            updateCandidateWcandidateWorkHistory,
+            candidateWorkHistorySkill,
+        })
+    }catch(err){
+        await transaction.rollback()
+        log.error(err, "Error while updateCandidateWorkHistoryById")
+        //console.log(err)
+        throw err 
     }
 }
 /*
