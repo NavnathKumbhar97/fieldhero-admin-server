@@ -1,6 +1,6 @@
 import { number, string } from "joi"
 import { customerDB, ormCustomer } from "../sequelize"
-import { log } from "../helper"
+import { log, getPagingData } from "../helper"
 import { Model } from "sequelize"
 import { Interface } from "readline"
 
@@ -8,14 +8,27 @@ import { Interface } from "readline"
  * get All Get Candidates 
  */
 
-const getCandidates = async (all: any) => {
+const getCandidates = async (pagination:any) => {
     let whereCondition = {}
-    if (all == "*") {
+    if (pagination.all == "*") {
         whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
-    const candidates = await customerDB.Candidate.findAll({
+    let page;
+    let limit;
+    if(pagination.limit == undefined && pagination.offset == undefined  ||
+    pagination.limit == undefined || pagination.offset == undefined
+    ){
+        page = 0;
+        limit = 10;
+    } else {
+        limit = parseInt(pagination.limit);
+        page = parseInt(pagination.offset)
+    }
+    const candidates = await customerDB.Candidate.findAndCountAll({
+        limit:limit,
+        offset:page,
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
@@ -31,13 +44,16 @@ const getCandidates = async (all: any) => {
         ],
         where: {
             isActive: whereCondition,
-        },
+        }
+       
     }).catch((err: any) => {
         log.error(err, "Error while getCandidates")
         //console.log(err)
         throw err
     })
-    return candidates
+    const response = getPagingData(candidates, page, limit);
+
+    return response
 }
 
 /*

@@ -6,14 +6,19 @@ import { createCandidateValidation } from "../validation/candidate"
 const CandidateRouter = Router()
 
 // Candidate
-
+interface GetCandidatParam {
+    all: number,
+    limit:number,
+    offset:number
+}
 //* Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
-    (req: Request, res: Response, next: NextFunction) => {
-        Candidate.getCandidates(req.query.all)
+    (req: Request<GetCandidatParam>, res: Response, next: NextFunction) => {
+        console.log(req.query)
+        Candidate.getCandidates(req.query)
             .then((candidates) => {
-                if (!candidates.length) {
+                if (!candidates.Candidates.length) {
                     res.sendStatus(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(candidates)

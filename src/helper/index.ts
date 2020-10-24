@@ -1,4 +1,4 @@
 import log from "./log"
 import httpStatus from "./http_status"
-
-export { log, httpStatus }
+import getPagingData from "./pagination"
+export { log, httpStatus,getPagingData }
