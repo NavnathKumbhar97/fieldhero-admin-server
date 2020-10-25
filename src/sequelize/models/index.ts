@@ -6,6 +6,9 @@ import { CandidateCertificateFactory } from "./candidate_cert"
 import { CandidateWorkFactory } from "./candidate_work"
 import { CandidateWorkSkillFactory } from "./candidate_work_skill"
 import { CandidateOtherFactory } from "./candidate_other"
+import { CustomerFactory } from "./customer"
+import { CustomerLoginFactory } from "./customer_login"
+import { CustomerSubscriptionFactory } from "./customer_subscription"
 export {
     CandidateCertificateFactory,
     CandidateFactory,
@@ -13,6 +16,9 @@ export {
     CandidateWorkFactory,
     CandidateWorkSkillFactory,
     CompanyFactory,
+    CustomerFactory,
+    CustomerLoginFactory,
+    CustomerSubscriptionFactory,
     IndustryFactory,
     SkillSetFactory,
 }
