@@ -10,14 +10,14 @@ const UploadRouter = Router()
 // configure storage for multer
 const storage = multer.diskStorage({
     destination: (req: Request, file: any, cb: any) => {
-        let p = `public/uploads/candidates/${req.params.id}/profile_image`
+        const p = `public/uploads/candidates/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })            
         }
         cb(null, p)
     },
     filename: (req: Request, file: any, cb: any) => {
-        let datetimestamp = Date.now()
+        const datetimestamp = Date.now()
         const newFilename = `${file.fieldname}-${
             req.params.id
         }-${datetimestamp}${path.extname(file.originalname)}`
@@ -53,7 +53,7 @@ UploadRouter.post(
                 message: "Please upload file",
             })
         } else {
-            let path = req.file.destination+'/'+req.file.filename;            
+            const path = req.file.destination+'/'+req.file.filename;            
             UploadImage.updateCandidateProfileById(
                 parseInt(req.params.id),
                 path

@@ -5,30 +5,32 @@ import { Model } from "sequelize"
 import { Interface } from "readline"
 
 /*
- * get All Get Candidates 
+ * get All Get Candidates
  */
 
-const getCandidates = async (pagination:any) => {
+const getCandidates = async (pagination: any) => {
     let whereCondition = {}
     if (pagination.all == "*") {
         whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
-    let page;
-    let limit;
-    if(pagination.limit == undefined && pagination.offset == undefined  ||
-    pagination.limit == undefined || pagination.offset == undefined
-    ){
-        page = 0;
-        limit = 10;
+    let page
+    let limit
+    if (
+        (pagination.limit == undefined && pagination.offset == undefined) ||
+        pagination.limit == undefined ||
+        pagination.offset == undefined
+    ) {
+        page = 0
+        limit = 10
     } else {
-        limit = parseInt(pagination.limit);
+        limit = parseInt(pagination.limit)
         page = parseInt(pagination.offset)
     }
     const candidates = await customerDB.Candidate.findAndCountAll({
-        limit:limit,
-        offset:page,
+        limit: limit,
+        offset: page,
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
@@ -44,14 +46,13 @@ const getCandidates = async (pagination:any) => {
         ],
         where: {
             isActive: whereCondition,
-        }
-       
+        },
     }).catch((err: any) => {
         log.error(err, "Error while getCandidates")
         //console.log(err)
         throw err
     })
-    const response = getPagingData(candidates, page, limit);
+    const response = getPagingData(candidates, page, limit)
 
     return response
 }
@@ -84,39 +85,53 @@ const getCandidateById = async (id: number) => {
 /*
  * Delete All Candidate truncate
  */
-const deleteAllCandiate = async() => {
-    let transaction = await ormCustomer.transaction()
+const deleteAllCandiate = async () => {
+    const transaction = await ormCustomer.transaction()
     try {
-        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true, transaction });
-        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate({
-            transaction
-        });
-        
-        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.truncate({
-            transaction     
+        await ormCustomer.query("SET FOREIGN_KEY_CHECKS = 0", {
+            raw: true,
+            transaction,
         })
-        const deleteCandiateCertificate =await customerDB.CandidateCertificate.truncate({
-            transaction
-        })
+        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate(
+            {
+                transaction,
+            }
+        )
 
-        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.truncate({
-            transaction
-        })
+        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.truncate(
+            {
+                transaction,
+            }
+        )
+        const deleteCandiateCertificate = await customerDB.CandidateCertificate.truncate(
+            {
+                transaction,
+            }
+        )
+
+        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.truncate(
+            {
+                transaction,
+            }
+        )
 
         const deleteCandiateInfo = await customerDB.Candidate.truncate({
-            transaction
+            transaction,
         })
-        await ormCustomer.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true,transaction }); //<---- Do not check referential constraints
-        
+        await ormCustomer.query("SET FOREIGN_KEY_CHECKS = 1", {
+            raw: true,
+            transaction,
+        }) //<---- Do not check referential constraints
+
         await transaction.commit()
-        return Object.assign({ 
+        return Object.assign({
             deleteSkillsWorkHistory,
             deleteCandiateWorkHistroy,
             deleteCandiateOtherDetails,
             deleteCandiateCertificate,
-            deleteCandiateInfo
+            deleteCandiateInfo,
         })
-    } catch(err){
+    } catch (err) {
         await transaction.rollback()
         log.error(err, "Error while deleteCandiate")
         //console.log(err)
@@ -128,64 +143,75 @@ const deleteAllCandiate = async() => {
  * Delete All Candidate By Id
  */
 const deleteCandiateById = async (id: number) => {
-    let transaction = await ormCustomer.transaction()
+    const transaction = await ormCustomer.transaction()
     try {
         const getCandiateDetails = await customerDB.Candidate.findOne({
-            where:{
-                id:id
+            where: {
+                id: id,
             },
-            transaction
+            transaction,
         })
-        let candidateId = getCandiateDetails?.id
-        const getCandidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll({
-            where:{
-                candidateId:candidateId 
-            },
-            transaction
-        })
-        let getCandidatesWorkHistoryArray = getCandidatesWorkHistory.map((item) => {
-                    return item.id
-        })
-        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy({
-            where:{
-                //@ts-ignore
-                workHistoryId:getCandidatesWorkHistoryArray
-            },
-            transaction
-        })
-        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy({
-            where:{
-                candidateId:candidateId 
-            },
-            transaction
-        })
-        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy({
-            where:{
-                candidateId:candidateId
-            },
-            transaction
-        })
-        const deleteCandiateCertificate = await customerDB.CandidateCertificate.destroy({
-            where:{
-                candidateId:candidateId
-            },
-            transaction
-        })
+        const candidateId = getCandiateDetails?.id
+        const getCandidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll(
+            {
+                where: {
+                    candidateId: candidateId,
+                },
+                transaction,
+            }
+        )
+        const getCandidatesWorkHistoryArray = getCandidatesWorkHistory.map(
+            (item) => {
+                return item.id!
+            }
+        )
+        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy(
+            {
+                where: {
+                    workHistoryId: getCandidatesWorkHistoryArray,
+                },
+                transaction,
+            }
+        )
+        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy(
+            {
+                where: {
+                    candidateId: candidateId,
+                },
+                transaction,
+            }
+        )
+        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy(
+            {
+                where: {
+                    candidateId: candidateId,
+                },
+                transaction,
+            }
+        )
+        const deleteCandiateCertificate = await customerDB.CandidateCertificate.destroy(
+            {
+                where: {
+                    candidateId: candidateId,
+                },
+                transaction,
+            }
+        )
         const deleteCandiateInfo = await customerDB.Candidate.destroy({
-            where:{
-                id:id
+            where: {
+                id: id,
             },
-            transaction
+            transaction,
         })
         await transaction.commit()
-        return Object.assign({ 
+        return Object.assign({
             deleteSkillsWorkHistory,
             deleteCandiateWorkHistroy,
             deleteCandiateOtherDetails,
             deleteCandiateCertificate,
-            deleteCandiateInfo
+            deleteCandiateInfo,
         })
-    } catch(err){
+    } catch (err) {
         await transaction.rollback()
         log.error(err, "Error while deleteCandiateById")
         //console.log(err)
@@ -193,7 +219,7 @@ const deleteCandiateById = async (id: number) => {
     }
 }
 /*
- * Create Candidate 
+ * Create Candidate
  */
 interface createCandidateParam {
     firstName: string
@@ -273,7 +299,7 @@ const createCandidate = async (param: createCandidateParam) => {
     }
 }
 /*
- * Update Candidate 
+ * Update Candidate
  */
 interface updateCandidateParam {
     id: number
@@ -368,7 +394,7 @@ const updateCandidateById = async (param: updateCandidateParam) => {
     }
 }
 /*
- * bulk Candidate  
+ * bulk Candidate
  */
 interface bulkCreateCandidateParam {
     firstName: string
@@ -399,7 +425,7 @@ interface bulkCreateCandidateParam {
 }
 
 const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
-    let transaction = await ormCustomer.transaction()
+    const transaction = await ormCustomer.transaction()
     try {
         const candidate = await customerDB.Candidate.bulkCreate(param, {
             fields: [
@@ -477,14 +503,13 @@ interface createCandidateTrainingCertParam {
 
 const addCandidateTrainingCert = async (
     param: createCandidateTrainingCertParam
-) => {    
-    let getskillId:any;
-    if(param.skillId == undefined || param.skillId == null){
-        getskillId = null;
-    } else{
-        if (typeof param.skillId !== "number" ) {
-            // @ts-ignore
-            let newSkillset = await customerDB.SkillSet.create({
+) => {
+    let getskillId: any
+    if (param.skillId == undefined || param.skillId == null) {
+        getskillId = null
+    } else {
+        if (typeof param.skillId !== "number") {
+            const newSkillset = await customerDB.SkillSet.create({
                 title: param.skillId,
             })
             getskillId = newSkillset.id
@@ -510,21 +535,19 @@ const addCandidateTrainingCert = async (
 /*
  * get Candidate Traning certificate By Id
  */
-const getCandidateTrainingCertById = async(id:number,certId:number)=>{
+const getCandidateTrainingCertById = async (id: number, certId: number) => {
     const candidateCertificate = await customerDB.CandidateCertificate.findOne({
-        include: [
-            { model: customerDB.SkillSet }
-        ],
-        where: { 
-            id:certId,
-            candidateId:id
+        include: [{ model: customerDB.SkillSet }],
+        where: {
+            id: certId,
+            candidateId: id,
         },
     }).catch((err: any) => {
         log.error(err, "Error while getCandidateTrainingCertById")
         //console.log(err);
         throw err
     })
-    return candidateCertificate;
+    return candidateCertificate
 }
 /*
  * update Candidate Traning certificate By Id
@@ -546,13 +569,12 @@ const updateCandidateTrainingCertById = async (
     const candidateCertificate = await customerDB.CandidateCertificate.findOne({
         where: { id: param.id },
     })
-    let getskillId:any;
-    if(param.skillId == undefined || param.skillId == null){
-        getskillId = null;
-    } else{
-        if (typeof param.skillId !== "number" ) {
-            // @ts-ignore
-            let newSkillset = await customerDB.SkillSet.create({
+    let getskillId: any
+    if (param.skillId == undefined || param.skillId == null) {
+        getskillId = null
+    } else {
+        if (typeof param.skillId !== "number") {
+            const newSkillset = await customerDB.SkillSet.create({
                 title: param.skillId,
             })
             getskillId = newSkillset.id
@@ -604,23 +626,22 @@ const removeCandidateTrainingCert = async (
  * get Candidate workHistory By Id
  */
 
-const getCandidateWorkHistoryById = async(id:number,workId:number) => {
+const getCandidateWorkHistoryById = async (id: number, workId: number) => {
     const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
-        where: { 
-            id:workId,
-            candidateId:id,
+        where: {
+            id: workId,
+            candidateId: id,
         },
         include: [
             { model: customerDB.CandidateWorkHistorySkill },
             { model: customerDB.Company },
         ],
-    }).catch((err:any)=>{
+    }).catch((err: any) => {
         log.error(err, "Error while getCandidateWorkHistoryById")
         //console.log(err)
         throw err
     })
     return candidateWorkHistory
-
 }
 /*
  * create Candidate workHistory By Id
@@ -638,11 +659,11 @@ interface createCandidateWorkHistoryParam {
 const addCandidateWorkHistory = async (
     param: createCandidateWorkHistoryParam
 ) => {
-    let transaction = await ormCustomer.transaction()
+    const transaction = await ormCustomer.transaction()
     try {
         let skillsSetArray = []
-        let skills: any = []
-        let newSkills: any = []
+        const skills: any = []
+        const newSkills: any = []
 
         skillsSetArray = param.skillId
         skillsSetArray.map((items: any) => {
@@ -681,19 +702,19 @@ const addCandidateWorkHistory = async (
                 transaction,
             }
         )
-        let getSkillId = skillSet.map((item) => {
+        const getSkillId = skillSet.map((item) => {
             return {
                 skillId: item.id,
                 workHistoryId: candidateWorkHistory.id,
             }
         })
-        let skillsArrayObject = skills.map((item: any) => {
+        const skillsArrayObject = skills.map((item: any) => {
             return {
                 skillId: item,
                 workHistoryId: candidateWorkHistory.id,
             }
         })
-        let workHistorySkill = [...skillsArrayObject, ...getSkillId]
+        const workHistorySkill = [...skillsArrayObject, ...getSkillId]
 
         const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
             workHistorySkill,
@@ -731,22 +752,26 @@ interface updateCandidateWorkHistoryParam {
 const updateCandidateWorkHistoryById = async (
     param: updateCandidateWorkHistoryParam
 ) => {
-    let transaction = await ormCustomer.transaction()
-    try{
-        let candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
-            where: { id: param.id },
-        })
+    const transaction = await ormCustomer.transaction()
+    try {
+        const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne(
+            {
+                where: { id: param.id },
+            }
+        )
 
-        const deleteCandidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.destroy({
-            where:{
-                workHistoryId:param.id
-            },
-            transaction
-        })
+        const deleteCandidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.destroy(
+            {
+                where: {
+                    workHistoryId: param.id,
+                },
+                transaction,
+            }
+        )
 
         let skillsSetArray = []
-        let skills: any = []
-        let newSkills: any = []
+        const skills: any = []
+        const newSkills: any = []
 
         skillsSetArray = param.skillId
         skillsSetArray.map((items: any) => {
@@ -774,24 +799,24 @@ const updateCandidateWorkHistoryById = async (
             candidateWorkHistory.description = param.description
             candidateWorkHistory.candidateId = param.candidate
             candidateWorkHistory.companyId = param.companyId
-            updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()            
+            updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
         }
         {
             transaction
         }
-        let getSkillId = skillSet.map((item) => {
+        const getSkillId = skillSet.map((item) => {
             return {
                 skillId: item.id,
-                workHistoryId:candidateWorkHistory?.id
+                workHistoryId: candidateWorkHistory?.id,
             }
         })
-        let skillsArrayObject = skills.map((item: any) => {
+        const skillsArrayObject = skills.map((item: any) => {
             return {
                 skillId: item,
                 workHistoryId: candidateWorkHistory?.id,
             }
         })
-        let workHistorySkill = [...skillsArrayObject, ...getSkillId]
+        const workHistorySkill = [...skillsArrayObject, ...getSkillId]
         const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
             workHistorySkill,
             {
@@ -805,11 +830,11 @@ const updateCandidateWorkHistoryById = async (
             updateCandidateWcandidateWorkHistory,
             candidateWorkHistorySkill,
         })
-    }catch(err){
+    } catch (err) {
         await transaction.rollback()
         log.error(err, "Error while updateCandidateWorkHistoryById")
         //console.log(err)
-        throw err 
+        throw err
     }
 }
 /*
@@ -890,7 +915,7 @@ const Candidate = {
     getCandidatesWorkHistory,
     getCandidateTrainingCert,
     getCandidateTrainingCertById,
-    getCandidateWorkHistoryById
+    getCandidateWorkHistoryById,
 }
 
 export { Candidate }
