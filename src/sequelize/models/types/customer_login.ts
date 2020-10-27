@@ -7,6 +7,7 @@ interface Attributes {
     customerId: number
     resetToken: string
     resetExpires: Date
+    isVerified: string
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

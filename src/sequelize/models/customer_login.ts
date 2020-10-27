@@ -33,5 +33,9 @@ export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
             allowNull: true,
             defaultValue: helper.getExpiryTime,
         },
+        isVerified: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
     })
 }
