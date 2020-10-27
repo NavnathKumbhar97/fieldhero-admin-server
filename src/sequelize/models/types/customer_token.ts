@@ -2,11 +2,9 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    email: string
-    passwordHash: string
+    token: string
     customerId: number
-    resetToken: string
-    resetExpires: Date
+    createdAt: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
@@ -17,4 +15,4 @@ type ModelTypes = typeof Model & {
     new (values?: Record<string, unknown>, options?: BuildOptions): CustomModel
 }
 
-export { ModelTypes as CustomerLoginModel }
+export { ModelTypes as CustomerTokenModel }

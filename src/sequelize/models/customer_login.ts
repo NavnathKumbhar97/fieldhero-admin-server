@@ -1,5 +1,6 @@
 import { DataTypes, Sequelize } from "sequelize"
 import { CustomerLoginModel } from "./types"
+import * as helper from "../../helper"
 export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
     return <CustomerLoginModel>orm.define("customer_login", {
         id: {
@@ -22,6 +23,15 @@ export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
                 model: "customer_master",
                 key: "id",
             },
+        },
+        resetToken: {
+            type: DataTypes.STRING(500),
+            allowNull: true,
+        },
+        resetExpires: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            defaultValue: helper.getExpiryTime,
         },
     })
 }
