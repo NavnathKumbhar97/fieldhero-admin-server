@@ -17,14 +17,14 @@ const getCandidates = async (pagination:any) => {
     }
     let page;
     let limit;
-    if(pagination.limit == undefined && pagination.offset == undefined  ||
-    pagination.limit == undefined || pagination.offset == undefined
+    if(pagination.limit == undefined && pagination.page == undefined  ||
+    pagination.limit == undefined || pagination.page == undefined
     ){
         page = 0;
         limit = 10;
     } else {
         limit = parseInt(pagination.limit);
-        page = parseInt(pagination.offset)
+        page = parseInt(pagination.page)
     }
     const candidates = await customerDB.Candidate.findAndCountAll({
         limit:limit,
