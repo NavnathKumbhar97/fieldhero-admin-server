@@ -29,11 +29,13 @@ const CandidateCertificate = models.CandidateCertificateFactory(orm)
 const CandidateWorkHistory = models.CandidateWorkFactory(orm)
 const CandidateWorkHistorySkill = models.CandidateWorkSkillFactory(orm)
 const CandidateOtherDetails = models.CandidateOtherFactory(orm)
+const Customer = models.CustomerFactory(orm)
+const CustomerLogin = models.CustomerLoginFactory(orm)
+const CustomerSubscription = models.CustomerSubscriptionFactory(orm)
+const CustomerToken = models.CustomerTokenFactory(orm)
 
 // Candidate, CandidateWorkHistory, CandidateCertificate
-Candidate.hasMany(CandidateWorkHistory, 
-    { foreignKey: "candidateId" },
-)
+Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
 CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId" })
 CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
@@ -42,10 +44,10 @@ CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId" })
 
 //CandidateWorkHistory
 CandidateWorkHistory.belongsTo(Company, {
-    foreignKey: "companyId"
+    foreignKey: "companyId",
 })
 Company.hasMany(CandidateWorkHistory, {
-    foreignKey: "companyId"
+    foreignKey: "companyId",
 })
 
 //company
@@ -73,6 +75,10 @@ const customerDB = {
     CandidateWorkHistory,
     CandidateWorkHistorySkill,
     Company,
+    Customer,
+    CustomerLogin,
+    CustomerSubscription,
+    CustomerToken,
     Industry,
     SkillSet,
 }

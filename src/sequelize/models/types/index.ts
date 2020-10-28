@@ -6,6 +6,10 @@ import { CandidateCertificateModel } from "./candidate_cert"
 import { CandidateWorkModel } from "./candidate_work"
 import { CandidateWorkSkillModel } from "./candidate_work_skill"
 import { CandidateOtherModel } from "./candidate_other"
+import { CustomerModel } from "./customer"
+import { CustomerLoginModel } from "./customer_login"
+import { CustomerSubscriptionModel } from "./customer_subscription"
+import { CustomerTokenModel } from "./customer_token"
 export {
     CandidateCertificateModel,
     CandidateModel,
@@ -13,6 +17,10 @@ export {
     CandidateWorkModel,
     CandidateWorkSkillModel,
     CompanyModel,
+    CustomerLoginModel,
+    CustomerModel,
+    CustomerSubscriptionModel,
+    CustomerTokenModel,
     IndustryModel,
     SkillSetModel,
 }

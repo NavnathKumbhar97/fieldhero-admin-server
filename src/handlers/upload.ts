@@ -6,12 +6,12 @@ import { log } from "../helper"
  * Upload Candiate Profile By Id
  */
 const updateCandidateProfileById = async (id: number, profileImage: string) => {
-    let CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
+    const CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
         where: { candidateId: id },
     })
     let updatedCandidateProfile = null
     if (CandidateProfile) {
-        let imagePath = CandidateProfile.profileImage
+        const imagePath = CandidateProfile.profileImage
         fs.unlink(path.join(process.cwd(), imagePath || ""), (err) => {
             return err;
         })

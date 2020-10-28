@@ -2,9 +2,14 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    title: string
-    description?: string
-    isActive?: boolean
+    fullName: string
+    companyName: string
+    birthDate: Date
+    gender: string
+    state: string
+    country: string
+    profileImage: string
+    isActive: boolean
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
@@ -15,4 +20,4 @@ type ModelTypes = typeof Model & {
     new (values?: Record<string, unknown>, options?: BuildOptions): CustomModel
 }
 
-export { ModelTypes as SkillSetModel }
+export { ModelTypes as CustomerModel }
