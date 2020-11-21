@@ -222,6 +222,7 @@ const deleteCandiateById = async (id: number) => {
  * Create Candidate
  */
 interface createCandidateParam {
+    fullName:string
     firstName: string
     middleName: string
     lastName: string
@@ -254,10 +255,10 @@ const createCandidate = async (param: createCandidateParam) => {
     try {
         const candidate = await customerDB.Candidate.create(
             {
-                fullName: param.firstName,
-                firstName: param.firstName,
-                middleName: param.middleName,
-                lastName: param.lastName,
+                fullName: param.fullName,
+                firstName: param.firstName || 'NULL',
+                middleName: param.middleName || 'NULL',
+                lastName: param.lastName || 'NULL',
                 birthDate: param.birthDate,
                 gender: param.gender,
                 perm_address: param.perm_address,
@@ -304,6 +305,7 @@ const createCandidate = async (param: createCandidateParam) => {
  */
 interface updateCandidateParam {
     id: number
+    fullName:string
     firstName: string
     middleName: string
     lastName: string
@@ -339,6 +341,7 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         })
         let updateCandidate = null
         if (candidateInfo) {
+            candidateInfo.fullName = param.fullName
             candidateInfo.firstName = param.firstName
             candidateInfo.middleName = param.middleName
             candidateInfo.lastName = param.lastName

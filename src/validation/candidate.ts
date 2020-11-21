@@ -2,9 +2,7 @@ import Joi from "joi"
 import { Request, Response, NextFunction } from "express"
 
 const createCandidate = Joi.object().keys({
-    firstName: Joi.string().required(),
-    middleName: Joi.string().required(),
-    lastName: Joi.string().required(),
+    fullName: Joi.string().required(),
     email1: Joi.string().email().required(),
     contactNo1: Joi.string()
         .length(10)
