@@ -7,6 +7,10 @@ export const CandidateFactory = (orm: Sequelize): CandidateModel => {
             primaryKey: true,
             autoIncrement: true,
         },
+        fullName:{
+            type: DataTypes.STRING(200),
+            allowNull: false
+        },
         firstName: {
             type: DataTypes.STRING(45),
             allowNull: false,

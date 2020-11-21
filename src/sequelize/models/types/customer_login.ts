@@ -5,9 +5,11 @@ interface Attributes {
     email: string
     passwordHash: string
     customerId: number
-    resetToken: string
-    resetExpires: Date
-    isVerified: string
+    resetToken?: string
+    resetExpires?: Date
+    newEmail?: string
+    newEmailToken?: string
+    isVerified?: string
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

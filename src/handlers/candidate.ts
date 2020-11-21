@@ -254,6 +254,7 @@ const createCandidate = async (param: createCandidateParam) => {
     try {
         const candidate = await customerDB.Candidate.create(
             {
+                fullName: param.firstName,
                 firstName: param.firstName,
                 middleName: param.middleName,
                 lastName: param.lastName,
@@ -397,6 +398,7 @@ const updateCandidateById = async (param: updateCandidateParam) => {
  * bulk Candidate
  */
 interface bulkCreateCandidateParam {
+    fullName: string
     firstName: string
     middleName: string
     lastName: string
@@ -429,6 +431,7 @@ const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
     try {
         const candidate = await customerDB.Candidate.bulkCreate(param, {
             fields: [
+                "fullName",
                 "firstName",
                 "middleName",
                 "lastName",
