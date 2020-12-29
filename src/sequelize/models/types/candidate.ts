@@ -3,7 +3,7 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     fullName: string
-    firstName: string
+    firstName?: string
     middleName?: string
     lastName?: string
     birthDate?: Date

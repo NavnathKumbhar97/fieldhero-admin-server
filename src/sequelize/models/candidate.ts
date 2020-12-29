@@ -13,7 +13,7 @@ export const CandidateFactory = (orm: Sequelize): CandidateModel => {
         },
         firstName: {
             type: DataTypes.STRING(45),
-            allowNull: false,
+            allowNull: true,
         },
         middleName: {
             type: DataTypes.STRING(45),
