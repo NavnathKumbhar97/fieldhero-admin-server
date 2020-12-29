@@ -1,13 +1,16 @@
 import { Router, Request, Response } from "express"
+import express from "express"
+import path from "path"
 import { httpStatus } from "../helper"
 import { IndustryRouter } from "./industry"
 import { SkillSetRouter } from "./skillset"
 import { CompanyRouter } from "./company"
-import { CandidateRouter} from "./candidate"
-import {UploadRouter} from "./upload"
+import { CandidateRouter } from "./candidate"
+import { UploadRouter } from "./upload"
 
 const router = Router()
 
+router.use("/public", express.static(path.join(process.cwd(), "public")))
 router.use(IndustryRouter)
 router.use(SkillSetRouter)
 router.use(CompanyRouter)
