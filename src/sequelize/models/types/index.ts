@@ -10,6 +10,7 @@ import { CustomerModel } from "./customer"
 import { CustomerLoginModel } from "./customer_login"
 import { CustomerSubscriptionModel } from "./customer_subscription"
 import { CustomerTokenModel } from "./customer_token"
+import { SubscriptionModel } from "./subscription"
 export {
     CandidateCertificateModel,
     CandidateModel,
@@ -23,4 +24,5 @@ export {
     CustomerTokenModel,
     IndustryModel,
     SkillSetModel,
+    SubscriptionModel,
 }

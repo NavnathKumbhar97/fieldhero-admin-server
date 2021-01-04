@@ -10,6 +10,7 @@ import { CustomerFactory } from "./customer"
 import { CustomerLoginFactory } from "./customer_login"
 import { CustomerSubscriptionFactory } from "./customer_subscription"
 import { CustomerTokenFactory } from "./customer_token"
+import { SubscriptionFactory } from "./subscription"
 export {
     CandidateCertificateFactory,
     CandidateFactory,
@@ -23,4 +24,5 @@ export {
     CustomerTokenFactory,
     IndustryFactory,
     SkillSetFactory,
+    SubscriptionFactory
 }
