@@ -5,7 +5,7 @@ interface Attributes {
     totalExpMonths?: number | null
     totalExpYears?: number | null
     registrationStatus?: string | null
-    candidateId: number
+    candidateId?: number
     profileImage?: string | null
 }
 

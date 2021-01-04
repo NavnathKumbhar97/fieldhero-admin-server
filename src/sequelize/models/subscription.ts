@@ -29,13 +29,15 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
             },
             createdOn: {
                 type: DataTypes.DATE,
+                defaultValue:null
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+                defaultValue:null
             },
         },
         {
-            timestamps: true,
+            timestamps: false,
             createdAt: "createdOn",
             updatedAt: "modifiedOn",
             deletedAt: false
