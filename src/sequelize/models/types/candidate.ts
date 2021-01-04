@@ -3,27 +3,27 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     fullName: string
-    firstName?: string
-    middleName?: string
-    lastName?: string
-    birthDate?: Date
-    gender?: string
-    perm_address?: string
-    perm_city?: string
-    perm_state?: string
-    perm_country?: string
-    perm_zip?: string
-    curr_address?: string
-    curr_city?: string
-    curr_state?: string
-    curr_country?: string
-    curr_zip?: string
-    email1?: string
-    email2?: string
-    contactNo1?: string
-    contactNo2?: string
-    aadharNo?: string
-    isActive?: boolean
+    firstName?: string | null
+    middleName?: string | null
+    lastName?: string | null
+    birthDate?: Date | null
+    gender?: string | null
+    perm_address?: string | null
+    perm_city?: string | null
+    perm_state?: string | null
+    perm_country?: string | null
+    perm_zip?: string | null
+    curr_address?: string | null
+    curr_city?: string | null
+    curr_state?: string | null
+    curr_country?: string | null
+    curr_zip?: string | null
+    email1?: string | null
+    email2?: string | null
+    contactNo1?: string | null
+    contactNo2?: string | null
+    aadharNo?: string | null
+    isActive?: boolean | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

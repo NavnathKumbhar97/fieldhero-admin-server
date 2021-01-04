@@ -5,9 +5,9 @@ interface Attributes {
     planName: string
     dataCount: number
     durationMonths: number
-    isActive?: boolean
-    createdOn?: Date
-    modifiedOn?: Date
+    isActive: boolean
+    createdOn?: Date | null
+    modifiedOn?: Date | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

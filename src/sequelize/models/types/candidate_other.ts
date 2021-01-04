@@ -2,11 +2,11 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    totalExpMonths: number
-    totalExpYears: number
-    registrationStatus: string
-    candidateId?: number
-    profileImage?: string
+    totalExpMonths?: number | null
+    totalExpYears?: number | null
+    registrationStatus?: string | null
+    candidateId: number
+    profileImage?: string | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

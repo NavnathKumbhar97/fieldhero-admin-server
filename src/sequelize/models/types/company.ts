@@ -3,9 +3,9 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     companyName: string
-    description: string
-    isActive: boolean
-    industryId: number
+    description?: string | null
+    isActive?: boolean | null
+    industryId?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

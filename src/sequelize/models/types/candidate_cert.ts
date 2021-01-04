@@ -4,11 +4,11 @@ interface Attributes {
     id?: number
     type: string
     title: string
-    issueDate: Date
-    issuedBy: string
-    description: string
+    issueDate?: Date | null
+    issuedBy?: string | null
+    description?: string | null
     candidateId: number
-    skillId: number
+    skillId?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

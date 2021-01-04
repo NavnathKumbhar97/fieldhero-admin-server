@@ -3,8 +3,8 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     title: string
-    description?: string
-    isActive?: boolean
+    description?: string | null
+    isActive?: boolean | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

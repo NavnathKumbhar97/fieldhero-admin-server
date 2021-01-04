@@ -1,12 +1,12 @@
 import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
-    id?: number,
-    startDate: Date,
-    endDate: Date,
-    description: string,
-    candidateId: number,
-    companyId: number,
+    id?: number
+    startDate?: Date | null
+    endDate?: Date | null
+    description?: string | null
+    candidateId: number
+    companyId?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
