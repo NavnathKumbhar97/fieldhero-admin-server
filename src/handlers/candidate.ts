@@ -222,7 +222,7 @@ const deleteCandiateById = async (id: number) => {
  * Create Candidate
  */
 interface createCandidateParam {
-    fullName:string
+    fullName: string
     firstName: string
     middleName: string
     lastName: string
@@ -256,9 +256,9 @@ const createCandidate = async (param: createCandidateParam) => {
         const candidate = await customerDB.Candidate.create(
             {
                 fullName: param.fullName,
-                firstName: param.firstName || 'NULL',
-                middleName: param.middleName || 'NULL',
-                lastName: param.lastName || 'NULL',
+                firstName: param.firstName || "NULL",
+                middleName: param.middleName || "NULL",
+                lastName: param.lastName || "NULL",
                 birthDate: param.birthDate,
                 gender: param.gender,
                 perm_address: param.perm_address,
@@ -305,7 +305,7 @@ const createCandidate = async (param: createCandidateParam) => {
  */
 interface updateCandidateParam {
     id: number
-    fullName:string
+    fullName: string
     firstName: string
     middleName: string
     lastName: string
@@ -459,7 +459,6 @@ const createBulkCandidate = async (param: Array<bulkCreateCandidateParam>) => {
             ],
             transaction,
         })
-
         const arrOtherDetails = candidate.map((item, ind) => {
             const { totalExpMonths, totalExpYears, registrationStatus } = param[
                 ind

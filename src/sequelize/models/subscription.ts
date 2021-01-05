@@ -1,5 +1,6 @@
 import { DataTypes, Sequelize } from "sequelize"
 import { SubscriptionModel } from "./types"
+import moment from "moment"
 export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
     return <SubscriptionModel>orm.define(
         "subscription_master",
@@ -29,18 +30,28 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
             },
             createdOn: {
                 type: DataTypes.DATE,
-                defaultValue:null
+                defaultValue: null,
+                get() {
+                    return moment(this.getDataValue("createdOn")).format(
+                        "YYYY-MM-DD HH:mm:ss"
+                    )
+                },
             },
             modifiedOn: {
                 type: DataTypes.DATE,
-                defaultValue:null
+                defaultValue: null,
+                get() {
+                    return moment(this.getDataValue("modifiedOn")).format(
+                        "YYYY-MM-DD HH:mm:ss"
+                    )
+                },
             },
         },
         {
-            timestamps: false,
+            timestamps: true,
             createdAt: "createdOn",
             updatedAt: "modifiedOn",
-            deletedAt: false
+            deletedAt: false,
         }
     )
 }

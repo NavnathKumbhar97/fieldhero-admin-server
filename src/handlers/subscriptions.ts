@@ -7,28 +7,24 @@ import { log } from "../helper"
 interface createSubscripitionParam {
     planName: string
     dataCount: number
-    durationMonths:number
+    durationMonths: number
     isActive: boolean
-    createdOn: Date
-    modifiedOn:Date
 }
 
 const createSubscripition = async (param: createSubscripitionParam) => {
     const findSubscripition = await customerDB.Subscription.findOne({
-        where:{
-            planName:param.planName
-        }
+        where: {
+            planName: param.planName,
+        },
     })
-    if(findSubscripition){
-        return null;
+    if (findSubscripition) {
+        return null
     } else {
         const subscription = await customerDB.Subscription.create({
             planName: param.planName,
             dataCount: param.dataCount,
-            durationMonths:param.durationMonths,    
+            durationMonths: param.durationMonths,
             isActive: param.isActive,
-            createdOn:new Date(),
-            modifiedOn:null
         }).catch((err) => {
             log.error(err, "Error while createSubscripition")
             //console.log(err)
@@ -38,22 +34,27 @@ const createSubscripition = async (param: createSubscripitionParam) => {
     }
 }
 
-
 /*
  * get All Subscription Plan Details
  */
-const getSubscriptions = async (all:any) => {
+const getSubscriptions = async (all: any) => {
     let whereCondition = {}
-    if(all == '*') {
-        whereCondition = [0,1]
+    if (all == "*") {
+        whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
     const subscriptions = await customerDB.Subscription.findAll({
-        attributes:["id","planName", "dataCount", "durationMonths", "isActive"],   
+        attributes: [
+            "id",
+            "planName",
+            "dataCount",
+            "durationMonths",
+            "isActive",
+        ],
         where: {
-            isActive: whereCondition
-        }
+            isActive: whereCondition,
+        },
     }).catch((err: any) => {
         log.error(err, "Error while getSubscriptions")
         //console.log(err)
@@ -61,7 +62,6 @@ const getSubscriptions = async (all:any) => {
     })
     return subscriptions
 }
-
 
 /*
  * get All Subscription Plans By Id
@@ -83,7 +83,7 @@ const getSubscriptionById = async (id: number) => {
  * Inactive Subscription Plan
  */
 
-const updatedSubscriptionById = async (id:number) => {
+const updatedSubscriptionById = async (id: number) => {
     const subscripition = await customerDB.Subscription.findOne({
         where: { id: id },
     })
@@ -91,22 +91,19 @@ const updatedSubscriptionById = async (id:number) => {
     if (subscripition) {
         subscripition.isActive = false
         subscripition.modifiedOn = new Date()
-        updatedsubscripition = await subscripition.save()
-            .catch((err:any)=>{
-                log.error(err, "Error while updatedSubscriptionById")
-                //console.log(err)
-                throw err;
+        updatedsubscripition = await subscripition.save().catch((err: any) => {
+            log.error(err, "Error while updatedSubscriptionById")
+            //console.log(err)
+            throw err
         })
         return updatedsubscripition
     }
 }
 
-
-
 const Subscription = {
     getSubscriptions,
     createSubscripition,
     getSubscriptionById,
-    updatedSubscriptionById
+    updatedSubscriptionById,
 }
 export { Subscription }
