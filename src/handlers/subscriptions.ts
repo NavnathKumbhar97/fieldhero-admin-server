@@ -8,6 +8,8 @@ interface createSubscripitionParam {
     planName: string
     dataCount: number
     durationMonths: number
+    price: number
+    note: string
     isActive: boolean
 }
 
@@ -24,6 +26,8 @@ const createSubscripition = async (param: createSubscripitionParam) => {
             planName: param.planName,
             dataCount: param.dataCount,
             durationMonths: param.durationMonths,
+            price: param.price,
+            note: param.note ? param.note : null,
             isActive: param.isActive,
         }).catch((err) => {
             log.error(err, "Error while createSubscripition")

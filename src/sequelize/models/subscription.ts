@@ -14,14 +14,17 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
             planName: {
                 type: DataTypes.STRING(40),
                 allowNull: false,
+                unique: true,
             },
             dataCount: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                defaultValue: 0,
             },
             durationMonths: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
+                defaultValue: 0,
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
@@ -45,6 +48,15 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
                         "YYYY-MM-DD HH:mm:ss"
                     )
                 },
+            },
+            price: {
+                type: DataTypes.DOUBLE,
+                allowNull: false,
+                defaultValue: 0,
+            },
+            note: {
+                type: DataTypes.STRING(200),
+                allowNull: true,
             },
         },
         {

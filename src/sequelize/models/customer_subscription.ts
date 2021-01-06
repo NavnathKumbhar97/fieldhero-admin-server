@@ -47,6 +47,10 @@ export const CustomerSubscriptionFactory = (
             modifiedOn: {
                 type: DataTypes.DATE,
             },
+            comment: {
+                type: DataTypes.STRING(200),
+                allowNull: true,
+            },
         },
         {
             timestamps: true,

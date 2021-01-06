@@ -6,6 +6,8 @@ interface Attributes {
     dataCount: number
     durationMonths: number
     isActive: boolean
+    price: number
+    note?: string | null
     createdOn?: Date | null
     modifiedOn?: Date | null
 }

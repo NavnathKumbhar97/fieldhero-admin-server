@@ -10,6 +10,7 @@ interface Attributes {
     status: string
     createdOn?: Date | null
     modifiedOn?: Date | null
+    comment?: string | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
