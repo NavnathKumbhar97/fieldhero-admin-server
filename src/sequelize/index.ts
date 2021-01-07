@@ -69,6 +69,10 @@ CandidateWorkHistorySkill.belongsTo(CandidateWorkHistory, {
     foreignKey: "workHistoryId",
 })
 
+// Customer
+Customer.hasOne(CustomerLogin, { foreignKey: "customerId" })
+CustomerLogin.belongsTo(Customer, { foreignKey: "customerId" })
+
 const customerDB = {
     Candidate,
     CandidateCertificate,

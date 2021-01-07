@@ -51,6 +51,10 @@ export const CustomerSubscriptionFactory = (
                 type: DataTypes.STRING(200),
                 allowNull: true,
             },
+            planName: {
+                type: DataTypes.STRING(40),
+                allowNull: false,
+            },
         },
         {
             timestamps: true,

@@ -84,17 +84,24 @@ const getSubscriptionById = async (id: number) => {
 }
 
 /*
- * Inactive Subscription Plan
+ * Update subscription
  */
+interface IUpdateSubscriptionParam {
+    id: number
+    note: string
+    isActive: boolean
+}
 
-const updatedSubscriptionById = async (id: number) => {
+const updatedSubscriptionById = async (param: IUpdateSubscriptionParam) => {
     const subscripition = await customerDB.Subscription.findOne({
-        where: { id: id },
+        where: { id: param.id },
     })
     let updatedsubscripition = null
     if (subscripition) {
-        subscripition.isActive = false
-        subscripition.modifiedOn = new Date()
+        subscripition.isActive = param.isActive
+            ? param.isActive
+            : !subscripition.isActive
+        if (param.note) subscripition.note = param.note
         updatedsubscripition = await subscripition.save().catch((err: any) => {
             log.error(err, "Error while updatedSubscriptionById")
             //console.log(err)

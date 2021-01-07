@@ -11,6 +11,7 @@ interface Attributes {
     createdOn?: Date | null
     modifiedOn?: Date | null
     comment?: string | null
+    planName: string
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

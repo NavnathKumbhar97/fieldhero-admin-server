@@ -6,7 +6,8 @@ import { IndustryRouter } from "./industry"
 import { SkillSetRouter } from "./skillset"
 import { CompanyRouter } from "./company"
 import { CandidateRouter } from "./candidate"
-import { SubscriptionRouter } from './subscriptions'
+import { SubscriptionRouter } from "./subscriptions"
+import { CustomerRouter } from "./customer"
 
 import { UploadRouter } from "./upload"
 
@@ -22,7 +23,7 @@ router.use(CompanyRouter)
 router.use(CandidateRouter)
 router.use(UploadRouter)
 router.use(SubscriptionRouter)
-
+router.use(CustomerRouter)
 
 // Bad Request
 
