@@ -133,7 +133,32 @@ CustomerRouter.get(
             })
     }
 )
-
-
+// Update Customer Subscription Plan By subscrition Id
+CustomerRouter.put(
+    "/customers/:id/subscription/:subId",
+    (
+        req: Request<IGetCustomerSubscriptionsParam>,
+        res: Response,
+        next: NextFunction
+    ) => {
+        Customer.updateCustomerSubscriptionsById(
+            {customerId:req.params.id,
+             id:req.params.subId,
+             ...req.body
+            })
+            .then((custSubscription) => {
+                if (custSubscription) {
+                    res.status(httpStatus.OK).json(custSubscription)
+                }
+                res.sendStatus(httpStatus.No_Content)
+            })
+            .catch((err) => {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            })
+    }
+)
 
 export { CustomerRouter }
