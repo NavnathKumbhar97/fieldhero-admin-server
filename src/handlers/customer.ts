@@ -106,6 +106,44 @@ const getCustomerSubscriptions = async (id: number) => {
     }
 }
 
-const Customer = { getCustomers, getCustomerById, getCustomerSubscriptions }
+interface ICustomerSubscriptionParam {
+    customerId: number
+    planName: string
+    startDate: Date
+    expiryDate: Date
+    allocatedData: number
+    status: string
+    comment?: string
+}
+const createCustomerSubscription = async (
+    param: ICustomerSubscriptionParam
+) => {
+    try {
+        const customerSubscription = await customerDB.CustomerSubscription.create(
+            {
+                planName: param.planName,
+                startDate: param.startDate,
+                expiryDate: param.expiryDate,
+                allocatedData: param.allocatedData,
+                usedData: 0,
+                status: param.status,
+                comment: param.comment ? param.comment : null,
+                customerId: param.customerId,
+            }
+        )
+        return customerSubscription
+    } catch (error) {
+        log.error(error, "Error while createCustomerSubscription")
+        //console.log(err)
+        throw error
+    }
+}
+
+const Customer = {
+    getCustomers,
+    getCustomerById,
+    getCustomerSubscriptions,
+    createCustomerSubscription,
+}
 
 export { Customer }

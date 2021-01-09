@@ -78,4 +78,31 @@ CustomerRouter.get(
     }
 )
 
+// * Create customer subscription
+interface ICreateCustomerSubscriptionParam {
+    id: number
+}
+CustomerRouter.post(
+    "/customers/:id/subscriptions",
+    (
+        req: Request<ICreateCustomerSubscriptionParam>,
+        res: Response,
+        next: NextFunction
+    ) => {
+        Customer.createCustomerSubscription({
+            customerId: req.params.id,
+            ...req.body,
+        })
+            .then((cust_subscription) => {
+                res.status(httpStatus.Created).json(cust_subscription)
+            })
+            .catch((err) => {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            })
+    }
+)
+
 export { CustomerRouter }

@@ -54,6 +54,8 @@ const getSubscriptions = async (all: any) => {
             "planName",
             "dataCount",
             "durationMonths",
+            "price",
+            "note",
             "isActive",
         ],
         where: {
