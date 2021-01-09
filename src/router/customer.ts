@@ -105,4 +105,35 @@ CustomerRouter.post(
     }
 )
 
+
+// * fetch customer subscriptions By Subscrition Id
+interface IGetCustomerSubscriptionsParam {
+    id: number,
+    subId:number 
+}
+CustomerRouter.get(
+    "/customers/:id/subscription/:subId",
+    (
+        req: Request<IGetCustomerSubscriptionsParam>,
+        res: Response,
+        next: NextFunction
+    ) => {
+        Customer.getCustomerSubscriptionsById(req.params.id,req.params.subId )
+            .then((custSubscription) => {
+                if (custSubscription) {
+                    res.status(httpStatus.OK).json(custSubscription)
+                }
+                res.sendStatus(httpStatus.No_Content)
+            })
+            .catch((err) => {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            })
+    }
+)
+
+
+
 export { CustomerRouter }

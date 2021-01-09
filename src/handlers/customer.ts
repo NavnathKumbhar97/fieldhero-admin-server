@@ -106,6 +106,34 @@ const getCustomerSubscriptions = async (id: number) => {
     }
 }
 
+const getCustomerSubscriptionsById = async (id: number, subId:number) => {
+    try {
+        const customer = await customerDB.Customer.findOne({
+            attributes: ["id"],
+            where: { id },
+        })
+        if (customer) {
+            const custSubscription = await customerDB.CustomerSubscription.findAll(
+                {
+                    where: {
+                        customerId: customer.id,
+                        id:subId
+                    },
+                }
+            )         
+            if (custSubscription) {
+                return custSubscription;
+            }
+        }
+        return null
+    } catch (error) {
+        log.error(error, "Error while getCustomerSubscriptions")
+        //console.log(err)
+        throw error
+    }
+}
+
+
 interface ICustomerSubscriptionParam {
     customerId: number
     planName: string
@@ -144,6 +172,7 @@ const Customer = {
     getCustomerById,
     getCustomerSubscriptions,
     createCustomerSubscription,
+    getCustomerSubscriptionsById
 }
 
 export { Customer }
