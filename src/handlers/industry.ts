@@ -1,4 +1,3 @@
-import { where } from "sequelize"
 import { customerDB } from "../sequelize"
 import { log } from "../helper"
 /*
@@ -37,6 +36,7 @@ const getIndustryById = async (id: number) => {
     })
     return industry
 }
+
 /*
  * Create Industry Details
  */
