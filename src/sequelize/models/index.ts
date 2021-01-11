@@ -11,6 +11,11 @@ import { CustomerLoginFactory } from "./customer_login"
 import { CustomerSubscriptionFactory } from "./customer_subscription"
 import { CustomerTokenFactory } from "./customer_token"
 import { SubscriptionFactory } from "./subscription"
+import { UserFactory } from "./user"
+import { RoleFactory } from "./role"
+import { UserLoginFactory } from "./user_login"
+import { PermissionFactory } from "./permission"
+import { RolePermissionFactory } from "./role_permission"
 export {
     CandidateCertificateFactory,
     CandidateFactory,
@@ -24,5 +29,10 @@ export {
     CustomerTokenFactory,
     IndustryFactory,
     SkillSetFactory,
-    SubscriptionFactory
+    SubscriptionFactory,
+    UserFactory,
+    RoleFactory,
+    UserLoginFactory,
+    PermissionFactory,
+    RolePermissionFactory,
 }

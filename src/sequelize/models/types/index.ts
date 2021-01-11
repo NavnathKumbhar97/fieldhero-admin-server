@@ -11,6 +11,11 @@ import { CustomerLoginModel } from "./customer_login"
 import { CustomerSubscriptionModel } from "./customer_subscription"
 import { CustomerTokenModel } from "./customer_token"
 import { SubscriptionModel } from "./subscription"
+import { UserModel } from "./user"
+import { RoleModel } from "./role"
+import { UserLoginModel } from "./user_login"
+import { PermissionModel } from "./permission"
+import { RolePermissionModel } from "./role_permission"
 export {
     CandidateCertificateModel,
     CandidateModel,
@@ -25,4 +30,9 @@ export {
     IndustryModel,
     SkillSetModel,
     SubscriptionModel,
+    UserModel,
+    RoleModel,
+    UserLoginModel,
+    PermissionModel,
+    RolePermissionModel,
 }

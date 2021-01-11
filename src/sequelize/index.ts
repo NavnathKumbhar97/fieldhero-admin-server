@@ -34,6 +34,11 @@ const CustomerLogin = models.CustomerLoginFactory(orm)
 const CustomerSubscription = models.CustomerSubscriptionFactory(orm)
 const CustomerToken = models.CustomerTokenFactory(orm)
 const Subscription = models.SubscriptionFactory(orm)
+const User = models.UserFactory(orm)
+const Role = models.RoleFactory(orm)
+const UserLogin = models.UserLoginFactory(orm)
+const Permission = models.PermissionFactory(orm)
+const RolePermission = models.RolePermissionFactory(orm)
 
 // Candidate, CandidateWorkHistory, CandidateCertificate
 Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
@@ -87,6 +92,11 @@ const customerDB = {
     Industry,
     SkillSet,
     Subscription,
+    User,
+    Role,
+    UserLogin,
+    Permission,
+    RolePermission,
 }
 
 export { customerDB, orm as ormCustomer }
