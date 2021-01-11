@@ -10,6 +10,8 @@ interface Attributes {
     country?: string | null
     profileImage?: string | null
     isActive?: boolean | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

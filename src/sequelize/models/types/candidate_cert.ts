@@ -9,6 +9,8 @@ interface Attributes {
     description?: string | null
     candidateId: number
     skillId?: number | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

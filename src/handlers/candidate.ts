@@ -227,7 +227,7 @@ interface createCandidateParam {
     middleName: string
     lastName: string
     birthDate: Date
-    gender: string
+    gender: "male" | "female" | "transgender" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -310,7 +310,7 @@ interface updateCandidateParam {
     middleName: string
     lastName: string
     birthDate: Date
-    gender: string
+    gender: "male" | "female" | "transgender" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -406,7 +406,7 @@ interface bulkCreateCandidateParam {
     middleName: string
     lastName: string
     birthDate: Date
-    gender: string
+    gender: "male" | "female" | "transgender" | null
     perm_address: string
     perm_city: string
     perm_state: string

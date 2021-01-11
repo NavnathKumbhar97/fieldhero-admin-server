@@ -7,6 +7,8 @@ interface Attributes {
     description?: string | null
     candidateId: number
     companyId?: number | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

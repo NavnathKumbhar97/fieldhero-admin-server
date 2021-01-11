@@ -21,13 +21,13 @@ const createCandidateValidation = async (
         stripUnknown: true, // remove unknown props
     }
     const createCandidates = Joi.array().items(createCandidate)
-    const { error, value } = await createCandidates.validate(req.body, options)
+    const { error } = await createCandidates.validate(req.body, options)
     if (error) {
         res.json({
             status: 400,
             error: "Error",
             Message: error.details
-                .map((i, index) => {
+                .map((i) => {
                     return JSON.stringify({
                         message: i.message,
                         index: i.path[0],

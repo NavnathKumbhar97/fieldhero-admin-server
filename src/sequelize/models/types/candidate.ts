@@ -7,7 +7,7 @@ interface Attributes {
     middleName?: string | null
     lastName?: string | null
     birthDate?: Date | null
-    gender?: string | null
+    gender?: "male" | "female" | "transgender" | null
     perm_address?: string | null
     perm_city?: string | null
     perm_state?: string | null
@@ -24,6 +24,8 @@ interface Attributes {
     contactNo2?: string | null
     aadharNo?: string | null
     isActive?: boolean | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

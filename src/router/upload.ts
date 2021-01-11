@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     destination: (req: Request, file: any, cb: any) => {
         const p = `public/uploads/candidates/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
-            fs.mkdirSync(p, { recursive: true })            
+            fs.mkdirSync(p, { recursive: true })
         }
         cb(null, p)
     },
@@ -39,13 +39,12 @@ const fileFilter = (req: Request, file: any, cb: any) => {
 
 const upload = multer({ storage: storage, fileFilter: fileFilter })
 
-
 //Upload route
 
 UploadRouter.post(
     "/upload-profile/:id",
     upload.single("image"),
-    (req: Request, res: Response, next: NextFunction) => {
+    (req: Request, res: Response) => {
         const file = req.file
         if (!file) {
             res.status(httpStatus.Bad_Request).json({
@@ -53,11 +52,12 @@ UploadRouter.post(
                 message: "Please upload file",
             })
         } else {
-            const path = req.file.destination+'/'+req.file.filename;            
+            const path = req.file.destination + "/" + req.file.filename
             UploadImage.updateCandidateProfileById(
                 parseInt(req.params.id),
                 path
-            ).then((image) => res.status(httpStatus.OK).json(image))
+            )
+                .then((image) => res.status(httpStatus.OK).json(image))
                 .catch((err) =>
                     res.status(httpStatus.Bad_Request).json({
                         code: httpStatus.Bad_Request,
@@ -69,4 +69,3 @@ UploadRouter.post(
 )
 
 export { UploadRouter }
-

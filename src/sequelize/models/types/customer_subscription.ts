@@ -8,10 +8,10 @@ interface Attributes {
     allocatedData: number
     usedData: number
     status: string
-    createdOn?: Date | null
-    modifiedOn?: Date | null
     comment?: string | null
     planName: string
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

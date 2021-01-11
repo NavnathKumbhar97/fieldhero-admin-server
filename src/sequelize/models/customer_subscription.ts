@@ -41,12 +41,6 @@ export const CustomerSubscriptionFactory = (
                 type: DataTypes.STRING(20),
                 allowNull: false,
             },
-            createdOn: {
-                type: DataTypes.DATE,
-            },
-            modifiedOn: {
-                type: DataTypes.DATE,
-            },
             comment: {
                 type: DataTypes.STRING(200),
                 allowNull: true,
@@ -54,6 +48,12 @@ export const CustomerSubscriptionFactory = (
             planName: {
                 type: DataTypes.STRING(40),
                 allowNull: false,
+            },
+            createdOn: {
+                type: DataTypes.DATE,
+            },
+            modifiedOn: {
+                type: DataTypes.DATE,
             },
         },
         {

@@ -6,6 +6,8 @@ interface Attributes {
     description?: string | null
     isActive?: boolean | null
     industryId?: number | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

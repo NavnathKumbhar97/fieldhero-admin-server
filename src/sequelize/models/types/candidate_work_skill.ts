@@ -4,6 +4,8 @@ interface Attributes {
     id?: number
     skillId: number
     workHistoryId: number
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

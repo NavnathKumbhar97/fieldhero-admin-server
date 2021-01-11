@@ -10,6 +10,8 @@ interface Attributes {
     newEmail?: string | null
     newEmailToken?: string | null
     isVerified?: string | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

@@ -1,5 +1,4 @@
-import { QueryInterface, DataTypes, NOW } from "sequelize"
-import * as helper from "../../helper"
+import { QueryInterface, DataTypes } from "sequelize"
 
 module.exports = {
     up: async (query: QueryInterface) => {

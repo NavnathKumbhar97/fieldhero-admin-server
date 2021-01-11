@@ -1,6 +1,5 @@
 import { DataTypes, Sequelize } from "sequelize"
 import { SubscriptionModel } from "./types"
-import moment from "moment"
 export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
     return <SubscriptionModel>orm.define(
         "subscription_master",
@@ -31,24 +30,6 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
                 defaultValue: true,
                 allowNull: false,
             },
-            createdOn: {
-                type: DataTypes.DATE,
-                defaultValue: null,
-                get() {
-                    return moment(this.getDataValue("createdOn")).format(
-                        "YYYY-MM-DD HH:mm:ss"
-                    )
-                },
-            },
-            modifiedOn: {
-                type: DataTypes.DATE,
-                defaultValue: null,
-                get() {
-                    return moment(this.getDataValue("modifiedOn")).format(
-                        "YYYY-MM-DD HH:mm:ss"
-                    )
-                },
-            },
             price: {
                 type: DataTypes.DOUBLE,
                 allowNull: false,
@@ -57,6 +38,12 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
             note: {
                 type: DataTypes.STRING(200),
                 allowNull: true,
+            },
+            createdOn: {
+                type: DataTypes.DATE,
+            },
+            modifiedOn: {
+                type: DataTypes.DATE,
             },
         },
         {

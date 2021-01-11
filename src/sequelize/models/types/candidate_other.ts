@@ -7,6 +7,8 @@ interface Attributes {
     registrationStatus?: string | null
     candidateId?: number
     profileImage?: string | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

@@ -4,7 +4,8 @@ interface Attributes {
     id?: number
     token: string
     customerId: number
-    createdAt: Date
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

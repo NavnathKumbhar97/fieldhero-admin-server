@@ -8,8 +8,8 @@ interface Attributes {
     isActive: boolean
     price: number
     note?: string | null
-    createdOn?: Date | null
-    modifiedOn?: Date | null
+    createdOn?: Date
+    modifiedOn?: Date
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
