@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express"
 import express from "express"
 import path from "path"
 import { httpStatus } from "../helper"
+import { LoginRouter } from "./passport"
 import { IndustryRouter } from "./industry"
 import { SkillSetRouter } from "./skillset"
 import { CompanyRouter } from "./company"
@@ -16,6 +17,7 @@ const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
 
 //call routers
+router.use(LoginRouter)
 router.use(IndustryRouter)
 router.use(SkillSetRouter)
 router.use(CompanyRouter)
@@ -25,7 +27,6 @@ router.use(SubscriptionRouter)
 router.use(CustomerRouter)
 router.use(RoleRouter)
 router.use(PermissionRouter)
-
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {
