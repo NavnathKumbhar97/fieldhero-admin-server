@@ -7,6 +7,9 @@ import { Subscription } from "./subscriptions"
 import { Customer } from "./customer"
 import { Role } from "./role"
 import { Permission } from "./permission"
+import { User } from "./user"
+import {emailTemplate} from "./mjml"
+
 
 export {
     Industry,
@@ -17,5 +20,7 @@ export {
     Subscription,
     Customer,
     Role,
-    Permission
+    Permission,
+    User,
+    emailTemplate
 }

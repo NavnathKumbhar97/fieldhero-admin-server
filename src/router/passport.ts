@@ -12,7 +12,7 @@ LoginRouter.post(
     "/login",
     (req: Request, res: Response, next: NextFunction) => {
         passport.authenticate(
-            "login",
+            "/users/login",
             { session: false },
             (err, user, info) => {
                 if (err) {

@@ -34,7 +34,7 @@ interface GetRoleByIdParam {
 }
 
 RoleRouter.get(
-    "/role/:id",
+    "/roles/:id",
     (req: Request<GetRoleByIdParam>, res: Response, next: NextFunction) => {
         Role.getRoleById(req.params.id)
             .then((role) => {

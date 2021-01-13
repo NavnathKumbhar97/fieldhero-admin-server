@@ -34,7 +34,7 @@ interface GetPermissionByIdParam {
 }
 
 PermissionRouter.get(
-    "/permission/:id",
+    "/permissions/:id",
     (req: Request<GetPermissionByIdParam>, res: Response, next: NextFunction) => {
         Permission.getPermissionsById(req.params.id)
             .then((permission) => {

@@ -2,7 +2,7 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    userId: number
+    userId?: number
     roleId: number
     email: string
     passwordHash: string
