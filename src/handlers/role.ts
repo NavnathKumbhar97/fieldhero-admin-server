@@ -14,6 +14,7 @@ const getRoles = async (all: any) => {
         whereCondition = 1
     }
     const roles = await customerDB.Role.findAll({
+        attributes: { exclude: ["uuid"] },
         where: {
             isActive: whereCondition,
         },
@@ -32,6 +33,15 @@ const getRoles = async (all: any) => {
 
 const getRoleById = async (id: number) => {
     const role = await customerDB.Role.findOne({
+        attributes: {
+            exclude: ["uuid"],
+        },
+        include: [
+            {
+                model: customerDB.RolePermission,
+                attributes: ["permissionId"],
+            },
+        ],
         where: {
             id,
         },
@@ -40,7 +50,12 @@ const getRoleById = async (id: number) => {
         //console.log(err)
         throw err
     })
-    return role
+    const { role_permissions, ...rest } = role?.toJSON() as any
+
+    return {
+        ...rest,
+        permissions: role_permissions.map((x: any) => x.permissionId),
+    }
 }
 
 /**
@@ -49,6 +64,7 @@ const getRoleById = async (id: number) => {
 interface createRoleParam {
     name: string
     description: string
+    isActive?: boolean
     permissionId: any
 }
 
@@ -59,6 +75,7 @@ const createRole = async (param: createRoleParam) => {
             {
                 name: param.name,
                 description: param.description,
+                isActive: param.isActive,
             },
             {
                 fields: ["name", "description", "uuid"],
@@ -107,7 +124,7 @@ const UpdateRoleById = async (param: updateRoleParam) => {
         const role = await customerDB.Role.findOne({
             where: { id: param.id },
         })
-        //Delete All Permission 
+        //Delete All Permission
         const deleteRolePermission = await customerDB.RolePermission.destroy({
             where: {
                 roleId: param.id,
@@ -125,7 +142,7 @@ const UpdateRoleById = async (param: updateRoleParam) => {
             transaction
         }
         const permissionArray = param.permissionId
-        const permissionArrayObjecct = permissionArray.map((item:number) => {
+        const permissionArrayObjecct = permissionArray.map((item: number) => {
             return {
                 roleId: role?.id,
                 permissionId: item,

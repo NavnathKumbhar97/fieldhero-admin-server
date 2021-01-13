@@ -28,7 +28,7 @@ RoleRouter.get(
 )
 
 
-//* Fetch Industry By Id
+//* Fetch Role By Id
 interface GetRoleByIdParam {
     id: number
 }
@@ -55,8 +55,9 @@ RoleRouter.get(
 //* Create Role and Permission
 
 RoleRouter.post(
-    "/role",
+    "/roles",
     (req: Request, res: Response, next: NextFunction) => {
+        // console.log(req.body)
         Role.createRole(req.body)
         .then((role) =>{
             res.status(httpStatus.Created).json(role)
@@ -72,7 +73,7 @@ RoleRouter.post(
 //* Update Role and Permission
 
 RoleRouter.put(
-    "/role/:id",
+    "/roles/:id",
     (req: Request, res: Response, next: NextFunction) => {
         Role.UpdateRoleById({
             id:req.params.id,

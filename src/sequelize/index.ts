@@ -48,7 +48,7 @@ CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasOne(CandidateOtherDetails, { foreignKey: "candidateId" })
 CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId" })
 
-//CandidateWorkHistory
+//CandidateWorkHistory - Company
 CandidateWorkHistory.belongsTo(Company, {
     foreignKey: "companyId",
 })
@@ -56,15 +56,15 @@ Company.hasMany(CandidateWorkHistory, {
     foreignKey: "companyId",
 })
 
-//company
+//Company - Industry
 Industry.hasMany(Company, { foreignKey: "industryId" })
 Company.belongsTo(Industry, { foreignKey: "industryId" })
 
-// Skill Set
+// Skill Set - Candidate Certificate
 SkillSet.hasMany(CandidateCertificate, { foreignKey: "skillId" })
 CandidateCertificate.belongsTo(SkillSet, { foreignKey: "skillId" })
 
-// CandidateWorkHistory
+// CandidateWorkHistory - Skill Set
 SkillSet.hasMany(CandidateWorkHistorySkill, { foreignKey: "skillId" })
 CandidateWorkHistorySkill.belongsTo(SkillSet, { foreignKey: "skillId" })
 CandidateWorkHistory.hasMany(CandidateWorkHistorySkill, {
@@ -74,9 +74,15 @@ CandidateWorkHistorySkill.belongsTo(CandidateWorkHistory, {
     foreignKey: "workHistoryId",
 })
 
-// Customer
+// Customer - Customer Login
 Customer.hasOne(CustomerLogin, { foreignKey: "customerId" })
 CustomerLogin.belongsTo(Customer, { foreignKey: "customerId" })
+
+// Role - Permission
+Permission.hasMany(RolePermission, { foreignKey: "permissionId" })
+Role.hasMany(RolePermission, { foreignKey: "roleId" })
+RolePermission.belongsTo(Permission, { foreignKey: "permissionId" })
+RolePermission.belongsTo(Role, { foreignKey: "roleId" })
 
 const customerDB = {
     Candidate,
