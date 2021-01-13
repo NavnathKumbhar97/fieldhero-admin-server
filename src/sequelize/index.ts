@@ -13,7 +13,7 @@ const orm = new Sequelize({
     dialectOptions: {
         connectionTimeout: 1000,
     },
-    logging: false,
+    logging: true,
     define: {
         freezeTableName: true,
         timestamps: false,
