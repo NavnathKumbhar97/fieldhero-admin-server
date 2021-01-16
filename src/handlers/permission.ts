@@ -19,7 +19,6 @@ const getPermissions = async (all: any) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getPermission")
-        //console.log(err)
         throw err
     })
     return permissions
@@ -31,14 +30,12 @@ const getPermissions = async (all: any) => {
  */
 
 const getPermissionsById = async (id: number) => {
-    console.log(id, 'id');
     const permission = await customerDB.Permission.findOne({
         where: {
-            id:id,
+            id: id,
         },
     }).catch((err: any) => {
         log.error(err, "Error while getPermissionById")
-        //console.log(err)
         throw err
     })
     return permission

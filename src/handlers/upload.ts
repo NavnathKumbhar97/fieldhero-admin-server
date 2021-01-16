@@ -13,15 +13,15 @@ const updateCandidateProfileById = async (id: number, profileImage: string) => {
     if (CandidateProfile) {
         const imagePath = CandidateProfile.profileImage
         fs.unlink(path.join(process.cwd(), imagePath || ""), (err) => {
-            return err;
+            return err
         })
         CandidateProfile.profileImage = profileImage
-        updatedCandidateProfile = await CandidateProfile.save()
-        .catch((err:any)=>{
-            log.error(err, "Error while update profile")
-            //console.log(err)
-            throw err;
-        })
+        updatedCandidateProfile = await CandidateProfile.save().catch(
+            (err: any) => {
+                log.error(err, "Error while update profile")
+                throw err
+            }
+        )
     }
     return updatedCandidateProfile
 }

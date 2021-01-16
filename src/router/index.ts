@@ -20,6 +20,9 @@ router.use("/public", express.static(path.join(process.cwd(), "public")))
 
 //call routers
 router.use(LoginRouter)
+// initiate jwt token authorization
+router.use(passport.authenticate("jwt", { session: false }))
+// router below will use passport jwt authorization
 router.use(IndustryRouter)
 router.use(SkillSetRouter)
 router.use(CompanyRouter)
@@ -28,9 +31,6 @@ router.use(UploadRouter)
 router.use(SubscriptionRouter)
 router.use(CustomerRouter)
 router.use(PermissionRouter)
-// initiate jwt token authorization
-router.use(passport.authenticate("jwt", { session: false }))
-// router below will use passport jwt authorization
 router.use(RoleRouter)
 router.use(UserRouter)
 

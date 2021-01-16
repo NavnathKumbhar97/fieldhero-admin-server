@@ -1,15 +1,18 @@
 import { Router, Request, Response, NextFunction } from "express"
-import { httpStatus } from "../helper"
 import { Subscription } from "../handlers"
+import * as middleware from "./middleware"
+import * as helper from "../helper"
+const { httpStatus, log } = helper
 
 const SubscriptionRouter = Router()
 
 // Subscription
 
-//* Create SubScripition Plane
+//* Create SubScripition Plan
 
 SubscriptionRouter.post(
     "/subscriptions",
+    middleware.permission(helper.permissions.subscription_create),
     (req: Request, res: Response, next: NextFunction) => {
         Subscription.createSubscripition({ ...req.body })
             .then((subscription) => {
@@ -21,7 +24,7 @@ SubscriptionRouter.post(
                 res.status(httpStatus.Created).json(subscription)
             })
             .catch((err) => {
-                console.log(err)
+                log.error(err, "Error while Create SubScripition Plan")
                 res.status(httpStatus.Bad_Request).json({
                     code: httpStatus.Bad_Request,
                     error: err,
@@ -34,6 +37,7 @@ SubscriptionRouter.post(
 
 SubscriptionRouter.get(
     "/subscriptions",
+    middleware.permission(helper.permissions.subscription_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Subscription.getSubscriptions(req.query.all)
             .then((subscriptions) => {
@@ -52,17 +56,10 @@ SubscriptionRouter.get(
 )
 
 //* Fetch Subscription By Id
-
-interface GetSubscriptionByIdParam {
-    id: number
-}
 SubscriptionRouter.get(
     "/subscriptions/:id",
-    (
-        req: Request<GetSubscriptionByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.subscription_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Subscription.getSubscriptionById(req.params.id)
             .then((subscription) => {
                 if (subscription == null) {
@@ -80,16 +77,10 @@ SubscriptionRouter.get(
 )
 
 // * Update subscription
-interface IUpdateSubscriptionParam {
-    id: number
-}
 SubscriptionRouter.put(
     "/subscriptions/:id",
-    (
-        req: Request<IUpdateSubscriptionParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.subscription_update),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Subscription.updatedSubscriptionById({ id: req.params.id, ...req.body })
             .then((subscription) =>
                 res.status(httpStatus.OK).json(subscription)

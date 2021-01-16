@@ -3,10 +3,10 @@ import { log } from "../helper"
 /*
  * get All Companies Details
  */
-const getCompanies = async (all:any) => {
+const getCompanies = async (all: any) => {
     let whereCondition = {}
-    if(all == '*') {
-        whereCondition = [0,1]
+    if (all == "*") {
+        whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
@@ -17,11 +17,10 @@ const getCompanies = async (all:any) => {
             },
         ],
         where: {
-            isActive: whereCondition
-        }
+            isActive: whereCondition,
+        },
     }).catch((err: any) => {
         log.error(err, "Error while getCompanies")
-        //console.log(err)
         throw err
     })
     return companies
@@ -34,12 +33,13 @@ const getCompanyById = async (id: number) => {
         where: {
             id,
         },
-        include: [{
-            model: customerDB.Industry,
-        }],
+        include: [
+            {
+                model: customerDB.Industry,
+            },
+        ],
     }).catch((err: any) => {
         log.error(err, "Error while getCompanyById")
-        //console.log(err)
         throw err
     })
     return company
@@ -56,12 +56,12 @@ interface createCompnayParam {
 
 const createCompany = async (param: createCompnayParam) => {
     const findCompnay = await customerDB.Company.findOne({
-        where:{
-            companyName:param.companyName
-        }
+        where: {
+            companyName: param.companyName,
+        },
     })
-    if(findCompnay){
-        return null;
+    if (findCompnay) {
+        return null
     } else {
         const company = await customerDB.Company.create({
             companyName: param.companyName,
@@ -70,7 +70,6 @@ const createCompany = async (param: createCompnayParam) => {
             industryId: param.industryId,
         }).catch((err) => {
             log.error(err, "Error while createCompany")
-            //console.log(err)
             throw err
         })
         return company
@@ -97,11 +96,9 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
         company.description = param.description
         company.isActive = param.isActive
         company.industryId = param.industryId
-        updatedCompany = await company.save()
-            .catch((err:any)=>{
-                log.error(err, "Error while updatedCompany")
-                //console.log(err)
-                throw err;
+        updatedCompany = await company.save().catch((err: any) => {
+            log.error(err, "Error while updatedCompany")
+            throw err
         })
         return updatedCompany
     }
@@ -111,20 +108,18 @@ const updatedCompanyById = async (param: updateCompnayParam) => {
  * Delete Compnay Details
  */
 
-const deleteCompanyById = async (id:number) => {
+const deleteCompanyById = async (id: number) => {
     const Company = await customerDB.Company.findOne({
-        where:{
-            id:id
-        }
+        where: {
+            id: id,
+        },
     })
     let deleteCompany = null
-    if(Company) {
-        Company.isActive = false;
-        deleteCompany = await Company.save()
-        .catch((err:any)=>{
+    if (Company) {
+        Company.isActive = false
+        deleteCompany = await Company.save().catch((err: any) => {
             log.error(err, "Error while deleteCompanyById")
-            //console.log(err)
-            throw err;
+            throw err
         })
         return deleteCompany
     }
@@ -134,7 +129,7 @@ const Company = {
     getCompanyById,
     createCompany,
     updatedCompanyById,
-    deleteCompanyById
+    deleteCompanyById,
 }
 
 export { Company }

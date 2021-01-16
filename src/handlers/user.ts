@@ -57,8 +57,6 @@ const createUser = async (param: createUserParam) => {
             ),
             { beautify: true }
         )
-        // eslint-disable-next-line no-console
-        console.log(html, "console")
         mailer
             .sendMail({
                 to: [param.email],
@@ -66,20 +64,13 @@ const createUser = async (param: createUserParam) => {
                 subject: "Your Password",
                 html: html.html,
             })
-            .then((success) =>
-                // eslint-disable-next-line no-console
-                console.log({ success })
-            )
-            .catch((err) =>
-                // eslint-disable-next-line no-console
-                console.log({ err })
-            )
+            .then((success) => log.info(success))
+            .catch((err) => log.error(err))
         await transaction.commit()
         return Object.assign({ userDetails, userLogin })
     } catch (err) {
         await transaction.rollback()
         log.error(err, "Error while createUser")
-        //console.log(err)
         throw err
     }
 }
@@ -112,7 +103,6 @@ const getUser = async (all: any) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getUser")
-        //console.log(err)
         throw err
     })
     return users
@@ -136,7 +126,6 @@ const getUserById = async (id: number) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getuserById")
-        //console.log(err)
         throw err
     })
     return user
@@ -146,7 +135,7 @@ const getUserById = async (id: number) => {
  * Update Industry Details
  */
 interface UpdateUserParam {
-    id:number
+    id: number
     fullName: string
     birthDate: Date
     gender: "male" | "female" | "transgender" | null
@@ -158,38 +147,34 @@ interface UpdateUserParam {
     roleId: number
     email: string
 }
-const updateUserById = async (param: UpdateUserParam) =>{
+const updateUserById = async (param: UpdateUserParam) => {
     const transaction = await ormCustomer.transaction()
-    try{
+    try {
         const user = await customerDB.User.findOne({
             where: { id: param.id },
         })
-        let updateUserDetails =null
+        let updateUserDetails = null
         if (user) {
-            user.fullName= param.fullName,
-            user.birthDate= param.birthDate || "NULL",
-            user.gender= param.gender,
-            user.address= param.address,
-            user.address= param.address,
-            user.state= param.state,
-            user.country= param.country,
-            user.isActive= param.isActive,
-            updateUserDetails = await user.save()
+            ;(user.fullName = param.fullName),
+                (user.birthDate = param.birthDate || "NULL"),
+                (user.gender = param.gender),
+                (user.address = param.address),
+                (user.address = param.address),
+                (user.state = param.state),
+                (user.country = param.country),
+                (user.isActive = param.isActive),
+                (updateUserDetails = await user.save())
         }
         {
             transaction
         }
-        const userLoginDetails = await customerDB.UserLogin.findOne(
-            {
-                where: { userId: param.id },
-            }
-        )
+        const userLoginDetails = await customerDB.UserLogin.findOne({
+            where: { userId: param.id },
+        })
         let updateUserLoginDetails = null
         if (userLoginDetails) {
-            if(param.roleId)
-            userLoginDetails.roleId = param.roleId
-            if(param.email)
-            userLoginDetails.email = param.email
+            if (param.roleId) userLoginDetails.roleId = param.roleId
+            if (param.email) userLoginDetails.email = param.email
             updateUserLoginDetails = await userLoginDetails.save()
         }
         {
@@ -197,9 +182,8 @@ const updateUserById = async (param: UpdateUserParam) =>{
         }
         await transaction.commit()
         return Object.assign({ updateUserDetails, updateUserLoginDetails })
-    } catch(err){
+    } catch (err) {
         await transaction.rollback()
-        // console.log(err)
         log.error(err, "Error while updateUserById")
         throw err
     }
@@ -209,6 +193,6 @@ const User = {
     createUser,
     getUser,
     getUserById,
-    updateUserById
+    updateUserById,
 }
 export { User }

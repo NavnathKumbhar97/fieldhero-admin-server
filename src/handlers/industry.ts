@@ -3,20 +3,19 @@ import { log } from "../helper"
 /*
  * get All Industries Details
  */
-const getIndustries = async (all:any) => {
+const getIndustries = async (all: any) => {
     let whereCondition = {}
-    if(all == '*') {
-        whereCondition = [0,1]
+    if (all == "*") {
+        whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
-    const industries = await customerDB.Industry.findAll({   
+    const industries = await customerDB.Industry.findAll({
         where: {
-            isActive: whereCondition
-        }
+            isActive: whereCondition,
+        },
     }).catch((err: any) => {
         log.error(err, "Error while getIndustries")
-        //console.log(err)
         throw err
     })
     return industries
@@ -31,7 +30,6 @@ const getIndustryById = async (id: number) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getIndustryById")
-        //console.log(err)
         throw err
     })
     return industry
@@ -41,7 +39,7 @@ const getIndustryById = async (id: number) => {
  * Create Industry Details
  */
 interface createIndustryParam {
-    method:string
+    method: string
     title: string
     description: string
     isActive: boolean
@@ -49,12 +47,12 @@ interface createIndustryParam {
 
 const createIndustry = async (param: createIndustryParam) => {
     const findIndustry = await customerDB.Industry.findOne({
-        where:{
-            title:param.title
-        }
+        where: {
+            title: param.title,
+        },
     })
-    if(findIndustry) {
-        return null;
+    if (findIndustry) {
+        return null
     } else {
         const industry = await customerDB.Industry.create({
             title: param.title,
@@ -62,7 +60,6 @@ const createIndustry = async (param: createIndustryParam) => {
             isActive: param.isActive,
         }).catch((err) => {
             log.error(err, "Error while createIndustry")
-            //console.log(err)
             throw err
         })
         return industry
@@ -73,12 +70,12 @@ const createIndustry = async (param: createIndustryParam) => {
  * Update Industry Details
  */
 interface updateIndustryParam {
-    id:number,
+    id: number
     title: string
     description: string
     isActive: boolean
 }
-const updateIndustryById = async (param: updateIndustryParam) =>{
+const updateIndustryById = async (param: updateIndustryParam) => {
     const industry = await customerDB.Industry.update(
         {
             title: param.title,
@@ -86,33 +83,30 @@ const updateIndustryById = async (param: updateIndustryParam) =>{
             isActive: param.isActive,
         },
         {
-            where:{
-                id:param.id
-            }           
+            where: {
+                id: param.id,
+            },
         }
-        ).catch((err) => {
-            log.error(err, "Error while updateIndustryById")
-            //console.log(err)
-            throw err
-        })
+    ).catch((err) => {
+        log.error(err, "Error while updateIndustryById")
+        throw err
+    })
     return industry
 }
 /*
  * Delete Industry Details
  */
-const deleteIndustryById = async (id:number) => {
+const deleteIndustryById = async (id: number) => {
     const industry = await customerDB.Industry.findOne({
-        where:{
-            id:id
-        }
+        where: {
+            id: id,
+        },
     })
     let deleteIndustry = null
-    if(industry) {
-        industry.isActive = false;
-        deleteIndustry = await industry.save()
-        .catch((err:any)=>{
+    if (industry) {
+        industry.isActive = false
+        deleteIndustry = await industry.save().catch((err: any) => {
             log.error(err, "Error while deleteIndustryById")
-            //console.log(err)
             throw err
         })
     }
@@ -124,6 +118,6 @@ const Industry = {
     getIndustryById,
     createIndustry,
     updateIndustryById,
-    deleteIndustryById
+    deleteIndustryById,
 }
 export { Industry }

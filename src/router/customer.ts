@@ -1,12 +1,15 @@
 import { Router, Request, Response, NextFunction } from "express"
-import { httpStatus } from "../helper"
+import * as middleware from "./middleware"
 import { Customer } from "../handlers"
+import * as helper from "../helper"
+const { httpStatus } = helper
 
 const CustomerRouter = Router()
 
 // * Fetch all customers
 CustomerRouter.get(
     "/customers",
+    middleware.permission(helper.permissions.customer_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Customer.getCustomers(req.query.all)
             .then((customers) => {
@@ -25,16 +28,11 @@ CustomerRouter.get(
 )
 
 // * fetch customer by id
-interface IGetCustomerByIdParam {
-    id: number
-}
+
 CustomerRouter.get(
     "/customers/:id",
-    (
-        req: Request<IGetCustomerByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.customer_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Customer.getCustomerById(req.params.id)
             .then((customer) => {
                 if (!customer) {
@@ -52,16 +50,10 @@ CustomerRouter.get(
 )
 
 // * fetch customer subscriptions
-interface IGetCustomerSubscriptionsParam {
-    id: number
-}
 CustomerRouter.get(
     "/customers/:id/subscriptions",
-    (
-        req: Request<IGetCustomerSubscriptionsParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.customer_subscription_read_all),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Customer.getCustomerSubscriptions(req.params.id)
             .then((subscriptions) => {
                 if (subscriptions && subscriptions.length) {
@@ -79,16 +71,10 @@ CustomerRouter.get(
 )
 
 // * Create customer subscription
-interface ICreateCustomerSubscriptionParam {
-    id: number
-}
 CustomerRouter.post(
     "/customers/:id/subscriptions",
-    (
-        req: Request<ICreateCustomerSubscriptionParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.customer_subscription_create),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Customer.createCustomerSubscription({
             customerId: req.params.id,
             ...req.body,
@@ -105,20 +91,12 @@ CustomerRouter.post(
     }
 )
 
-
 // * fetch customer subscriptions By Subscrition Id
-interface IGetCustomerSubscriptionsParam {
-    id: number,
-    subId:number 
-}
 CustomerRouter.get(
     "/customers/:id/subscription/:subId",
-    (
-        req: Request<IGetCustomerSubscriptionsParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
-        Customer.getCustomerSubscriptionsById(req.params.id,req.params.subId )
+    middleware.permission(helper.permissions.customer_subscription_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
+        Customer.getCustomerSubscriptionsById(req.params.id, req.params.subId)
             .then((custSubscription) => {
                 if (custSubscription) {
                     res.status(httpStatus.OK).json(custSubscription)
@@ -133,19 +111,17 @@ CustomerRouter.get(
             })
     }
 )
-// Update Customer Subscription Plan By subscrition Id
+
+// * Update Customer Subscription Plan By subscrition Id
 CustomerRouter.put(
     "/customers/:id/subscription/:subId",
-    (
-        req: Request<IGetCustomerSubscriptionsParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
-        Customer.updateCustomerSubscriptionsById(
-            {customerId:req.params.id,
-             id:req.params.subId,
-             ...req.body
-            })
+    middleware.permission(helper.permissions.customer_subscription_update),
+    (req: Request<any>, res: Response, next: NextFunction) => {
+        Customer.updateCustomerSubscriptionsById({
+            customerId: req.params.id,
+            id: req.params.subId,
+            ...req.body,
+        })
             .then((custSubscription) => {
                 if (custSubscription) {
                     res.status(httpStatus.OK).json(custSubscription)

@@ -1,21 +1,17 @@
 import { Router, Request, Response, NextFunction } from "express"
+import * as middleware from "./middleware"
 import { Candidate } from "../handlers"
-import { httpStatus } from "../helper"
 import { createCandidateValidation } from "../validation/candidate"
+import * as helper from "../helper"
+const { httpStatus } = helper
 
 const CandidateRouter = Router()
 
-// Candidate
-interface GetCandidatParam {
-    all: number,
-    limit:number,
-    offset:number
-}
 //* Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
-    (req: Request<GetCandidatParam>, res: Response, next: NextFunction) => {
-        console.log(req.query)
+    middleware.permission(helper.permissions.candidate_basic_read_all),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Candidate.getCandidates(req.query)
             .then((candidates) => {
                 if (!candidates.Candidates.length) {
@@ -31,21 +27,15 @@ CandidateRouter.get(
             )
     }
 )
-interface GetCandidateByIdParam {
-    id: number
-}
 
 //* Fetch Candidate by Id
 CandidateRouter.get(
     "/candidates/:id",
-    (
-        req: Request<GetCandidateByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    middleware.permission(helper.permissions.candidate_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Candidate.getCandidateById(req.params.id)
             .then((candidate) => {
-                if(candidate == null){
+                if (candidate == null) {
                     res.sendStatus(httpStatus.No_Content)
                 }
                 res.status(httpStatus.OK).json(candidate)
@@ -62,6 +52,7 @@ CandidateRouter.get(
 //* create candidate
 CandidateRouter.post(
     "/candidates",
+    middleware.permission(helper.permissions.candidate_create),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.createCandidate({ ...req.body })
             .then((candidate) => {
@@ -79,6 +70,7 @@ CandidateRouter.post(
 //* Update candiate
 CandidateRouter.put(
     "/candidates/:id",
+    middleware.permission(helper.permissions.candidate_update),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.updateCandidateById({
             id: req.params.id,
@@ -133,9 +125,9 @@ CandidateRouter.delete(
 //* bulk create candidates
 CandidateRouter.post(
     "/bulkcandidates",
+    middleware.permission(helper.permissions.candidate_basic_bulk_create),
     createCandidateValidation,
     (req: Request, res: Response, next: NextFunction) => {
-        // console.log(req.body)
         Candidate.createBulkCandidate(req.body)
             .then((candidate) => {
                 res.status(httpStatus.OK).json(candidate)
@@ -148,9 +140,10 @@ CandidateRouter.post(
             )
     }
 )
-// * get Candidate Trainig-Cerf
+// * Fetch all Candidate Trainig-Cerf
 CandidateRouter.get(
     "/candidates/:id/training-cert",
+    middleware.permission(helper.permissions.candidate_certification_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.getCandidateTrainingCert(parseInt(req.params.id))
             .then((cert) => {
@@ -167,26 +160,30 @@ CandidateRouter.get(
 // * get Candidate Tranining-cref By Id
 CandidateRouter.get(
     "/candidates/:id/training-cert/:certId",
+    middleware.permission(helper.permissions.candidate_certification_read),
     (req: Request, res: Response, next: NextFunction) => {
-        Candidate.
-        getCandidateTrainingCertById(parseInt(req.params.id),parseInt(req.params.certId))
-        .then((cert) => {
-            if(cert == null) {
-                res.sendStatus(httpStatus.No_Content)
-            }
-            res.status(httpStatus.OK).json(cert)
-        })
-        .catch((err) =>
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err,
-            })
+        Candidate.getCandidateTrainingCertById(
+            parseInt(req.params.id),
+            parseInt(req.params.certId)
         )
+            .then((cert) => {
+                if (cert == null) {
+                    res.sendStatus(httpStatus.No_Content)
+                }
+                res.status(httpStatus.OK).json(cert)
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
-) 
+)
 // * Create Candidate Trainig-Cerf
 CandidateRouter.post(
     "/candidates/:id/training-cert",
+    middleware.permission(helper.permissions.candidate_certification_create),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.addCandidateTrainingCert({
             ...req.body,
@@ -206,6 +203,7 @@ CandidateRouter.post(
 // * Update Candidate Trainig-Cerf
 CandidateRouter.put(
     "/candidates/:id/training-cert/:certId",
+    middleware.permission(helper.permissions.candidate_certification_update),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.updateCandidateTrainingCertById({
             id: req.params.certId,
@@ -222,17 +220,10 @@ CandidateRouter.put(
     }
 )
 
-interface RemoveCandidateByIdParam {
-    certId: number
-}
 //* Delete Candiate Traninig Cert
 CandidateRouter.delete(
     "/candidates/:id/training-cert/:certId",
-    (
-        req: Request<RemoveCandidateByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Candidate.removeCandidateTrainingCert({ id: req.params.certId })
             .then((deletedRows) =>
                 res.status(httpStatus.OK).json({
@@ -252,6 +243,7 @@ CandidateRouter.delete(
 //* get Candidate work history
 CandidateRouter.get(
     "/candidates/:id/work-history",
+    middleware.permission(helper.permissions.candidate_work_history_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.getCandidatesWorkHistory(parseInt(req.params.id))
             .then((candidatesWorkHistory) => {
@@ -267,31 +259,34 @@ CandidateRouter.get(
             )
     }
 )
-//* get Candiate  work History By Id 
+//* get Candiate  work History By Id
 CandidateRouter.get(
     "/candidates/:id/work-history/:workId",
+    middleware.permission(helper.permissions.candidate_work_history_read),
     (req: Request, res: Response, next: NextFunction) => {
-        Candidate.
-        getCandidateWorkHistoryById(parseInt(req.params.id),parseInt(req.params.workId))
-        .then((candidatesWorkHistory) => {
-            if(candidatesWorkHistory == null){
-                res.sendStatus(httpStatus.No_Content)
-            }
-            res.status(httpStatus.OK).json(candidatesWorkHistory)
-        })
-        .catch((err) =>
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err,
-            })
+        Candidate.getCandidateWorkHistoryById(
+            parseInt(req.params.id),
+            parseInt(req.params.workId)
         )
+            .then((candidatesWorkHistory) => {
+                if (candidatesWorkHistory == null) {
+                    res.sendStatus(httpStatus.No_Content)
+                }
+                res.status(httpStatus.OK).json(candidatesWorkHistory)
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
-) 
-
+)
 
 //* Create Candiate Work History
 CandidateRouter.post(
     "/candidates/:id/work-history",
+    middleware.permission(helper.permissions.candidate_work_history_create),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.addCandidateWorkHistory({
             ...req.body,
@@ -312,6 +307,7 @@ CandidateRouter.post(
 //* Update Candiate WorkHistory
 CandidateRouter.put(
     "/candidates/:id/work-history/:workId",
+    middleware.permission(helper.permissions.candidate_work_history_update),
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.updateCandidateWorkHistoryById({
             id: req.params.workId,
@@ -330,18 +326,10 @@ CandidateRouter.put(
     }
 )
 
-interface RemoveCandidateWorkHistoryByIdParam {
-    workId: number
-}
-
 //* Delete Candidate Work History
 CandidateRouter.delete(
     "/candidates/:id/work-history/:workId",
-    (
-        req: Request<RemoveCandidateWorkHistoryByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Candidate.removeCandidateWorkHistory({ id: req.params.workId })
             .then((deletedRows) =>
                 res.status(httpStatus.OK).json({

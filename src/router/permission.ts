@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express"
+import * as middleware from "./middleware"
 import { Permission } from "../handlers"
-import { httpStatus } from "../helper"
+import * as helper from "../helper"
+const { httpStatus } = helper
 
 const PermissionRouter = Router()
 
@@ -10,6 +12,7 @@ const PermissionRouter = Router()
 
 PermissionRouter.get(
     "/permissions",
+    middleware.permission(helper.permissions.permission_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Permission.getPermissions(req.query.all)
             .then((permissions) => {
@@ -29,13 +32,10 @@ PermissionRouter.get(
 
 //* Fetch Industry By Id
 
-interface GetPermissionByIdParam {
-    id: number
-}
-
 PermissionRouter.get(
     "/permissions/:id",
-    (req: Request<GetPermissionByIdParam>, res: Response, next: NextFunction) => {
+    middleware.permission(helper.permissions.permission_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Permission.getPermissionsById(req.params.id)
             .then((permission) => {
                 if (permission == null) {

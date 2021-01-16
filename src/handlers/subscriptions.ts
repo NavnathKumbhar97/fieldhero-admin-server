@@ -31,7 +31,6 @@ const createSubscripition = async (param: createSubscripitionParam) => {
             isActive: param.isActive,
         }).catch((err) => {
             log.error(err, "Error while createSubscripition")
-            //console.log(err)
             throw err
         })
         return subscription
@@ -63,7 +62,6 @@ const getSubscriptions = async (all: any) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getSubscriptions")
-        //console.log(err)
         throw err
     })
     return subscriptions
@@ -79,7 +77,6 @@ const getSubscriptionById = async (id: number) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getSubscriptionById")
-        //console.log(err)
         throw err
     })
     return subscription
@@ -106,7 +103,6 @@ const updatedSubscriptionById = async (param: IUpdateSubscriptionParam) => {
         if (param.note) subscripition.note = param.note
         updatedsubscripition = await subscripition.save().catch((err: any) => {
             log.error(err, "Error while updatedSubscriptionById")
-            //console.log(err)
             throw err
         })
         return updatedsubscripition

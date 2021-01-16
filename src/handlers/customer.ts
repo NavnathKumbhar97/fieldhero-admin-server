@@ -37,7 +37,6 @@ const getCustomers = async (all: any) => {
         })
     } catch (error) {
         log.error(error, "Error while getCustomers")
-        //console.log(err)
         throw error
     }
 }
@@ -72,7 +71,6 @@ const getCustomerById = async (id: number) => {
         return null
     } catch (error) {
         log.error(error, "Error while getCustomerById")
-        //console.log(err)
         throw error
     }
 }
@@ -101,15 +99,14 @@ const getCustomerSubscriptions = async (id: number) => {
         return null
     } catch (error) {
         log.error(error, "Error while getCustomerSubscriptions")
-        //console.log(err)
         throw error
     }
 }
 
 /**
  *  Get CusomerSubscrtion By SubscriptionById
- * @param id 
- * @param subId 
+ * @param id
+ * @param subId
  */
 
 const getCustomerSubscriptionsById = async (id: number, subId: number) => {
@@ -134,7 +131,6 @@ const getCustomerSubscriptionsById = async (id: number, subId: number) => {
         return null
     } catch (error) {
         log.error(error, "Error while getCustomerSubscriptionById")
-        //console.log(err)
         throw error
     }
 }
@@ -167,14 +163,12 @@ const createCustomerSubscription = async (
         return customerSubscription
     } catch (error) {
         log.error(error, "Error while createCustomerSubscription")
-        //console.log(err)
         throw error
     }
 }
 
-
 interface updateSubScriptionParam {
-    id:number
+    id: number
     customerId: number
     planName: string
     startDate: Date
@@ -184,11 +178,13 @@ interface updateSubScriptionParam {
     comment?: string
 }
 
-const updateCustomerSubscriptionsById = async (param: updateSubScriptionParam) => {
+const updateCustomerSubscriptionsById = async (
+    param: updateSubScriptionParam
+) => {
     try {
         const customer = await customerDB.Customer.findOne({
             attributes: ["id"],
-            where: { id:param.customerId },
+            where: { id: param.customerId },
         })
         if (customer) {
             const custSubscription = await customerDB.CustomerSubscription.findAll(
@@ -199,28 +195,26 @@ const updateCustomerSubscriptionsById = async (param: updateSubScriptionParam) =
                     },
                 }
             )
-            const updateSubScription = null;
-            if(custSubscription){
-                custSubscription[0].planName = param.planName,
-                custSubscription[0].startDate = param.startDate,
-                custSubscription[0].expiryDate = param.expiryDate,
-                custSubscription[0].allocatedData = param.allocatedData,
-                custSubscription[0].status = param.status,
-                custSubscription[0].comment = param.comment
+            const updateSubScription = null
+            if (custSubscription) {
+                ;(custSubscription[0].planName = param.planName),
+                    (custSubscription[0].startDate = param.startDate),
+                    (custSubscription[0].expiryDate = param.expiryDate),
+                    (custSubscription[0].allocatedData = param.allocatedData),
+                    (custSubscription[0].status = param.status),
+                    (custSubscription[0].comment = param.comment)
 
-                const updateSubScription = await custSubscription[0].save();
-                
-                return updateSubScription;
+                const updateSubScription = await custSubscription[0].save()
+
+                return updateSubScription
             }
         }
         return null
-    } catch(error) {
+    } catch (error) {
         log.error(error, "Error while updateCustomerSubscriptionsById")
-        //console.log(err)
         throw error
     }
 }
-
 
 const Customer = {
     getCustomers,
@@ -228,7 +222,7 @@ const Customer = {
     getCustomerSubscriptions,
     createCustomerSubscription,
     getCustomerSubscriptionsById,
-    updateCustomerSubscriptionsById
+    updateCustomerSubscriptionsById,
 }
 
 export { Customer }

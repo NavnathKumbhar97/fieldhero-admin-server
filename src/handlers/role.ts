@@ -20,7 +20,6 @@ const getRoles = async (all: any) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getRoles")
-        //console.log(err)
         throw err
     })
     return roles
@@ -47,7 +46,6 @@ const getRoleById = async (id: number) => {
         },
     }).catch((err: any) => {
         log.error(err, "Error while getRoleById")
-        //console.log(err)
         throw err
     })
     const { role_permissions, ...rest } = role?.toJSON() as any
@@ -104,7 +102,6 @@ const createRole = async (param: createRoleParam) => {
     } catch (err: any) {
         await transaction.rollback()
         log.error(err, "Error while createRole")
-        //console.log(err)
         throw err
     }
 }
@@ -164,7 +161,6 @@ const UpdateRoleById = async (param: updateRoleParam) => {
     } catch (err) {
         await transaction.rollback()
         log.error(err, "Error while UpdateRoleById")
-        //console.log(err)
         throw err
     }
 }

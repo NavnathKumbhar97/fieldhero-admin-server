@@ -1,23 +1,22 @@
 import { customerDB } from "../sequelize"
-import {log} from "../helper"
+import { log } from "../helper"
 /*
  * Get All SkillSets Details
  */
-const getSkillSets = async (all:any) => {
+const getSkillSets = async (all: any) => {
     let whereCondition = {}
-    if(all == '*') {
-        whereCondition = [0,1]
+    if (all == "*") {
+        whereCondition = [0, 1]
     } else {
         whereCondition = 1
     }
     const skillSets = await customerDB.SkillSet.findAll({
-        where:{
-            isActive: whereCondition
-        }
+        where: {
+            isActive: whereCondition,
+        },
     }).catch((err: any) => {
         log.error(err, "Error while getSkillSets")
-        //console.log(err)
-        throw err;
+        throw err
     })
     return skillSets
 }
@@ -32,9 +31,7 @@ const getSkillSetById = async (id: number) => {
         },
     }).catch((err) => {
         log.error(err, "Error while getSkillSetById")
-        //console.log(err)
-        throw err;
-        
+        throw err
     })
     return skillSet
 }
@@ -49,21 +46,20 @@ interface createSkillSetParam {
 
 const createSkillSet = async (param: createSkillSetParam) => {
     const findSkillSet = await customerDB.SkillSet.findOne({
-        where:{
-            title:param.title
-        }
+        where: {
+            title: param.title,
+        },
     })
-    if(findSkillSet){
-        return null;
-    } else{
+    if (findSkillSet) {
+        return null
+    } else {
         const createdSkillSet = await customerDB.SkillSet.create({
             title: param.title,
             description: param.description,
             isActive: param.isActive,
-        }).catch((err:any) => {
+        }).catch((err: any) => {
             log.error(err, "Error while createSkillSet")
-            //console.log(err)
-            throw err;
+            throw err
         })
         return createdSkillSet
     }
@@ -80,18 +76,16 @@ interface updateSkillSetParam {
 
 const updateSkillSetById = async (param: updateSkillSetParam) => {
     const skill = await customerDB.SkillSet.findOne({
-        where: { id: param.id }
+        where: { id: param.id },
     })
     let updatedSkill = null
     if (skill) {
         skill.title = param.title
         skill.description = param.description
         skill.isActive = param.isActive
-        updatedSkill = await skill.save()
-        .catch((err:any)=>{
+        updatedSkill = await skill.save().catch((err: any) => {
             log.error(err, "Error while updateSkillSetById")
-            //console.log(err)
-            throw err;   
+            throw err
         })
         return updatedSkill
     }
@@ -100,32 +94,29 @@ const updateSkillSetById = async (param: updateSkillSetParam) => {
 /*
  * Deleted SkillSets Details
  */
-const deleteSkillSetById = async (id:number) => {
+const deleteSkillSetById = async (id: number) => {
     const skillSet = await customerDB.SkillSet.findOne({
-        where:{
-            id
-        }
+        where: {
+            id,
+        },
     })
     let deleteSkillSet = null
-    if(skillSet) {
-        skillSet.isActive = false;
-        deleteSkillSet = await skillSet.save()
-        .catch((err:any)=>{
+    if (skillSet) {
+        skillSet.isActive = false
+        deleteSkillSet = await skillSet.save().catch((err: any) => {
             log.error(err, "Error while deleteSkillSetById")
-            //console.log(err)
-            throw err;   
+            throw err
         })
         return deleteSkillSet
     }
 }
-
 
 const SkillSet = {
     getSkillSets,
     getSkillSetById,
     createSkillSet,
     updateSkillSetById,
-    deleteSkillSetById
+    deleteSkillSetById,
 }
 
 export { SkillSet }

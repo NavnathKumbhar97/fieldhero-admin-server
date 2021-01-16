@@ -2,8 +2,10 @@ import { Router, Request, Response, NextFunction } from "express"
 import multer from "multer"
 import path from "path"
 import fs from "fs"
-import { httpStatus } from "../helper"
 import { UploadImage } from "../handlers"
+import * as middleware from "./middleware"
+import * as helper from "../helper"
+const { httpStatus } = helper
 
 const UploadRouter = Router()
 
@@ -43,6 +45,9 @@ const upload = multer({ storage: storage, fileFilter: fileFilter })
 
 UploadRouter.post(
     "/upload-profile/:id",
+    middleware.permission(
+        helper.permissions.candidate_basic_upload_profile_image
+    ),
     upload.single("image"),
     (req: Request, res: Response) => {
         const file = req.file

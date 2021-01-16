@@ -29,7 +29,7 @@ LoginRouter.post(
                         message: info.message,
                     })
                 } else if (user) {
-                    req.login(user.id, (err) => {
+                    try {
                         const dataStoredInToken = {
                             sub: user.uuid,
                             role: user.roleId,
@@ -47,7 +47,12 @@ LoginRouter.post(
                             },
                             message: "User logged in successfully",
                         })
-                    })
+                    } catch (error) {
+                        res.status(httpStatus.Bad_Request).json({
+                            code: httpStatus.Bad_Request,
+                            error: error,
+                        })
+                    }
                 }
             }
         )(req, res, next)

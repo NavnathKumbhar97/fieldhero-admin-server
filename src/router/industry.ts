@@ -1,7 +1,9 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Industry } from "../handlers"
-import { httpStatus } from "../helper"
+import * as middleware from "./middleware"
 import { industryValidation } from "../validation/industry"
+import * as helper from "../helper"
+const { httpStatus } = helper
 
 const IndustryRouter = Router()
 // Industry
@@ -9,6 +11,7 @@ const IndustryRouter = Router()
 //* Fetch all Industry
 IndustryRouter.get(
     "/industries",
+    middleware.permission(helper.permissions.industry_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         Industry.getIndustries(req.query.all)
             .then((industries) => {
@@ -26,13 +29,11 @@ IndustryRouter.get(
     }
 )
 
-interface GetIndustryByIdParam {
-    id: number
-}
 //* Fetch Industry By Id
 IndustryRouter.get(
     "/industries/:id",
-    (req: Request<GetIndustryByIdParam>, res: Response, next: NextFunction) => {
+    middleware.permission(helper.permissions.industry_read),
+    (req: Request<any>, res: Response, next: NextFunction) => {
         Industry.getIndustryById(req.params.id)
             .then((industry) => {
                 if (industry == null) {
@@ -49,15 +50,18 @@ IndustryRouter.get(
     }
 )
 
-//* Create Industry 
+//* Create Industry
 IndustryRouter.post(
     "/industries",
+    middleware.permission(helper.permissions.industry_create),
     industryValidation,
     (req: Request, res: Response, next: NextFunction) => {
         Industry.createIndustry({ ...req.body })
             .then((industry) => {
-                if(industry == null) {
-                    res.status(httpStatus.Conflict).json({"Success":"Industry Already Exits"})
+                if (industry == null) {
+                    res.status(httpStatus.Conflict).json({
+                        Success: "Industry Already Exits",
+                    })
                 }
                 res.status(httpStatus.Created).json(industry)
             })
@@ -72,46 +76,45 @@ IndustryRouter.post(
 //* Update Industry
 IndustryRouter.put(
     "/industries/:id",
+    middleware.permission(helper.permissions.industry_update),
     industryValidation,
-    (req:Request, res:Response, next:NextFunction) => {
-    Industry.
-        updateIndustryById({
+    (req: Request, res: Response, next: NextFunction) => {
+        Industry.updateIndustryById({
             id: req.params.id,
-            ...req.body 
+            ...req.body,
         })
-        .then((industry) =>
-            res.status(httpStatus.OK).json({
-                "Message":"Data Updated Successfully",
-                "Success":industry})
-        )
-        .catch((err) =>
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: err
-            })
-        )
+            .then((industry) =>
+                res.status(httpStatus.OK).json({
+                    Message: "Data Updated Successfully",
+                    Success: industry,
+                })
+            )
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
 )
-interface DeleteIndustryByIdParam {
-    id: number
-}
+
 //* Delete Industry
 IndustryRouter.delete(
     "/industries/:id",
-    (req: Request<DeleteIndustryByIdParam>, res: Response, next: NextFunction) => {
-    Industry.
-        deleteIndustryById(req.params.id)
-        .then((industry) =>
-        res.status(httpStatus.OK).json({
-            "Message":"Row Delete Successfully",
-            "Success":industry})
-        )
-        .catch((err) =>
-        res.status(httpStatus.Bad_Request).json({
-            code: httpStatus.Bad_Request,
-            error: err
-            })
-        )
+    (req: Request<any>, res: Response, next: NextFunction) => {
+        Industry.deleteIndustryById(req.params.id)
+            .then((industry) =>
+                res.status(httpStatus.OK).json({
+                    Message: "Row Delete Successfully",
+                    Success: industry,
+                })
+            )
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
     }
 )
 export { IndustryRouter }

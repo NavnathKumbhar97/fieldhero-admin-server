@@ -85,12 +85,31 @@ passport.use(
         },
         async (jwtPayload, done) => {
             const user = await customerDB.User.findOne({
+                attributes: ["id", "uuid"],
+                include: [
+                    {
+                        model: customerDB.UserLogin,
+                        attributes: ["id", "userId"],
+                        include: [
+                            {
+                                model: customerDB.Role,
+                            },
+                        ],
+                    },
+                ],
                 where: { uuid: jwtPayload.sub },
             }).catch((err) => done(err))
             if (!user) {
                 done(null, false, { message: "Authorization failed" })
             } else {
-                done(null, user)
+                const _user: any = user.toJSON()
+                done(null, {
+                    id: _user.id,
+                    uuid: _user.uuid,
+                    role: {
+                        ..._user.user_login.role_master,
+                    },
+                })
             }
         }
     )
