@@ -84,6 +84,14 @@ Role.hasMany(RolePermission, { foreignKey: "roleId" })
 RolePermission.belongsTo(Permission, { foreignKey: "permissionId" })
 RolePermission.belongsTo(Role, { foreignKey: "roleId" })
 
+// User - User Login
+User.hasOne(UserLogin, { foreignKey: "userId" })
+UserLogin.belongsTo(User, { foreignKey: "userId" })
+
+// Role - User Login
+Role.hasMany(UserLogin, { foreignKey: "roleId" })
+UserLogin.belongsTo(Role, { foreignKey: "roleId" })
+
 const customerDB = {
     Candidate,
     CandidateCertificate,

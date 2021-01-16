@@ -7,14 +7,21 @@ import { httpStatus } from "../helper"
 const LoginRouter = Router()
 LoginRouter.use(passport.initialize())
 
+interface IUserParam {
+    email: string
+    id: number
+    uuid: string
+    roleId: string
+}
+
 //* Admin Login API
 LoginRouter.post(
-    "/login",
+    "/users/login",
     (req: Request, res: Response, next: NextFunction) => {
         passport.authenticate(
-            "/users/login",
+            "login",
             { session: false },
-            (err, user, info) => {
+            (err, user: IUserParam, info) => {
                 if (err) {
                     res.status(httpStatus.Bad_Request).send({ message: err })
                 } else if (!user) {
@@ -23,13 +30,21 @@ LoginRouter.post(
                     })
                 } else if (user) {
                     req.login(user.id, (err) => {
-                        const dataStoredInToken = { id: user.id }
+                        const dataStoredInToken = {
+                            sub: user.uuid,
+                            role: user.roleId,
+                        }
                         const secret = process.env.JWT_SECRET_KEY!
-                        const token = jwt.sign(dataStoredInToken, secret, {})
+                        const token = jwt.sign(dataStoredInToken, secret, {
+                            expiresIn: "8h",
+                        })
                         res.status(httpStatus.OK).send({
                             auth: true,
                             token,
-                            user,
+                            user: {
+                                email: user.email,
+                                id: user.id,
+                            },
                             message: "User logged in successfully",
                         })
                     })

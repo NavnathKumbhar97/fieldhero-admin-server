@@ -73,3 +73,9 @@ Use Sequelize and Typescript like a pro! With/out the LEGACY decorators
 
 How to delete a commit in git, local and remote<br>
 [https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/](https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/)
+
+Node.js - Role Based Authorization Tutorial with Example API
+[https://jasonwatmore.com/post/2018/11/28/nodejs-role-based-authorization-tutorial-with-example-api](https://jasonwatmore.com/post/2018/11/28/nodejs-role-based-authorization-tutorial-with-example-api)
+
+How to restrict access using Passport.js role-based authorisation
+[https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/](https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/)

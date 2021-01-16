@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express"
 import express from "express"
 import path from "path"
+import passport from "passport"
 import { httpStatus } from "../helper"
 import { LoginRouter } from "./passport"
 import { IndustryRouter } from "./industry"
@@ -12,7 +13,7 @@ import { CustomerRouter } from "./customer"
 import { RoleRouter } from "./role"
 import { PermissionRouter } from "./permission"
 import { UploadRouter } from "./upload"
-import { UserRouter } from './user'
+import { UserRouter } from "./user"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -26,8 +27,11 @@ router.use(CandidateRouter)
 router.use(UploadRouter)
 router.use(SubscriptionRouter)
 router.use(CustomerRouter)
-router.use(RoleRouter)
 router.use(PermissionRouter)
+// initiate jwt token authorization
+router.use(passport.authenticate("jwt", { session: false }))
+// router below will use passport jwt authorization
+router.use(RoleRouter)
 router.use(UserRouter)
 
 // Bad Request
