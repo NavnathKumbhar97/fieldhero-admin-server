@@ -121,6 +121,12 @@ const getUserById = async (id: number) => {
             "profileImage",
             "isActive",
         ],
+        include: [
+            {
+                model: customerDB.UserLogin,
+                attributes: ["email", "roleId"],
+            },
+        ],
         where: {
             id,
         },
@@ -128,7 +134,13 @@ const getUserById = async (id: number) => {
         log.error(err, "Error while getuserById")
         throw err
     })
-    return user
+    const _user: any = user?.toJSON()
+    const { user_login, ...rest } = _user
+    return {
+        ...rest,
+        email: user_login.email,
+        roleId: user_login.roleId,
+    }
 }
 
 /*
