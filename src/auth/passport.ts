@@ -3,7 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local"
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt"
 import { customerDB } from "../sequelize"
 // import crypto from "crypto"
-import { passwordfunction } from "../helper"
+import { log, passwordfunction } from "../helper"
 
 /**
  * Login Api
@@ -29,6 +29,12 @@ passport.use(
                         {
                             model: customerDB.Role,
                             attributes: ["id", "uuid"],
+                            include: [
+                                {
+                                    model: customerDB.RolePermission,
+                                    attributes: ["permissionId"],
+                                },
+                            ],
                         },
                     ],
                     attributes: [
@@ -42,6 +48,7 @@ passport.use(
                 if (!userLogin) {
                     done(null, false, { message: "Email not found" })
                 } else {
+                    console.log(userLogin.toJSON())
                     const isVerified = await passwordfunction.verifyPassword(
                         password,
                         userLogin.passwordHash
@@ -55,11 +62,15 @@ passport.use(
                             role_master,
                             ...rest
                         } = userJson
+                        const { role_permissions } = role_master
                         done(null, {
                             email,
                             id: user_master.id,
                             uuid: user_master.uuid,
                             roleId: role_master.uuid,
+                            permissions: role_permissions.map(
+                                (x: any) => x.permissionId
+                            ),
                         })
                     } else {
                         done(null, false, {
@@ -68,6 +79,7 @@ passport.use(
                     }
                 }
             } catch (error) {
+                log.error(error, "error while login")
                 done(error)
             }
         }

@@ -26,14 +26,14 @@ export default (permissionTocheck: number) => {
                         next()
                     } else {
                         // if permission not available in role
-                        res.status(httpStatus.Unauthorized).send("Unauthorized")
+                        res.status(httpStatus.Forbidden).send("Forbidden")
                     }
                 } catch (error) {
-                    res.status(httpStatus.Unauthorized).send("Unauthorized")
+                    res.status(httpStatus.Forbidden).send("Forbidden")
                 }
             } else {
                 // if role not found
-                res.status(httpStatus.Unauthorized).send("Unauthorized")
+                res.status(httpStatus.Forbidden).send("Forbidden")
             }
         } catch (error) {
             res.status(httpStatus.Bad_Request).json({

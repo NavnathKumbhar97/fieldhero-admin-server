@@ -52,7 +52,7 @@ UserRouter.put(
 // * Get user Details
 UserRouter.get(
     "/users",
-    middleware.permission(helper.permissions.user_create),
+    middleware.permission(helper.permissions.user_read_all),
     (req: Request, res: Response, next: NextFunction) => {
         User.getUser(req.query.all)
             .then((users) => {

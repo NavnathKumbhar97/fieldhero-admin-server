@@ -55,7 +55,6 @@ SkillSetRouter.get(
 SkillSetRouter.post(
     "/skills",
     middleware.permission(helper.permissions.skill_create),
-    skillSetValidation,
     (req: Request, res: Response, next: NextFunction) => {
         SkillSet.createSkillSet({ ...req.body })
             .then((skill) => {

@@ -1,10 +1,11 @@
 export default {
     OK: 200,
-    Created:201,
+    Created: 201,
+    No_Content: 204,
     Bad_Request: 400,
-    Internal_Server_Error: 500,
-    Not_Found: 404,
     Unauthorized: 401,
+    Forbidden: 403,
+    Not_Found: 404,
     Conflict: 409,
-    No_Content: 204
+    Internal_Server_Error: 500,
 }

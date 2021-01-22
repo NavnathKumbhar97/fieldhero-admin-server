@@ -12,6 +12,7 @@ interface IUserParam {
     id: number
     uuid: string
     roleId: string
+    permissions: Array<number>
 }
 
 //* Admin Login API
@@ -44,6 +45,7 @@ LoginRouter.post(
                             user: {
                                 email: user.email,
                                 id: user.id,
+                                permissions: user.permissions,
                             },
                             message: "User logged in successfully",
                         })
