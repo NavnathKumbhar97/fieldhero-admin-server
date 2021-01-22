@@ -167,7 +167,7 @@ const updateUserById = async (param: UpdateUserParam) => {
         })
         let updateUserDetails = null
         if (user) {
-            ;(user.fullName = param.fullName),
+            (user.fullName = param.fullName),
                 (user.birthDate = param.birthDate || "NULL"),
                 (user.gender = param.gender),
                 (user.address = param.address),

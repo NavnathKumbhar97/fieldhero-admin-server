@@ -197,7 +197,7 @@ const updateCustomerSubscriptionsById = async (
             )
             const updateSubScription = null
             if (custSubscription) {
-                ;(custSubscription[0].planName = param.planName),
+                (custSubscription[0].planName = param.planName),
                     (custSubscription[0].startDate = param.startDate),
                     (custSubscription[0].expiryDate = param.expiryDate),
                     (custSubscription[0].allocatedData = param.allocatedData),
