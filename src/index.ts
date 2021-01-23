@@ -17,9 +17,17 @@ import { routerV1 } from "./router"
 //         .catch((err) => log.error(err, "failed"))
 // })
 
+const isBulkCandidateUpload = (req: Request) => {
+    if (req.path === "/api/v1/bulkcandidates") return true
+    return false
+}
+
 const app: Express = express()
 app.use(cors())
-app.use(bodyparser.json())
+const parseJSON = bodyparser.json()
+app.use((req, res, next) =>
+    isBulkCandidateUpload(req) ? next() : parseJSON(req, res, next)
+)
 app.use(bodyparser.urlencoded({ extended: false }))
 app.use(helmet())
 // configure pino logging with express

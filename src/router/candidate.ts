@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express"
+import bodyParser from "body-parser"
 import * as middleware from "./middleware"
 import { Candidate } from "../handlers"
-import { createCandidateValidation } from "../validation/candidate"
 import * as helper from "../helper"
 const { httpStatus } = helper
 
@@ -125,8 +125,9 @@ CandidateRouter.delete(
 //* bulk create candidates
 CandidateRouter.post(
     "/bulkcandidates",
+    bodyParser.json({ limit: 1024 * 1024 * 5 }),
+    bodyParser.raw({ limit: 1024 * 1024 * 5 }),
     middleware.permission(helper.permissions.candidate_basic_bulk_create),
-    createCandidateValidation,
     (req: Request, res: Response, next: NextFunction) => {
         Candidate.createBulkCandidate(req.body)
             .then((candidate) => {
