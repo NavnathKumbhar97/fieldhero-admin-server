@@ -1,5 +1,14 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
+import { Op } from "sequelize"
+import generator from "generate-password"
+import bcrypt from "bcrypt"
+import mjml from "mjml"
+// local imports
+import { customerDB, ormCustomer } from "../sequelize"
+import { log, httpStatus } from "../helper"
+import { emailTemplate } from "../handlers"
+import * as config from "../config"
+import mailer from "../../nodemailer"
+import { custom } from "joi"
 
 // * Get all customers
 const getCustomers = async (all: any) => {
@@ -197,7 +206,7 @@ const updateCustomerSubscriptionsById = async (
             )
             const updateSubScription = null
             if (custSubscription) {
-                (custSubscription[0].planName = param.planName),
+                ;(custSubscription[0].planName = param.planName),
                     (custSubscription[0].startDate = param.startDate),
                     (custSubscription[0].expiryDate = param.expiryDate),
                     (custSubscription[0].allocatedData = param.allocatedData),
@@ -216,6 +225,128 @@ const updateCustomerSubscriptionsById = async (
     }
 }
 
+const resetLoginPasswordForCustomer = async (param: any) => {
+    const t = await ormCustomer.transaction()
+    try {
+        const customerLogin = await customerDB.CustomerLogin.findOne({
+            include: [
+                {
+                    model: customerDB.Customer,
+                    attributes: ["fullName"],
+                },
+            ],
+            where: {
+                customerId: {
+                    [Op.eq]: param.id,
+                },
+            },
+            transaction: t,
+        })
+        if (customerLogin) {
+            const _customerLogin: any = customerLogin.toJSON()
+            const newPassword = generator.generate({
+                excludeSimilarCharacters: true,
+                length: 12,
+                lowercase: true,
+                uppercase: true,
+                numbers: true,
+                symbols: false,
+                strict: true,
+            })
+            const newPasswordHash = await bcrypt.hash(
+                newPassword,
+                config.BCRYPT_ROUNDS
+            )
+            customerLogin.passwordHash = newPasswordHash
+            await customerLogin.save({ transaction: t })
+            await t.commit()
+            const html = mjml(
+                emailTemplate.generateResetPasswordByAdminSuccessEmail({
+                    fullName: _customerLogin.customer_master.fullName,
+                    password: newPassword,
+                })
+            ).html
+            mailer
+                .sendMail({
+                    to: [_customerLogin.email],
+                    from: `"Field Hero" <no-reply@fieldhero.in>`,
+                    subject: "Password Reset Successfully",
+                    html,
+                })
+                .catch((err) => {
+                    log.error(
+                        err.message,
+                        "Error in nodemailer while resetLoginPasswordForCustomer"
+                    )
+                })
+            return {
+                status: true,
+                code: httpStatus.OK,
+                message:
+                    "Password reset successfully. New password has been sent on your email.",
+                data: null,
+            }
+        } else {
+            return {
+                status: false,
+                code: httpStatus.Bad_Request,
+                message: "Customer not found",
+            }
+        }
+    } catch (error) {
+        await t.rollback()
+        log.error(error, "error while resetLoginPasswordForCustomer")
+        throw error
+    }
+}
+
+interface IUpdateCustomerparam {
+    id: number
+    fullName: string
+    companyName: string
+    birthDate: Date
+    gender: string
+    state: string
+    country: string
+}
+const updateCustomer = async (param: IUpdateCustomerparam) => {
+    const t = await ormCustomer.transaction()
+    try {
+        const customer = await customerDB.Customer.findOne({
+            where: {
+                id: param.id,
+            },
+            transaction: t,
+        })
+        if (customer) {
+            if (param.fullName) customer.fullName = param.fullName
+            customer.companyName = param.companyName
+            customer.birthDate = param.birthDate
+            customer.gender = param.gender
+            customer.state = param.state
+            customer.country = param.country
+            await customer.save({ transaction: t })
+            await t.commit()
+            return {
+                status: true,
+                code: httpStatus.No_Content,
+                message: `Customer updated successfully`,
+                data: null,
+            }
+        } else {
+            return {
+                status: false,
+                code: httpStatus.Bad_Request,
+                message: "Customer not found",
+            }
+        }
+    } catch (error) {
+        await t.rollback()
+        log.error(error, "error while updateCustomer")
+        throw error
+    }
+}
+
 const Customer = {
     getCustomers,
     getCustomerById,
@@ -223,6 +354,8 @@ const Customer = {
     createCustomerSubscription,
     getCustomerSubscriptionsById,
     updateCustomerSubscriptionsById,
+    resetLoginPasswordForCustomer,
+    updateCustomer,
 }
 
 export { Customer }

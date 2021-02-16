@@ -40,6 +40,14 @@ export const UserLoginFactory = (orm: Sequelize): UserLoginModel => {
             modifiedOn: {
                 type: DataTypes.DATE,
             },
+            resetToken: {
+                type: DataTypes.STRING(500),
+                allowNull: true,
+            },
+            resetExpires: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
         },
         {
             timestamps: true,

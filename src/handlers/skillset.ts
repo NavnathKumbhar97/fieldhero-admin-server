@@ -14,6 +14,7 @@ const getSkillSets = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["title", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getSkillSets")
         throw err

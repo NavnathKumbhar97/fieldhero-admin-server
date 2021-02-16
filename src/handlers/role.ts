@@ -18,6 +18,7 @@ const getRoles = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["name", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getRoles")
         throw err

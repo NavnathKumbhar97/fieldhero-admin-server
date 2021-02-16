@@ -126,19 +126,31 @@ CandidateRouter.delete(
 CandidateRouter.post(
     "/bulkcandidates",
     bodyParser.json({ limit: 1024 * 1024 * 5 }),
-    bodyParser.raw({ limit: 1024 * 1024 * 5 }),
     middleware.permission(helper.permissions.candidate_basic_bulk_create),
-    (req: Request, res: Response, next: NextFunction) => {
-        Candidate.createBulkCandidate(req.body)
-            .then((candidate) => {
-                res.status(httpStatus.OK).json(candidate)
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const response = await Candidate.createBulkCandidate(req.body)
+            if (response) {
+                if (response.status) {
+                    res.status(response.code).json({
+                        status: response.code,
+                        message: response.message,
+                        data: response.data,
+                    })
+                } else {
+                    res.status(response.code).json({
+                        status: response.code,
+                        message: response.message,
+                    })
+                }
+            }
+            // res.status(httpStatus.OK).json(candidate)
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error.message,
             })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+        }
     }
 )
 // * Fetch all Candidate Trainig-Cerf

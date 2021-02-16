@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { SkillSet } from "../handlers"
 import * as middleware from "./middleware"
-import { skillSetValidation } from "../validation/skillset"
 import * as helper from "../helper"
 const { httpStatus } = helper
 
@@ -55,22 +54,23 @@ SkillSetRouter.get(
 SkillSetRouter.post(
     "/skills",
     middleware.permission(helper.permissions.skill_create),
-    (req: Request, res: Response, next: NextFunction) => {
-        SkillSet.createSkillSet({ ...req.body })
-            .then((skill) => {
-                if (skill == null) {
-                    res.status(httpStatus.Conflict).json({
-                        Success: "SkillSet Already Exits",
-                    })
-                }
-                res.status(httpStatus.Created).json(skill)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const skill = await SkillSet.createSkillSet({ ...req.body })
+            if (skill == null) {
+                res.status(httpStatus.Conflict).json({
+                    code: httpStatus.Conflict,
+                    message: "Skillset already exist",
                 })
-            )
+            } else {
+                res.status(httpStatus.Created).json(skill)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error,
+            })
+        }
     }
 )
 
@@ -78,7 +78,6 @@ SkillSetRouter.post(
 SkillSetRouter.put(
     "/skills/:id",
     middleware.permission(helper.permissions.skill_update),
-    skillSetValidation,
     (req: Request, res: Response, next: NextFunction) => {
         SkillSet.updateSkillSetById({ id: req.params.id, ...req.body })
             .then((skill) => res.status(httpStatus.OK).json(skill))

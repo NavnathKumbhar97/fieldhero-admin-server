@@ -14,6 +14,7 @@ const getIndustries = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["title", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getIndustries")
         throw err
@@ -51,9 +52,11 @@ const createIndustry = async (param: createIndustryParam) => {
             title: param.title,
         },
     })
+    console.log(param, findIndustry)
     if (findIndustry) {
         return null
     } else {
+        console.log(param)
         const industry = await customerDB.Industry.create({
             title: param.title,
             description: param.description,

@@ -6,8 +6,10 @@ interface Attributes {
     roleId: number
     email: string
     passwordHash: string
-    createdOn?: Date
-    modifiedOn?: Date
+    createdOn?: Date | null
+    modifiedOn?: Date | null
+    resetToken?: string | null
+    resetExpires?: Date | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

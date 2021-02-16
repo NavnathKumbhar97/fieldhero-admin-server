@@ -13,17 +13,16 @@ const UserRouter = Router()
 UserRouter.post(
     "/users",
     middleware.permission(helper.permissions.user_create),
-    (req: Request, res: Response, next: NextFunction) => {
-        User.createUser(req.body)
-            .then((user) => {
-                res.status(httpStatus.Created).json(user)
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = await User.createUser(req.body)
+            res.status(httpStatus.Created).json(user)
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
             })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+        }
     }
 )
 
@@ -32,20 +31,19 @@ UserRouter.post(
 UserRouter.put(
     "/users/:id",
     middleware.permission(helper.permissions.user_update),
-    (req: Request, res: Response, next: NextFunction) => {
-        User.updateUserById({
-            id: req.params.id,
-            ...req.body,
-        })
-            .then((user) => {
-                res.status(httpStatus.Created).json(user)
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const user = await User.updateUserById({
+                id: req.params.id,
+                ...req.body,
             })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
+            res.status(httpStatus.Created).json(user)
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
             })
+        }
     }
 )
 

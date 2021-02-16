@@ -60,6 +60,7 @@ const getSubscriptions = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["planName", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getSubscriptions")
         throw err

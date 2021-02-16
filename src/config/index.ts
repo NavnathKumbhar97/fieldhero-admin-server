@@ -4,3 +4,6 @@ export const DB_PORT: number = parseInt(process.env.DB_PORT || "3006")
 export const DB_NAME: string = process.env.DB_NAME || "localhost"
 export const DB_USER: string = process.env.DB_USER || "localhost"
 export const DB_PASS: string = process.env.DB_PASS || "localhost"
+export const SERVER_URL: string = process.env.SERVER_URL || "http://localhost"
+export const CLIENT_URL: string = process.env.CLIENT_URL || "http://localhost"
+export const BCRYPT_ROUNDS: number = parseInt(process.env.BCRYPT_ROUNDS || "10")

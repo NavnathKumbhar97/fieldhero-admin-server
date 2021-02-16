@@ -1,9 +1,15 @@
-import { customerDB, ormCustomer } from "../sequelize"
-import { log, passwordfunction } from "../helper"
 import mjml from "mjml"
-import mailer from "../../nodemailer"
+import { Op } from "sequelize"
+import crypto from "crypto"
+import moment from "moment"
+import generator from "generate-password"
+import bcrypt from "bcrypt"
+// local imports
+import { customerDB, ormCustomer } from "../sequelize"
+import { log, passwordfunction, httpStatus } from "../helper"
 import { emailTemplate } from "../handlers/mjml"
-import { unuse } from "passport"
+import mailer from "../../nodemailer"
+import * as config from "../config"
 
 /**
  * Create User Details
@@ -27,7 +33,7 @@ const createUser = async (param: createUserParam) => {
         const userDetails = await customerDB.User.create(
             {
                 fullName: param.fullName,
-                birthDate: param.birthDate || "NULL",
+                birthDate: param.birthDate || null,
                 gender: param.gender,
                 address: param.address,
                 state: param.state,
@@ -60,7 +66,7 @@ const createUser = async (param: createUserParam) => {
         mailer
             .sendMail({
                 to: [param.email],
-                from: '"Field Hero" <no-reply@apexa.in>',
+                from: `"Field Hero" <no-reply@fieldhero.in>`,
                 subject: "Your Password",
                 html: html.html,
             })
@@ -101,6 +107,7 @@ const getUser = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["fullName", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getUser")
         throw err
@@ -167,15 +174,14 @@ const updateUserById = async (param: UpdateUserParam) => {
         })
         let updateUserDetails = null
         if (user) {
-            (user.fullName = param.fullName),
-                (user.birthDate = param.birthDate || "NULL"),
-                (user.gender = param.gender),
-                (user.address = param.address),
-                (user.address = param.address),
-                (user.state = param.state),
-                (user.country = param.country),
-                (user.isActive = param.isActive),
-                (updateUserDetails = await user.save())
+            user.fullName = param.fullName
+            user.birthDate = param.birthDate || null
+            user.gender = param.gender
+            user.address = param.address
+            user.state = param.state
+            user.country = param.country
+            user.isActive = param.isActive
+            updateUserDetails = await user.save()
         }
         {
             transaction
@@ -201,10 +207,182 @@ const updateUserById = async (param: UpdateUserParam) => {
     }
 }
 
+const createResetPasswordToken = async (email: string) => {
+    const t = await ormCustomer.transaction()
+    try {
+        const user = await customerDB.UserLogin.findOne({
+            include: [
+                {
+                    model: customerDB.User,
+                    attributes: ["fullName"],
+                },
+            ],
+            where: {
+                email: {
+                    [Op.eq]: email,
+                },
+            },
+            transaction: t,
+        })
+        if (user) {
+            const _user: any = user.toJSON()
+            const token = crypto.randomBytes(32).toString("hex")
+            user.resetToken = token
+            user.resetExpires = moment(Date.now() + 3600000).toDate()
+            await user.save({ transaction: t })
+            await t.commit()
+
+            const html = mjml(
+                emailTemplate.generateForgotPasswordEmail({
+                    fullName: _user.user_master.fullName,
+                    email: _user.email,
+                    token,
+                })
+            ).html
+            mailer
+                .sendMail({
+                    to: [_user.email],
+                    from: `"Field Hero" <no-reply@fieldhero.in>`,
+                    subject: "Reset Password Request",
+                    html,
+                })
+                .catch((err) => {
+                    log.error(
+                        err.message,
+                        "Error in nodemailer while createResetPasswordToken"
+                    )
+                })
+            return {
+                status: true,
+                code: httpStatus.OK,
+                data: null,
+                message: "Password reset request has been sent on your email.",
+            }
+        } else {
+            return {
+                status: false,
+                code: httpStatus.Not_Found,
+                message: "Email not found",
+            }
+        }
+    } catch (error) {
+        t.rollback()
+        log.error("Error while createResetPasswordToken", error.message)
+        return {
+            status: false,
+            code: httpStatus.Bad_Request,
+            message: "Error while createResetPasswordToken",
+        }
+    }
+}
+
+const resetPasswordForUser = async (token: string, email: string) => {
+    const t = await ormCustomer.transaction()
+    try {
+        const userLogin = await customerDB.UserLogin.findOne({
+            include: [
+                {
+                    model: customerDB.User,
+                    attributes: ["fullName"],
+                },
+            ],
+            where: {
+                email: {
+                    [Op.eq]: email,
+                },
+            },
+            transaction: t,
+        })
+        if (userLogin) {
+            const _userLogin: any = userLogin.toJSON()
+            if (_userLogin.resetToken === token) {
+                const isTokenValid = moment(_userLogin.resetExpires).isAfter(
+                    moment()
+                )
+                if (isTokenValid) {
+                    const newPassword = generator.generate({
+                        excludeSimilarCharacters: true,
+                        length: 12,
+                        lowercase: true,
+                        uppercase: true,
+                        numbers: true,
+                        symbols: false,
+                        strict: true,
+                    })
+                    const newPasswordHash = await bcrypt.hash(
+                        newPassword,
+                        config.BCRYPT_ROUNDS
+                    )
+                    userLogin.resetToken = null
+                    userLogin.resetExpires = null
+                    userLogin.passwordHash = newPasswordHash
+                    await userLogin.save({ transaction: t })
+                    await t.commit()
+                    const html = mjml(
+                        emailTemplate.generateResetPasswordSuccessEmail({
+                            fullName: _userLogin.user_master.fullName,
+                            password: newPassword,
+                        })
+                    ).html
+                    mailer
+                        .sendMail({
+                            to: [_userLogin.email],
+                            from: `"Field Hero" <no-reply@fieldhero.in>`,
+                            subject: "Password Reset Successfully",
+                            html,
+                        })
+                        .catch((err) => {
+                            log.error(
+                                err.message,
+                                "Error in nodemailer while resetPasswordForUser"
+                            )
+                        })
+                    return {
+                        status: true,
+                        code: httpStatus.OK,
+                        message:
+                            "Password reset successfully. New password has been sent on your email.",
+                        data: null,
+                    }
+                } else {
+                    return {
+                        status: false,
+                        code: httpStatus.Bad_Request,
+                        message:
+                            "Token expired. Please request reset password again.",
+                    }
+                }
+            } else {
+                return {
+                    status: false,
+                    code: httpStatus.Bad_Request,
+                    message: "Token mismatch.",
+                }
+            }
+        } else {
+            return {
+                status: false,
+                code: httpStatus.Bad_Request,
+                message: "Email not found.",
+            }
+        }
+    } catch (error) {
+        await t.rollback()
+        log.error("Error while resetPasswordForUser", error.message)
+        return {
+            status: false,
+            code: httpStatus.Bad_Request,
+            message: "Error while resetPasswordForUser",
+        }
+    }
+}
+
 const User = {
     createUser,
     getUser,
     getUserById,
     updateUserById,
+    createResetPasswordToken,
+    resetPasswordForUser,
 }
 export { User }

@@ -1,9 +1,7 @@
-import { number, string } from "joi"
+import paginate from "jw-paginate"
 import * as helper from "../helper"
 import { customerDB, ormCustomer } from "../sequelize"
-import { log, getPagingData } from "../helper"
-import { Model } from "sequelize"
-import { Interface } from "readline"
+import { log, httpStatus } from "../helper"
 
 /*
  * get All Get Candidates
@@ -16,22 +14,15 @@ const getCandidates = async (pagination: any) => {
     } else {
         whereCondition = 1
     }
-    let page
-    let limit
-    if (
-        (pagination.limit == undefined && pagination.offset == undefined) ||
-        pagination.limit == undefined ||
-        pagination.offset == undefined
-    ) {
-        page = 0
+    let page = 1,
         limit = 10
-    } else {
-        limit = parseInt(pagination.limit)
-        page = parseInt(pagination.offset)
-    }
+    if (pagination.page) page = parseInt(pagination.page)
+    if (pagination.limit) limit = parseInt(pagination.limit)
+    const count = await customerDB.Candidate.count()
+    const _paginate = paginate(count, page, limit)
     const candidates = await customerDB.Candidate.findAndCountAll({
         limit: limit,
-        offset: page,
+        offset: _paginate.startIndex,
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
@@ -48,11 +39,15 @@ const getCandidates = async (pagination: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["fullName", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getCandidates")
         throw err
     })
-    const response = getPagingData(candidates, page, limit)
+    const response = {
+        Candidates: candidates.rows,
+        ..._paginate,
+    }
 
     return response
 }
@@ -398,163 +393,185 @@ const updateCandidateById = async (param: updateCandidateParam) => {
  */
 interface bulkCreateCandidateParam {
     fullName: string
-    birthDate: Date
-    gender: "male" | "female" | "transgender" | null
-    perm_address: string
-    perm_city: string
-    perm_state: string
-    perm_country: string
-    perm_zip: string
-    curr_address: string
-    curr_city: string
-    curr_state: string
-    curr_country: string
-    curr_zip: string
-    primary_email: string
-    secondary_email: string
+    birthDate?: Date | null
+    gender?: "male" | "female" | "transgender" | null
+    perm_address?: string | null
+    perm_city?: string | null
+    perm_state?: string | null
+    perm_country?: string | null
+    perm_zip?: string | null
+    curr_address?: string | null
+    curr_city?: string | null
+    curr_state?: string | null
+    curr_country?: string | null
+    curr_zip?: string | null
+    primary_email?: string | null
+    secondary_email?: string | null
     primary_mobile: string
-    secondary_mobile: string
-    aadharNo: string
-    isActive: boolean
-    totalExpMonths: number
-    totalExpYears: number
-    registrationStatus: string
-    candidateId: number
+    secondary_mobile?: string | null
+    aadharNo?: string | null
+    isActive?: boolean | null
+    totalExpMonths?: number | null
+    totalExpYears?: number | null
+    registrationStatus?: string | null
+    candidateId?: number | null
 }
 
 const createBulkCandidate = async (param: Array<any>) => {
-    console.log(param)
-    param.map((item) => {
-        // fullName
-        let fullName = helper.candidate.handleString(item.fullName)
-        // birthdate
-        let birthDate = item.birthDate ? item.birthDate.trim() : null
-        birthDate = helper.parseDate(birthDate)?.format("YYYY-MM-DD")
-        // gender
-        let gender = item.gender ? item.gender.trim() : null
-        gender = gender ? (gender as string).toLowerCase() : null
-        // perm_address
-        let perm_address = helper.candidate.handleString(item.perm_address)
-        // perm_city
-        let perm_city = helper.candidate.handleString(item.perm_city)
-        // perm_state
-        let perm_state = helper.candidate.handleString(item.perm_state)
-        // perm_country
-        let perm_country = "India"
-        // perm_zip
-        let perm_zip = helper.candidate.handleNumber(item.perm_pincode)
-        // curr_address
-        let curr_address = helper.candidate.handleString(item.curr_address)
-        // curr_city
-        let curr_city = helper.candidate.handleString(item.curr_city)
-        // curr_state
-        let curr_state = helper.candidate.handleString(item.curr_state)
-        // curr_country
-        let curr_country = "India"
-        // curr_zip
-        let curr_zip = helper.candidate.handleNumber(item.curr_pincode)
-        // email1
-        let email1 = helper.candidate.handleEmail(item.primary_email)
-        // email2
-        let email2 = helper.candidate.handleEmail(item.secondary_email)
-        // contactNo1
-        let contactNo1 = helper.candidate.handleNumber(item.primary_mobile)
-        // contactNo2
-        let contactNo2 = helper.candidate.handleNumber(item.secondary_mobile)
-        // aadharNo
-        let aadharNo = helper.candidate.handleAadhar(item.aadharNo)
-        // isActive
-        let isActive = true
-        // registrationStatus
-        let registrationStatus = helper.candidate.handleString(
-            item.registrationStatus
+    const transaction = await ormCustomer.transaction()
+    try {
+        const _params: any = param
+            .map((item, i) => {
+                // fullName
+                let fullName = helper.candidate.handleString(item.fullName)
+                // birthdate
+                let birthDate = helper.candidate.handleDate(item.birthdate)
+                // gender
+                let gender = item.gender ? item.gender.trim() : null
+                gender = gender ? (gender as string).toLowerCase() : null
+                // perm_address
+                let perm_address = helper.candidate.handleString(
+                    item.perm_address
+                )
+                // perm_city
+                let perm_city = helper.candidate.handleString(item.perm_city)
+                // perm_state
+                let perm_state = helper.candidate.handleString(item.perm_state)
+                // perm_country
+                let perm_country = "India"
+                // perm_zip
+                let perm_zip = helper.candidate.handleNumber(item.perm_pincode)
+                // curr_address
+                let curr_address = helper.candidate.handleString(
+                    item.curr_address
+                )
+                // curr_city
+                let curr_city = helper.candidate.handleString(item.curr_city)
+                // curr_state
+                let curr_state = helper.candidate.handleString(item.curr_state)
+                // curr_country
+                let curr_country = "India"
+                // curr_zip
+                let curr_zip = helper.candidate.handleNumber(item.curr_pincode)
+                // email1
+                let email1 = helper.candidate.handleEmail(item.primary_email)
+                // email2
+                let email2 = helper.candidate.handleEmail(item.secondary_email)
+                // contactNo1
+                let contactNo1 = helper.candidate.handleNumber(
+                    item.primary_mobile
+                )
+                // contactNo2
+                let contactNo2 = helper.candidate.handleNumber(
+                    item.secondary_mobile
+                )
+                // aadharNo
+                let aadharNo = helper.candidate.handleAadhar(item.aadharNo)
+                // isActive
+                let isActive = true
+                // registrationStatus
+                let registrationStatus = helper.candidate.handleString(
+                    item.registrationStatus
+                )
+                // totalExpMonths
+                let totalExpMonths = helper.candidate.handleNumber(
+                    item.exp_months
+                )
+                // totalExpYears
+                let totalExpYears = helper.candidate.handleNumber(
+                    item.exp_years
+                )
+                return {
+                    fullName,
+                    birthDate,
+                    gender,
+                    perm_address,
+                    perm_city,
+                    perm_state,
+                    perm_country,
+                    perm_zip,
+                    curr_address,
+                    curr_city,
+                    curr_state,
+                    curr_country,
+                    curr_zip,
+                    email1,
+                    email2,
+                    contactNo1,
+                    contactNo2,
+                    aadharNo,
+                    isActive,
+                    registrationStatus,
+                    totalExpMonths,
+                    totalExpYears,
+                }
+            })
+            .filter((item) => item.fullName && item.contactNo1)
+        const candidate = await customerDB.Candidate.bulkCreate(_params, {
+            fields: [
+                "fullName",
+                "birthDate",
+                "gender",
+                "perm_address",
+                "perm_city",
+                "perm_state",
+                "perm_country",
+                "perm_zip",
+                "curr_address",
+                "curr_city",
+                "curr_state",
+                "curr_country",
+                "curr_zip",
+                "email1",
+                "email2",
+                "contactNo1",
+                "contactNo2",
+                "aadharNo",
+                "isActive",
+            ],
+            transaction,
+        })
+        const arrOtherDetails = candidate.map((item, ind) => {
+            const {
+                totalExpMonths,
+                totalExpYears,
+                registrationStatus,
+            } = _params[ind]
+            return {
+                totalExpMonths,
+                totalExpYears,
+                registrationStatus,
+                candidateId: item.id,
+            }
+        })
+        const candidateother = await customerDB.CandidateOtherDetails.bulkCreate(
+            arrOtherDetails,
+            {
+                fields: [
+                    "totalExpMonths",
+                    "totalExpYears",
+                    "registrationStatus",
+                    "candidateId",
+                ],
+                transaction,
+            }
         )
-        // totalExpMonths
-        let totalExpMonths = helper.candidate.handleNumber(item.exp_months)
-        // totalExpYears
-        let totalExpYears = helper.candidate.handleNumber(item.exp_years)
-        return {
-            fullName,
-            birthDate,
-            gender,
-            perm_address,
-            perm_city,
-            perm_state,
-            perm_country,
-            perm_zip,
-            curr_address,
-            curr_city,
-            curr_state,
-            curr_country,
-            curr_zip,
-            email1,
-            email2,
-            contactNo1,
-            contactNo2,
-            aadharNo,
-            isActive,
-            registrationStatus,
-            totalExpMonths,
-            totalExpYears,
-        }
-    })
-    // const transaction = await ormCustomer.transaction()
-    // try {
-    //     const candidate = await customerDB.Candidate.bulkCreate(param, {
-    //         fields: [
-    //             "fullName",
-    //             "birthDate",
-    //             "gender",
-    //             "perm_address",
-    //             "perm_city",
-    //             "perm_state",
-    //             "perm_country",
-    //             "perm_zip",
-    //             "curr_address",
-    //             "curr_city",
-    //             "curr_state",
-    //             "curr_country",
-    //             "curr_zip",
-    //             "email1",
-    //             "email2",
-    //             "contactNo1",
-    //             "contactNo2",
-    //             "aadharNo",
-    //             "isActive",
-    //         ],
-    //         transaction,
-    //     })
-    //     const arrOtherDetails = candidate.map((item, ind) => {
-    //         const { totalExpMonths, totalExpYears, registrationStatus } = param[
-    //             ind
-    //         ]
-    //         return {
-    //             totalExpMonths,
-    //             totalExpYears,
-    //             registrationStatus,
-    //             candidateId: item.id,
-    //         }
-    //     })
-    //     const candidateother = await customerDB.CandidateOtherDetails.bulkCreate(
-    //         arrOtherDetails,
-    //         {
-    //             fields: [
-    //                 "totalExpMonths",
-    //                 "totalExpYears",
-    //                 "registrationStatus",
-    //                 "candidateId",
-    //             ],
-    //             transaction,
-    //         }
-    //     )
 
-    //     await transaction.commit()
-    //     return Object.assign({ candidate, candidateother })
-    // } catch (err: any) {
-    //     await transaction.rollback()
-    //     log.error(err, "Error while bluckCreateCandidate")
-    //     throw err
-    // }
+        await transaction.commit()
+        // return Object.assign({ candidate, candidateother })
+        return {
+            status: true,
+            code: httpStatus.Created,
+            message: `${candidate.length} candidates uploaded successfully`,
+            data: {
+                totalCreated: candidate.length,
+            },
+        }
+    } catch (err: any) {
+        await transaction.rollback()
+        log.error(err, "Error while createBulkCandidate")
+        throw err
+    }
 }
 
 /*

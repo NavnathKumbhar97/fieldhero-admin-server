@@ -13,23 +13,25 @@ const SubscriptionRouter = Router()
 SubscriptionRouter.post(
     "/subscriptions",
     middleware.permission(helper.permissions.subscription_create),
-    (req: Request, res: Response, next: NextFunction) => {
-        Subscription.createSubscripition({ ...req.body })
-            .then((subscription) => {
-                if (subscription == null) {
-                    res.status(httpStatus.Conflict).json({
-                        Success: "Plan Name Already Exits",
-                    })
-                }
-                res.status(httpStatus.Created).json(subscription)
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const subscription = await Subscription.createSubscripition({
+                ...req.body,
             })
-            .catch((err) => {
-                log.error(err, "Error while Create SubScripition Plan")
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
+            if (subscription == null) {
+                res.status(httpStatus.Conflict).json({
+                    code: httpStatus.Conflict,
+                    message: "Plan name already exits",
                 })
+            } else {
+                res.status(httpStatus.Created).json(subscription)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
             })
+        }
     }
 )
 

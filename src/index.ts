@@ -7,15 +7,6 @@ import pino from "pino-http"
 import * as config from "./config"
 import { log } from "./helper"
 import { routerV1 } from "./router"
-// import * as sequelize from "./sequelize/umzug"
-
-// sequelize.umzugCustomer.pending().then((migrations) => {
-//     log.info(migrations.map((m) => m.file))
-//     sequelize.umzugCustomer
-//         .up()
-//         .then(() => log.info("success"))
-//         .catch((err) => log.error(err, "failed"))
-// })
 
 const isBulkCandidateUpload = (req: Request) => {
     if (req.path === "/api/v1/bulkcandidates") return true

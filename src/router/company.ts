@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express"
 import * as middleware from "./middleware"
 import { Company } from "../handlers"
-import { companyValidation } from "../validation/company"
 import * as helper from "../helper"
 const { httpStatus, log } = helper
 const CompanyRouter = Router()
@@ -11,20 +10,20 @@ const CompanyRouter = Router()
 CompanyRouter.get(
     "/companies",
     middleware.permission(helper.permissions.company_read_all),
-    (req: Request, res: Response, next: NextFunction) => {
-        Company.getCompanies(req.query.all)
-            .then((companies) => {
-                if (!companies.length) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const companies = await Company.getCompanies(req.query.all)
+            if (!companies.length) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(companies)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error.message,
             })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+        }
     }
 )
 
@@ -53,24 +52,23 @@ CompanyRouter.get(
 CompanyRouter.post(
     "/companies",
     middleware.permission(helper.permissions.company_create),
-    companyValidation,
-    (req: Request, res: Response, next: NextFunction) => {
-        Company.createCompany({ ...req.body })
-            .then((company) => {
-                if (company == null) {
-                    res.status(httpStatus.Conflict).json({
-                        Success: "Company Already Exits",
-                    })
-                }
-                res.status(httpStatus.Created).json(company)
-            })
-            .catch((err) => {
-                log.error(err)
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const company = await Company.createCompany({ ...req.body })
+            if (!company) {
+                res.status(httpStatus.Conflict).json({
+                    code: httpStatus.Conflict,
+                    message: "Company already exist",
                 })
+            } else {
+                res.status(httpStatus.Created).json(company)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error.message,
             })
+        }
     }
 )
 
@@ -78,7 +76,6 @@ CompanyRouter.post(
 CompanyRouter.put(
     "/companies/:id",
     middleware.permission(helper.permissions.company_update),
-    companyValidation,
     (req: Request, res: Response, next: NextFunction) => {
         Company.updatedCompanyById({ id: req.params.id, ...req.body })
             .then((company) => res.status(httpStatus.OK).json(company))

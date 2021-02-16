@@ -10,25 +10,24 @@ const CustomerRouter = Router()
 CustomerRouter.get(
     "/customers",
     middleware.permission(helper.permissions.customer_read_all),
-    (req: Request, res: Response, next: NextFunction) => {
-        Customer.getCustomers(req.query.all)
-            .then((customers) => {
-                if (!customers.length) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const customers = await Customer.getCustomers(req.query.all)
+            if (!customers.length) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(customers)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
             })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+        }
     }
 )
 
 // * fetch customer by id
-
 CustomerRouter.get(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_read),
@@ -46,6 +45,42 @@ CustomerRouter.get(
                     error: err,
                 })
             })
+    }
+)
+
+// * Update customer
+CustomerRouter.put(
+    "/customers/:id",
+    middleware.permission(helper.permissions.customer_update),
+    async (req: Request<any>, res: Response) => {
+        try {
+            const response = await Customer.updateCustomer({
+                id: req.params.id,
+                ...req.body,
+            })
+            if (response) {
+                const { code, message, status, data } = response
+                if (status) {
+                    res.status(code).json({
+                        message,
+                        data,
+                    })
+                } else {
+                    res.status(code).json({
+                        message,
+                    })
+                }
+            } else {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                })
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
+            })
+        }
     }
 )
 
@@ -116,7 +151,7 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_update),
-    (req: Request<any>, res: Response, next: NextFunction) => {
+    (req: Request<any>, res: Response) => {
         Customer.updateCustomerSubscriptionsById({
             customerId: req.params.id,
             id: req.params.subId,
@@ -134,6 +169,41 @@ CustomerRouter.put(
                     error: err,
                 })
             })
+    }
+)
+
+// * Reset customer password for login
+CustomerRouter.post(
+    "/customers/:id/reset-password",
+    middleware.permission(helper.permissions.customer_reset_password),
+    async (req: Request<any>, res: Response) => {
+        try {
+            const response = await Customer.resetLoginPasswordForCustomer({
+                id: req.params.id,
+            })
+            if (response) {
+                const { code, message, status, data } = response
+                if (status) {
+                    res.status(code).json({
+                        message,
+                        data,
+                    })
+                } else {
+                    res.status(code).json({
+                        message,
+                    })
+                }
+            } else {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                })
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
+            })
+        }
     }
 )
 

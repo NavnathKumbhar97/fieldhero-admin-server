@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express"
 import { Industry } from "../handlers"
 import * as middleware from "./middleware"
-import { industryValidation } from "../validation/industry"
 import * as helper from "../helper"
 const { httpStatus } = helper
 
@@ -33,20 +32,20 @@ IndustryRouter.get(
 IndustryRouter.get(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Industry.getIndustryById(req.params.id)
-            .then((industry) => {
-                if (industry == null) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request<any>, res: Response, next: NextFunction) => {
+        try {
+            const industry = await Industry.getIndustryById(req.params.id)
+            if (industry == null) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(industry)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error,
             })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+        }
     }
 )
 
@@ -54,47 +53,47 @@ IndustryRouter.get(
 IndustryRouter.post(
     "/industries",
     middleware.permission(helper.permissions.industry_create),
-    industryValidation,
-    (req: Request, res: Response, next: NextFunction) => {
-        Industry.createIndustry({ ...req.body })
-            .then((industry) => {
-                if (industry == null) {
-                    res.status(httpStatus.Conflict).json({
-                        Success: "Industry Already Exits",
-                    })
-                }
-                res.status(httpStatus.Created).json(industry)
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const industry = await Industry.createIndustry({
+                ...req.body,
             })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
+            if (industry == null) {
+                res.status(httpStatus.Conflict).json({
+                    code: httpStatus.Conflict,
+                    message: "Industry already exist",
                 })
-            )
+            } else {
+                res.status(httpStatus.Created).json(industry)
+            }
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                error: error,
+            })
+        }
     }
 )
 //* Update Industry
 IndustryRouter.put(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_update),
-    industryValidation,
-    (req: Request, res: Response, next: NextFunction) => {
-        Industry.updateIndustryById({
-            id: req.params.id,
-            ...req.body,
-        })
-            .then((industry) =>
-                res.status(httpStatus.OK).json({
-                    Message: "Data Updated Successfully",
-                    Success: industry,
-                })
-            )
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+    async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const industry = await Industry.updateIndustryById({
+                id: req.params.id,
+                ...req.body,
+            })
+            res.status(httpStatus.OK).json({
+                Message: "Data Updated Successfully",
+                Success: industry,
+            })
+        } catch (error) {
+            res.status(httpStatus.Bad_Request).json({
+                code: httpStatus.Bad_Request,
+                message: error.message,
+            })
+        }
     }
 )
 

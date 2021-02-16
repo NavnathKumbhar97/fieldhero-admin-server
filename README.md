@@ -38,6 +38,16 @@ DB_PORT=3306
 DB_USER='user'
 DB_PASS='pass'
 DB_NAME='dbname'
+# JWT
+BCRYPT_ROUNDS=random_number
+JWT_SECRET_KEY='random_string'
+# SMTP
+SMTP_URL='smtp_url'
+SMTP_HOST='smtp_host'
+SMTP_EMAIL='smtp_email'
+SMTP_PWD='smtp_password'
+# 
+SERVER_URL='http://localhost'
 ```
 
 ## Deploy

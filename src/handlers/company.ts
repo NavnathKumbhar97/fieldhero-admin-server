@@ -19,6 +19,7 @@ const getCompanies = async (all: any) => {
         where: {
             isActive: whereCondition,
         },
+        order: [["companyName", "ASC"]],
     }).catch((err: any) => {
         log.error(err, "Error while getCompanies")
         throw err

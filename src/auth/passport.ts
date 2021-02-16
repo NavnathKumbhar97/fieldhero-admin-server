@@ -48,7 +48,6 @@ passport.use(
                 if (!userLogin) {
                     done(null, false, { message: "Email not found" })
                 } else {
-                    console.log(userLogin.toJSON())
                     const isVerified = await passwordfunction.verifyPassword(
                         password,
                         userLogin.passwordHash
