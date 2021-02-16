@@ -423,62 +423,62 @@ const createBulkCandidate = async (param: Array<any>) => {
         const _params: any = param
             .map((item, i) => {
                 // fullName
-                let fullName = helper.candidate.handleString(item.fullName)
+                const fullName = helper.candidate.handleString(item.fullName)
                 // birthdate
-                let birthDate = helper.candidate.handleDate(item.birthdate)
+                const birthDate = helper.candidate.handleDate(item.birthdate)
                 // gender
                 let gender = item.gender ? item.gender.trim() : null
                 gender = gender ? (gender as string).toLowerCase() : null
                 // perm_address
-                let perm_address = helper.candidate.handleString(
+                const perm_address = helper.candidate.handleString(
                     item.perm_address
                 )
                 // perm_city
-                let perm_city = helper.candidate.handleString(item.perm_city)
+                const perm_city = helper.candidate.handleString(item.perm_city)
                 // perm_state
-                let perm_state = helper.candidate.handleString(item.perm_state)
+                const perm_state = helper.candidate.handleString(item.perm_state)
                 // perm_country
-                let perm_country = "India"
+                const perm_country = "India"
                 // perm_zip
-                let perm_zip = helper.candidate.handleNumber(item.perm_pincode)
+                const perm_zip = helper.candidate.handleNumber(item.perm_pincode)
                 // curr_address
-                let curr_address = helper.candidate.handleString(
+                const curr_address = helper.candidate.handleString(
                     item.curr_address
                 )
                 // curr_city
-                let curr_city = helper.candidate.handleString(item.curr_city)
+                const curr_city = helper.candidate.handleString(item.curr_city)
                 // curr_state
-                let curr_state = helper.candidate.handleString(item.curr_state)
+                const curr_state = helper.candidate.handleString(item.curr_state)
                 // curr_country
-                let curr_country = "India"
+                const curr_country = "India"
                 // curr_zip
-                let curr_zip = helper.candidate.handleNumber(item.curr_pincode)
+                const curr_zip = helper.candidate.handleNumber(item.curr_pincode)
                 // email1
-                let email1 = helper.candidate.handleEmail(item.primary_email)
+                const email1 = helper.candidate.handleEmail(item.primary_email)
                 // email2
-                let email2 = helper.candidate.handleEmail(item.secondary_email)
+                const email2 = helper.candidate.handleEmail(item.secondary_email)
                 // contactNo1
-                let contactNo1 = helper.candidate.handleNumber(
+                const contactNo1 = helper.candidate.handleNumber(
                     item.primary_mobile
                 )
                 // contactNo2
-                let contactNo2 = helper.candidate.handleNumber(
+                const contactNo2 = helper.candidate.handleNumber(
                     item.secondary_mobile
                 )
                 // aadharNo
-                let aadharNo = helper.candidate.handleAadhar(item.aadharNo)
+                const aadharNo = helper.candidate.handleAadhar(item.aadharNo)
                 // isActive
-                let isActive = true
+                const isActive = true
                 // registrationStatus
-                let registrationStatus = helper.candidate.handleString(
+                const registrationStatus = helper.candidate.handleString(
                     item.registrationStatus
                 )
                 // totalExpMonths
-                let totalExpMonths = helper.candidate.handleNumber(
+                const totalExpMonths = helper.candidate.handleNumber(
                     item.exp_months
                 )
                 // totalExpYears
-                let totalExpYears = helper.candidate.handleNumber(
+                const totalExpYears = helper.candidate.handleNumber(
                     item.exp_years
                 )
                 return {
