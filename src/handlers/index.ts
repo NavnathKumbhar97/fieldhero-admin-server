@@ -8,19 +8,20 @@ import { Customer } from "./customer"
 import { Role } from "./role"
 import { Permission } from "./permission"
 import { User } from "./user"
-import {emailTemplate} from "./mjml"
-
+import { emailTemplate } from "./mjml"
+import { express } from "./express"
 
 export {
-    Industry,
-    SkillSet,
-    Company,
     Candidate,
-    UploadImage,
-    Subscription,
+    Company,
     Customer,
-    Role,
+    emailTemplate,
+    express,
+    Industry,
     Permission,
+    Role,
+    SkillSet,
+    Subscription,
+    UploadImage,
     User,
-    emailTemplate
 }

@@ -1,48 +1,39 @@
-import { Router, Request, Response, NextFunction } from "express"
-import { User } from "../handlers"
+import { Router, Request, Response } from "express"
+// local imports
+import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
 const { httpStatus } = helper
 
 const UserRouter = Router()
 
-// User Create
-
 //* Create User Details
-
 UserRouter.post(
     "/users",
     middleware.permission(helper.permissions.user_create),
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
         try {
-            const user = await User.createUser(req.body)
+            const user = await handler.User.createUser(req.body)
             res.status(httpStatus.Created).json(user)
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
 
 //* Update User Details
-
 UserRouter.put(
     "/users/:id",
     middleware.permission(helper.permissions.user_update),
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
         try {
-            const user = await User.updateUserById({
+            const user = await handler.User.updateUserById({
                 id: req.params.id,
                 ...req.body,
             })
             res.status(httpStatus.Created).json(user)
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
@@ -51,20 +42,17 @@ UserRouter.put(
 UserRouter.get(
     "/users",
     middleware.permission(helper.permissions.user_read_all),
-    (req: Request, res: Response, next: NextFunction) => {
-        User.getUser(req.query.all)
-            .then((users) => {
-                if (!users.length) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request, res: Response) => {
+        try {
+            const users = await handler.User.getUser(req.query.all)
+            if (!users.length) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(users)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -72,20 +60,17 @@ UserRouter.get(
 UserRouter.get(
     "/users/:id",
     middleware.permission(helper.permissions.user_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        User.getUserById(req.params.id)
-            .then((user) => {
-                if (user == null) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request<any>, res: Response) => {
+        try {
+            const user = await handler.User.getUserById(req.params.id)
+            if (user == null) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(user)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 

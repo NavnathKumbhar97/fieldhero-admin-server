@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express"
-import { SkillSet } from "../handlers"
+import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
 const { httpStatus } = helper
@@ -12,20 +12,17 @@ const SkillSetRouter = Router()
 SkillSetRouter.get(
     "/skills",
     middleware.permission(helper.permissions.skill_read_all),
-    (req: Request, res: Response, next: NextFunction) => {
-        SkillSet.getSkillSets(req.query.all)
-            .then((skills) => {
-                if (!skills.length) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request, res: Response) => {
+        try {
+            const skills = await handler.SkillSet.getSkillSets(req.query.all)
+            if (!skills.length) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(skills)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -33,20 +30,17 @@ SkillSetRouter.get(
 SkillSetRouter.get(
     "/skills/:id",
     middleware.permission(helper.permissions.skill_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        SkillSet.getSkillSetById(req.params.id)
-            .then((skill) => {
-                if (skill == null) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request<any>, res: Response) => {
+        try {
+            const skill = await handler.SkillSet.getSkillSetById(req.params.id)
+            if (skill == null) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(skill)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -54,9 +48,9 @@ SkillSetRouter.get(
 SkillSetRouter.post(
     "/skills",
     middleware.permission(helper.permissions.skill_create),
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
         try {
-            const skill = await SkillSet.createSkillSet({ ...req.body })
+            const skill = await handler.SkillSet.createSkillSet({ ...req.body })
             if (skill == null) {
                 res.status(httpStatus.Conflict).json({
                     code: httpStatus.Conflict,
@@ -66,10 +60,7 @@ SkillSetRouter.post(
                 res.status(httpStatus.Created).json(skill)
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: error,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
@@ -78,15 +69,16 @@ SkillSetRouter.post(
 SkillSetRouter.put(
     "/skills/:id",
     middleware.permission(helper.permissions.skill_update),
-    (req: Request, res: Response, next: NextFunction) => {
-        SkillSet.updateSkillSetById({ id: req.params.id, ...req.body })
-            .then((skill) => res.status(httpStatus.OK).json(skill))
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+    async (req: Request, res: Response) => {
+        try {
+            const skill = await handler.SkillSet.updateSkillSetById({
+                id: req.params.id,
+                ...req.body,
+            })
+            res.status(httpStatus.OK).json(skill)
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 interface DeleteSkillSetByIdParam {
@@ -95,24 +87,18 @@ interface DeleteSkillSetByIdParam {
 // * Delete skillSet
 SkillSetRouter.delete(
     "/skills/:id",
-    (
-        req: Request<DeleteSkillSetByIdParam>,
-        res: Response,
-        next: NextFunction
-    ) => {
-        SkillSet.deleteSkillSetById(req.params.id)
-            .then((skill) =>
-                res.status(httpStatus.OK).json({
-                    Message: "Row Delete Successfully",
-                    Success: skill,
-                })
+    async (req: Request<DeleteSkillSetByIdParam>, res: Response) => {
+        try {
+            const skill = await handler.SkillSet.deleteSkillSetById(
+                req.params.id
             )
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            res.status(httpStatus.OK).json({
+                Message: "Row Delete Successfully",
+                Success: skill,
+            })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 export { SkillSetRouter }

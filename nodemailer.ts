@@ -1,11 +1,13 @@
 import nodemailer from "nodemailer"
+// local imports
+import * as config from "./src/config"
 
 const transaporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
+    host: config.SMTP_HOST,
     secure: true,
     auth: {
-        user: process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PWD,
+        user: config.SMTP_EMAIL,
+        pass: config.SMTP_PWD,
     },
 })
 

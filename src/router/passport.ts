@@ -52,10 +52,7 @@ LoginRouter.post(
                             message: "User logged in successfully",
                         })
                     } catch (error) {
-                        res.status(httpStatus.Bad_Request).json({
-                            code: httpStatus.Bad_Request,
-                            error: error,
-                        })
+                        handler.express.handleRouterError(res, error)
                     }
                 }
             }
@@ -63,84 +60,84 @@ LoginRouter.post(
     }
 )
 
-LoginRouter.post("/users/forgot-password", async (req, res) => {
-    try {
-        if (!req.body.email) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: "Email is required",
-            })
-        } else {
-            const response = await handler.User.createResetPasswordToken(
-                req.body.email
-            )
-            if (response) {
-                const { code, message, status, data } = response
-                if (status) {
-                    res.status(code).json({
-                        message,
-                        data,
-                    })
-                } else {
-                    res.status(code).json({
-                        message,
-                    })
-                }
-            } else {
+LoginRouter.post(
+    "/users/forgot-password",
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.body.email) {
                 res.status(httpStatus.Bad_Request).json({
                     code: httpStatus.Bad_Request,
+                    error: "Email is required",
                 })
+            } else {
+                const response = await handler.User.createResetPasswordToken(
+                    req.body.email
+                )
+                if (response) {
+                    const { code, message, status, data } = response
+                    if (status) {
+                        res.status(code).json({
+                            message,
+                            data,
+                        })
+                    } else {
+                        res.status(code).json({
+                            message,
+                        })
+                    }
+                } else {
+                    res.status(httpStatus.Bad_Request).json({
+                        code: httpStatus.Bad_Request,
+                    })
+                }
             }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
         }
-    } catch (error) {
-        res.status(httpStatus.Bad_Request).json({
-            code: httpStatus.Bad_Request,
-            error: error,
-        })
     }
-})
+)
 
-LoginRouter.get("/users/verify-reset-password", async (req, res) => {
-    try {
-        if (!req.query.token) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: "No token received",
-            })
-        } else if (!req.query.email) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: "Email is required",
-            })
-        } else {
-            const response = await handler.User.resetPasswordForUser(
-                req.query.token as string,
-                req.query.email as string
-            )
-            if (response) {
-                const { code, message, status, data } = response
-                if (status) {
-                    res.status(code).json({
-                        message,
-                        data,
-                    })
-                } else {
-                    res.status(code).json({
-                        message,
-                    })
-                }
-            } else {
+LoginRouter.get(
+    "/users/verify-reset-password",
+    async (req: Request, res: Response) => {
+        try {
+            if (!req.query.token) {
                 res.status(httpStatus.Bad_Request).json({
                     code: httpStatus.Bad_Request,
+                    error: "No token received",
                 })
+            } else if (!req.query.email) {
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: "Email is required",
+                })
+            } else {
+                const response = await handler.User.resetPasswordForUser(
+                    req.query.token as string,
+                    req.query.email as string
+                )
+                if (response) {
+                    const { code, message, status, data } = response
+                    if (status) {
+                        res.status(code).json({
+                            message,
+                            data,
+                        })
+                    } else {
+                        res.status(code).json({
+                            message,
+                        })
+                    }
+                } else {
+                    res.status(httpStatus.Bad_Request).json({
+                        code: httpStatus.Bad_Request,
+                    })
+                }
             }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
         }
-    } catch (error) {
-        res.status(httpStatus.Bad_Request).json({
-            code: httpStatus.Bad_Request,
-            error: error,
-        })
     }
-})
+)
 
 export { LoginRouter }

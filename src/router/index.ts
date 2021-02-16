@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express"
 import express from "express"
 import path from "path"
 import passport from "passport"
+// local imports
 import { httpStatus } from "../helper"
 import { LoginRouter } from "./passport"
 import { IndustryRouter } from "./industry"
@@ -37,10 +38,8 @@ router.use(UserRouter)
 // Bad Request
 router.all("*", (req: Request, res: Response) => {
     res.status(httpStatus.Bad_Request).json({
-        error: {
-            code: httpStatus.Bad_Request,
-            message: "Bad Request - Url not found",
-        },
+        code: httpStatus.Bad_Request,
+        message: "Bad Request - Url not found",
     })
 })
 

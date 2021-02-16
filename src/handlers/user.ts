@@ -66,7 +66,7 @@ const createUser = async (param: createUserParam) => {
         mailer
             .sendMail({
                 to: [param.email],
-                from: `"Field Hero" <no-reply@fieldhero.in>`,
+                from: config.EMAIL_FROM,
                 subject: "Your Password",
                 html: html.html,
             })
@@ -242,7 +242,7 @@ const createResetPasswordToken = async (email: string) => {
             mailer
                 .sendMail({
                     to: [_user.email],
-                    from: `"Field Hero" <no-reply@fieldhero.in>`,
+                    from: config.EMAIL_FROM,
                     subject: "Reset Password Request",
                     html,
                 })
@@ -327,7 +327,7 @@ const resetPasswordForUser = async (token: string, email: string) => {
                     mailer
                         .sendMail({
                             to: [_userLogin.email],
-                            from: `"Field Hero" <no-reply@fieldhero.in>`,
+                            from: config.EMAIL_FROM,
                             subject: "Password Reset Successfully",
                             html,
                         })

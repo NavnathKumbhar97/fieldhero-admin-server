@@ -269,7 +269,7 @@ const resetLoginPasswordForCustomer = async (param: any) => {
             mailer
                 .sendMail({
                     to: [_customerLogin.email],
-                    from: `"Field Hero" <no-reply@fieldhero.in>`,
+                    from: config.EMAIL_FROM,
                     subject: "Password Reset Successfully",
                     html,
                 })

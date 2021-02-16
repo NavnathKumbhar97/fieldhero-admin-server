@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express"
+// local imports
 import { customerDB } from "../../sequelize"
 import { httpStatus } from "../../helper"
+import * as handler from "../../handlers"
 
 export default (permissionTocheck: number) => {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -36,10 +38,7 @@ export default (permissionTocheck: number) => {
                 res.status(httpStatus.Forbidden).send("Forbidden")
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                error: error,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 }
