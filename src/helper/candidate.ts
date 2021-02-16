@@ -9,7 +9,7 @@ const handleString = (input: any): string | null => {
 
 const handleDate = (input: any): string | undefined | null => {
     if (input && typeof input === "string") {
-        let result = input.trim()
+        const result = input.trim()
         return helper.parseDate(result)?.format("YYYY-MM-DD")
     }
     return null
