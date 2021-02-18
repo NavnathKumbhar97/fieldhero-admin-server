@@ -1,7 +1,13 @@
 import * as helper from "../helper"
-const handleString = (input: any): string | null => {
+const handleString = (
+    input: any,
+    length?: number
+): string | null | undefined => {
     if (input && typeof input === "string") {
         const result = input.trim()
+        if (result && length) {
+            return result.length <= length ? result : undefined
+        }
         return result ? result : null
     }
     return null
@@ -22,7 +28,7 @@ const handleNumber = (input: any): number | null => {
     return null
 }
 
-const handleEmail = (input: any): string | null => {
+const handleEmail = (input: any, length?: number): string | null => {
     if (input && typeof input === "string") {
         const result = input.trim()
         return result ? result : null
@@ -31,8 +37,16 @@ const handleEmail = (input: any): string | null => {
         typeof input === "object" &&
         Object.keys(input).length
     ) {
-        const result = input.text.trim()
-        return result ? result : null
+        if (input.richText) {
+            const result = input.richText
+                .map((x: any) => x.text)
+                .join("")
+                .trim()
+            return result ? result : null
+        } else {
+            const result = input.text.trim()
+            return result ? result : null
+        }
     }
     return null
 }

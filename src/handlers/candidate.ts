@@ -22,7 +22,7 @@ const getCandidates = async (pagination: any) => {
     const _paginate = paginate(count, page, limit)
     const candidates = await customerDB.Candidate.findAndCountAll({
         limit: limit,
-        offset: _paginate.startIndex,
+        offset: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
         include: [
             { model: customerDB.CandidateOtherDetails },
             { model: customerDB.CandidateCertificate },
@@ -436,27 +436,41 @@ const createBulkCandidate = async (param: Array<any>) => {
                 // perm_city
                 const perm_city = helper.candidate.handleString(item.perm_city)
                 // perm_state
-                const perm_state = helper.candidate.handleString(item.perm_state)
+                const perm_state = helper.candidate.handleString(
+                    item.perm_state
+                )
                 // perm_country
                 const perm_country = "India"
                 // perm_zip
-                const perm_zip = helper.candidate.handleNumber(item.perm_pincode)
+                const perm_zip = helper.candidate.handleNumber(
+                    item.perm_pincode
+                )
                 // curr_address
                 const curr_address = helper.candidate.handleString(
                     item.curr_address
                 )
                 // curr_city
-                const curr_city = helper.candidate.handleString(item.curr_city)
+                const curr_city = helper.candidate.handleString(
+                    item.curr_city,
+                    45
+                )
+                if (curr_city === undefined) console.log(i, item.curr_city)
                 // curr_state
-                const curr_state = helper.candidate.handleString(item.curr_state)
+                const curr_state = helper.candidate.handleString(
+                    item.curr_state
+                )
                 // curr_country
                 const curr_country = "India"
                 // curr_zip
-                const curr_zip = helper.candidate.handleNumber(item.curr_pincode)
+                const curr_zip = helper.candidate.handleNumber(
+                    item.curr_pincode
+                )
                 // email1
                 const email1 = helper.candidate.handleEmail(item.primary_email)
                 // email2
-                const email2 = helper.candidate.handleEmail(item.secondary_email)
+                const email2 = helper.candidate.handleEmail(
+                    item.secondary_email
+                )
                 // contactNo1
                 const contactNo1 = helper.candidate.handleNumber(
                     item.primary_mobile
@@ -569,7 +583,7 @@ const createBulkCandidate = async (param: Array<any>) => {
         }
     } catch (err: any) {
         await transaction.rollback()
-        log.error(err, "Error while createBulkCandidate")
+        // log.error(err, "Error while createBulkCandidate")
         throw err
     }
 }

@@ -107,8 +107,8 @@ CandidateRouter.delete("/candidates", async (req: Request, res: Response) => {
 //* bulk create candidates
 CandidateRouter.post(
     "/bulkcandidates",
-    // 5mb
-    bodyParser.json({ limit: 1024 * 1024 * 5 }),
+    // 50mb
+    bodyParser.json({ limit: 1024 * 1024 * 50 }),
     middleware.permission(helper.permissions.candidate_basic_bulk_create),
     async (req: Request, res: Response) => {
         try {
