@@ -1,23 +1,23 @@
-import { Router, Request, Response, NextFunction } from "express"
-import { Subscription } from "../handlers"
+import { Router, Request, Response } from "express"
+// local imports
+import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
-const { httpStatus, log } = helper
+const { httpStatus } = helper
 
 const SubscriptionRouter = Router()
 
-// Subscription
-
 //* Create SubScripition Plan
-
 SubscriptionRouter.post(
     "/subscriptions",
     middleware.permission(helper.permissions.subscription_create),
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
         try {
-            const subscription = await Subscription.createSubscripition({
-                ...req.body,
-            })
+            const subscription = await handler.Subscription.createSubscripition(
+                {
+                    ...req.body,
+                }
+            )
             if (subscription == null) {
                 res.status(httpStatus.Conflict).json({
                     code: httpStatus.Conflict,
@@ -27,33 +27,28 @@ SubscriptionRouter.post(
                 res.status(httpStatus.Created).json(subscription)
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
 
 //* Fetch All Subscription List
-
 SubscriptionRouter.get(
     "/subscriptions",
     middleware.permission(helper.permissions.subscription_read_all),
-    (req: Request, res: Response, next: NextFunction) => {
-        Subscription.getSubscriptions(req.query.all)
-            .then((subscriptions) => {
-                if (!subscriptions.length) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request, res: Response) => {
+        try {
+            const subscriptions = await handler.Subscription.getSubscriptions(
+                req.query.all
+            )
+            if (!subscriptions.length) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(subscriptions)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -61,20 +56,19 @@ SubscriptionRouter.get(
 SubscriptionRouter.get(
     "/subscriptions/:id",
     middleware.permission(helper.permissions.subscription_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Subscription.getSubscriptionById(req.params.id)
-            .then((subscription) => {
-                if (subscription == null) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
-                res.status(httpStatus.OK).json(subscription)
-            })
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
+    async (req: Request<any>, res: Response) => {
+        try {
+            const subscription = await handler.Subscription.getSubscriptionById(
+                req.params.id
             )
+            if (subscription == null) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
+                res.status(httpStatus.OK).json(subscription)
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -82,17 +76,18 @@ SubscriptionRouter.get(
 SubscriptionRouter.put(
     "/subscriptions/:id",
     middleware.permission(helper.permissions.subscription_update),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Subscription.updatedSubscriptionById({ id: req.params.id, ...req.body })
-            .then((subscription) =>
-                res.status(httpStatus.OK).json(subscription)
+    async (req: Request<any>, res: Response) => {
+        try {
+            const subscription = await handler.Subscription.updatedSubscriptionById(
+                {
+                    id: req.params.id,
+                    ...req.body,
+                }
             )
-            .catch((err) =>
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            )
+            res.status(httpStatus.OK).json(subscription)
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 

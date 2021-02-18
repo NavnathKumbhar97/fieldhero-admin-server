@@ -1,6 +1,7 @@
-import { Router, Request, Response, NextFunction } from "express"
+import { Router, Request, Response } from "express"
+// local imports
 import * as middleware from "./middleware"
-import { Customer } from "../handlers"
+import * as handler from "../handlers"
 import * as helper from "../helper"
 const { httpStatus } = helper
 
@@ -10,19 +11,16 @@ const CustomerRouter = Router()
 CustomerRouter.get(
     "/customers",
     middleware.permission(helper.permissions.customer_read_all),
-    async (req: Request, res: Response, next: NextFunction) => {
+    async (req: Request, res: Response) => {
         try {
-            const customers = await Customer.getCustomers(req.query.all)
+            const customers = await handler.Customer.getCustomers(req.query.all)
             if (!customers.length) {
                 res.sendStatus(httpStatus.No_Content)
             } else {
                 res.status(httpStatus.OK).json(customers)
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
@@ -31,20 +29,19 @@ CustomerRouter.get(
 CustomerRouter.get(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Customer.getCustomerById(req.params.id)
-            .then((customer) => {
-                if (!customer) {
-                    res.sendStatus(httpStatus.No_Content)
-                }
+    async (req: Request<any>, res: Response) => {
+        try {
+            const customer = await handler.Customer.getCustomerById(
+                req.params.id
+            )
+            if (!customer) {
+                res.sendStatus(httpStatus.No_Content)
+            } else {
                 res.status(httpStatus.OK).json(customer)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -54,7 +51,7 @@ CustomerRouter.put(
     middleware.permission(helper.permissions.customer_update),
     async (req: Request<any>, res: Response) => {
         try {
-            const response = await Customer.updateCustomer({
+            const response = await handler.Customer.updateCustomer({
                 id: req.params.id,
                 ...req.body,
             })
@@ -76,10 +73,7 @@ CustomerRouter.put(
                 })
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )
@@ -88,20 +82,19 @@ CustomerRouter.put(
 CustomerRouter.get(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_read_all),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Customer.getCustomerSubscriptions(req.params.id)
-            .then((subscriptions) => {
-                if (subscriptions && subscriptions.length) {
-                    res.status(httpStatus.OK).json(subscriptions)
-                }
+    async (req: Request<any>, res: Response) => {
+        try {
+            const subscriptions = await handler.Customer.getCustomerSubscriptions(
+                req.params.id
+            )
+            if (subscriptions && subscriptions.length) {
+                res.status(httpStatus.OK).json(subscriptions)
+            } else {
                 res.sendStatus(httpStatus.No_Content)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -109,20 +102,18 @@ CustomerRouter.get(
 CustomerRouter.post(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_create),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Customer.createCustomerSubscription({
-            customerId: req.params.id,
-            ...req.body,
-        })
-            .then((cust_subscription) => {
-                res.status(httpStatus.Created).json(cust_subscription)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+    async (req: Request<any>, res: Response) => {
+        try {
+            const cust_subscription = await handler.Customer.createCustomerSubscription(
+                {
+                    customerId: req.params.id,
+                    ...req.body,
+                }
+            )
+            res.status(httpStatus.Created).json(cust_subscription)
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -130,20 +121,20 @@ CustomerRouter.post(
 CustomerRouter.get(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_read),
-    (req: Request<any>, res: Response, next: NextFunction) => {
-        Customer.getCustomerSubscriptionsById(req.params.id, req.params.subId)
-            .then((custSubscription) => {
-                if (custSubscription) {
-                    res.status(httpStatus.OK).json(custSubscription)
-                }
+    async (req: Request<any>, res: Response) => {
+        try {
+            const custSubscription = await handler.Customer.getCustomerSubscriptionsById(
+                req.params.id,
+                req.params.subId
+            )
+            if (custSubscription) {
+                res.status(httpStatus.OK).json(custSubscription)
+            } else {
                 res.sendStatus(httpStatus.No_Content)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -151,24 +142,23 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_update),
-    (req: Request<any>, res: Response) => {
-        Customer.updateCustomerSubscriptionsById({
-            customerId: req.params.id,
-            id: req.params.subId,
-            ...req.body,
-        })
-            .then((custSubscription) => {
-                if (custSubscription) {
-                    res.status(httpStatus.OK).json(custSubscription)
+    async (req: Request<any>, res: Response) => {
+        try {
+            const custSubscription = await handler.Customer.updateCustomerSubscriptionsById(
+                {
+                    customerId: req.params.id,
+                    id: req.params.subId,
+                    ...req.body,
                 }
+            )
+            if (custSubscription) {
+                res.status(httpStatus.OK).json(custSubscription)
+            } else {
                 res.sendStatus(httpStatus.No_Content)
-            })
-            .catch((err) => {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                    error: err,
-                })
-            })
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
     }
 )
 
@@ -178,9 +168,11 @@ CustomerRouter.post(
     middleware.permission(helper.permissions.customer_reset_password),
     async (req: Request<any>, res: Response) => {
         try {
-            const response = await Customer.resetLoginPasswordForCustomer({
-                id: req.params.id,
-            })
+            const response = await handler.Customer.resetLoginPasswordForCustomer(
+                {
+                    id: req.params.id,
+                }
+            )
             if (response) {
                 const { code, message, status, data } = response
                 if (status) {
@@ -199,10 +191,7 @@ CustomerRouter.post(
                 })
             }
         } catch (error) {
-            res.status(httpStatus.Bad_Request).json({
-                code: httpStatus.Bad_Request,
-                message: error.message,
-            })
+            handler.express.handleRouterError(res, error)
         }
     }
 )

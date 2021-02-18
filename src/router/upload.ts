@@ -1,8 +1,8 @@
-import { Router, Request, Response, NextFunction } from "express"
+import { Router, Request, Response } from "express"
 import multer from "multer"
 import path from "path"
 import fs from "fs"
-import { UploadImage } from "../handlers"
+import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
 const { httpStatus } = helper
@@ -49,26 +49,24 @@ UploadRouter.post(
         helper.permissions.candidate_basic_upload_profile_image
     ),
     upload.single("image"),
-    (req: Request, res: Response) => {
-        const file = req.file
-        if (!file) {
-            res.status(httpStatus.Bad_Request).json({
-                status: "failed",
-                message: "Please upload file",
-            })
-        } else {
-            const path = req.file.destination + "/" + req.file.filename
-            UploadImage.updateCandidateProfileById(
-                parseInt(req.params.id),
-                path
-            )
-                .then((image) => res.status(httpStatus.OK).json(image))
-                .catch((err) =>
-                    res.status(httpStatus.Bad_Request).json({
-                        code: httpStatus.Bad_Request,
-                        error: err,
-                    })
+    async (req: Request, res: Response) => {
+        try {
+            const file = req.file
+            if (!file) {
+                res.status(httpStatus.Bad_Request).json({
+                    status: "failed",
+                    message: "Please upload file",
+                })
+            } else {
+                const path = req.file.destination + "/" + req.file.filename
+                const image = await handler.UploadImage.updateCandidateProfileById(
+                    parseInt(req.params.id),
+                    path
                 )
+                res.status(httpStatus.OK).json(image)
+            }
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
         }
     }
 )

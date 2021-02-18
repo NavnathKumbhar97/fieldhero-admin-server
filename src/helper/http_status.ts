@@ -7,5 +7,6 @@ export default {
     Forbidden: 403,
     Not_Found: 404,
     Conflict: 409,
+    Payload_Too_large: 413,
     Internal_Server_Error: 500,
 }
