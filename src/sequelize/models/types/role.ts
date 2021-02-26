@@ -4,10 +4,12 @@ interface Attributes {
     id?: number
     name: string
     description?: string | null
-    uuid?: string
+    uuid: string
     isActive?: boolean
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

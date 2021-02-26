@@ -13,6 +13,7 @@ export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
             email: {
                 type: DataTypes.STRING(80),
                 allowNull: false,
+                unique: true,
             },
             passwordHash: {
                 type: DataTypes.STRING(200),
@@ -35,18 +36,18 @@ export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
                 allowNull: true,
                 defaultValue: helper.getExpiryTime,
             },
+            status: {
+                type: DataTypes.ENUM,
+                values: ["pending", "verified"],
+                defaultValue: "pending",
+                allowNull: true,
+            },
             newEmail: {
                 type: DataTypes.STRING(80),
                 allowNull: true,
-                defaultValue: null,
             },
             newEmailToken: {
                 type: DataTypes.STRING(500),
-                allowNull: true,
-                defaultValue: null,
-            },
-            isVerified: {
-                type: DataTypes.STRING(20),
                 allowNull: true,
             },
             createdOn: {
@@ -54,6 +55,22 @@ export const CustomerLoginFactory = (orm: Sequelize): CustomerLoginModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

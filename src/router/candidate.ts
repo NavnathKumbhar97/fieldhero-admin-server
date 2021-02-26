@@ -11,7 +11,7 @@ const CandidateRouter = Router()
 //* Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
-    middleware.permission(helper.permissions.candidate_basic_read_all),
+    middleware.permission(helper.permissions.candidate_read_all),
     async (req: Request<any>, res: Response) => {
         try {
             const candidates = await handler.Candidate.getCandidates(req.query)

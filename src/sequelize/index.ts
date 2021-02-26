@@ -39,6 +39,7 @@ const Role = models.RoleFactory(orm)
 const UserLogin = models.UserLoginFactory(orm)
 const Permission = models.PermissionFactory(orm)
 const RolePermission = models.RolePermissionFactory(orm)
+const Agent = models.AgentFactory(orm)
 
 // Candidate, CandidateWorkHistory, CandidateCertificate
 Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
@@ -93,6 +94,7 @@ Role.hasMany(UserLogin, { foreignKey: "roleId" })
 UserLogin.belongsTo(Role, { foreignKey: "roleId" })
 
 const customerDB = {
+    Agent,
     Candidate,
     CandidateCertificate,
     CandidateOtherDetails,
@@ -104,13 +106,13 @@ const customerDB = {
     CustomerSubscription,
     CustomerToken,
     Industry,
+    Permission,
+    Role,
+    RolePermission,
     SkillSet,
     Subscription,
     User,
-    Role,
     UserLogin,
-    Permission,
-    RolePermission,
 }
 
 export { customerDB, orm as ormCustomer }

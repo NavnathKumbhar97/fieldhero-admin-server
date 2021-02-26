@@ -16,7 +16,9 @@ import { RoleModel } from "./role"
 import { UserLoginModel } from "./user_login"
 import { PermissionModel } from "./permission"
 import { RolePermissionModel } from "./role_permission"
+import { AgentModel } from "./agent"
 export {
+    AgentModel,
     CandidateCertificateModel,
     CandidateModel,
     CandidateOtherModel,
@@ -28,11 +30,11 @@ export {
     CustomerSubscriptionModel,
     CustomerTokenModel,
     IndustryModel,
+    PermissionModel,
+    RoleModel,
+    RolePermissionModel,
     SkillSetModel,
     SubscriptionModel,
-    UserModel,
-    RoleModel,
     UserLoginModel,
-    PermissionModel,
-    RolePermissionModel,
+    UserModel,
 }

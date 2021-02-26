@@ -16,7 +16,9 @@ import { RoleFactory } from "./role"
 import { UserLoginFactory } from "./user_login"
 import { PermissionFactory } from "./permission"
 import { RolePermissionFactory } from "./role_permission"
+import { AgentFactory } from "./agent"
 export {
+    AgentFactory,
     CandidateCertificateFactory,
     CandidateFactory,
     CandidateOtherFactory,
@@ -28,11 +30,11 @@ export {
     CustomerSubscriptionFactory,
     CustomerTokenFactory,
     IndustryFactory,
+    PermissionFactory,
+    RoleFactory,
+    RolePermissionFactory,
     SkillSetFactory,
     SubscriptionFactory,
     UserFactory,
-    RoleFactory,
     UserLoginFactory,
-    PermissionFactory,
-    RolePermissionFactory,
 }

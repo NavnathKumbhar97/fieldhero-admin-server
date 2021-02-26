@@ -17,6 +17,10 @@ export const CandidateWorkFactory = (orm: Sequelize): CandidateWorkModel => {
                 type: DataTypes.DATEONLY,
                 allowNull: true,
             },
+            designation: {
+                type: DataTypes.STRING(60),
+                allowNull: true,
+            },
             description: {
                 type: DataTypes.STRING(100),
                 allowNull: true,
@@ -42,6 +46,22 @@ export const CandidateWorkFactory = (orm: Sequelize): CandidateWorkModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

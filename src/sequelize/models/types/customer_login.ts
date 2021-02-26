@@ -7,11 +7,13 @@ interface Attributes {
     customerId: number
     resetToken?: string | null
     resetExpires?: Date | null
+    status?: "pending" | "verified" | null
     newEmail?: string | null
     newEmailToken?: string | null
-    isVerified?: string | null
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

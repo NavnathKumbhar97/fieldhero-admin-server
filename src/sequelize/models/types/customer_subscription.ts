@@ -5,13 +5,15 @@ interface Attributes {
     customerId: number
     startDate: Date
     expiryDate: Date
-    allocatedData: number
-    usedData: number
+    planName: string
+    allocatedData?: number
+    usedData?: number
     status: string
     comment?: string | null
-    planName: string
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

@@ -32,6 +32,22 @@ export const RolePermissionFactory = (orm: Sequelize): RolePermissionModel => {
             modifiedOn: {
                 type: DataTypes.DATE,
             },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
         },
         {
             timestamps: true,

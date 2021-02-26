@@ -9,6 +9,10 @@ const getExpiryTime = () => {
     return Date.now() + 3600000
 }
 
+const getGender = () => {
+    return ["male","female","other"]
+}
+
 const parseDate = (date: string): moment.Moment | null => {
     if (moment(date, "DD.MM.YYYY", true).isValid())
         return moment(date, "DD.MM.YYYY", true)
@@ -31,6 +35,7 @@ export {
     passwordfunction,
     getPagingData,
     getExpiryTime,
+    getGender,
     permissions,
     parseDate,
     candidate,

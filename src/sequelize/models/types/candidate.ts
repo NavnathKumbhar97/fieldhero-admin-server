@@ -3,11 +3,8 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     fullName: string
-    firstName?: string | null
-    middleName?: string | null
-    lastName?: string | null
     birthDate?: Date | null
-    gender?: "male" | "female" | "transgender" | null
+    gender?: "male" | "female" | "other" | null
     perm_address?: string | null
     perm_city?: string | null
     perm_state?: string | null
@@ -20,12 +17,16 @@ interface Attributes {
     curr_zip?: string | null
     email1?: string | null
     email2?: string | null
-    contactNo1?: string | null
+    contactNo1: string
     contactNo2?: string | null
     aadharNo?: string | null
-    isActive?: boolean | null
+    isActive?: boolean
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
+    approved_on?: Date | null
+    approved_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
