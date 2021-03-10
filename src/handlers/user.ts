@@ -7,6 +7,7 @@ import bcrypt from "bcrypt"
 // local imports
 import { customerDB, ormCustomer } from "../sequelize"
 import { log, passwordfunction, httpStatus } from "../helper"
+import * as helper from "../helper"
 import { emailTemplate } from "../handlers/mjml"
 import mailer from "../../nodemailer"
 import * as config from "../config"
@@ -17,7 +18,7 @@ import * as config from "../config"
 interface createUserParam {
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "transgender" | null
+    gender: "male" | "female" | "other" | null
     address: string
     state: string
     country: string
@@ -45,7 +46,7 @@ const createUser = async (param: createUserParam) => {
 
         const userLogin = await customerDB.UserLogin.create(
             {
-                userId: userDetails.id,
+                userId: userDetails.id as number,
                 roleId: param.roleId,
                 email: param.email,
                 passwordHash: await passwordfunction.encryptPassword(
@@ -157,7 +158,7 @@ interface UpdateUserParam {
     id: number
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "transgender" | null
+    gender: "male" | "female" | "other" | null
     address: string
     state: string
     country: string
@@ -377,6 +378,63 @@ const resetPasswordForUser = async (token: string, email: string) => {
     }
 }
 
+const changePassword = async (
+    userId: any,
+    oldPassword: string,
+    newPassword: string
+): Promise<helper.IResponseObject> => {
+    const t = await ormCustomer.transaction()
+    try {
+        console.log(userId, oldPassword, newPassword)
+        const userLogin = await customerDB.UserLogin.findOne({
+            where: {
+                userId,
+            },
+            transaction: t,
+        })
+        if (userLogin) {
+            console.log(userLogin.toJSON())
+            const isPasswordSame = await passwordfunction.verifyPassword(
+                oldPassword,
+                userLogin.passwordHash
+            )
+            if (isPasswordSame) {
+                const newEncPassword = await passwordfunction.encryptPassword(
+                    newPassword
+                )
+                userLogin.passwordHash = newEncPassword
+                await userLogin.save({ transaction: t })
+                await t.commit()
+                return helper.getHandlerResponseObject(
+                    true,
+                    httpStatus.OK,
+                    "Password changed successfully"
+                )
+            } else {
+                return helper.getHandlerResponseObject(
+                    false,
+                    httpStatus.Bad_Request,
+                    "Old password is wrong"
+                )
+            }
+        } else {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Bad_Request,
+                "Error while changePassword"
+            )
+        }
+    } catch (error) {
+        await t.rollback()
+        log.error("Error while changePassword", error.message)
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "User not found"
+        )
+    }
+}
+
 const User = {
     createUser,
     getUser,
@@ -384,5 +442,6 @@ const User = {
     updateUserById,
     createResetPasswordToken,
     resetPasswordForUser,
+    changePassword,
 }
 export { User }

@@ -113,7 +113,8 @@ CandidateRouter.post(
     async (req: Request, res: Response) => {
         try {
             const response = await handler.Candidate.createBulkCandidate(
-                req.body
+                req.body,
+                helper.getUserLoginId(req.user)
             )
             if (response) {
                 if (response.status) {

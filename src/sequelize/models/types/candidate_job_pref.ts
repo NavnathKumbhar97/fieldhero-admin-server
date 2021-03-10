@@ -2,16 +2,12 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    fullName: string
-    birthDate?: Date | null
-    gender?: "male" | "female" | "other" | null
-    address?: string | null
-    state?: string | null
-    country?: string | null
-    pan_card?: string | null
-    profileImage?: string | null
-    uuid?: string
-    isActive?: boolean
+    candidate_id: number
+    industry_id?: number | null
+    category?: string | null
+    pref_location_1?: string | null
+    pref_location_2?: string | null
+    pref_location_3?: string | null
     createdOn?: Date
     modifiedOn?: Date
     created_by?: number | null
@@ -26,4 +22,4 @@ type ModelTypes = typeof Model & {
     new (values?: Record<string, unknown>, options?: BuildOptions): CustomModel
 }
 
-export { ModelTypes as UserModel }
+export { ModelTypes as CandidateJobPreferenceModel }

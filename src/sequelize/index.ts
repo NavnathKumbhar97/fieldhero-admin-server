@@ -40,14 +40,21 @@ const UserLogin = models.UserLoginFactory(orm)
 const Permission = models.PermissionFactory(orm)
 const RolePermission = models.RolePermissionFactory(orm)
 const Agent = models.AgentFactory(orm)
+const CandidateJobPreference = models.CandiateJobPreferenceFactory(orm)
 
-// Candidate, CandidateWorkHistory, CandidateCertificate
+// Candidate, CandidateWorkHistory, CandidateCertificate, CandidateOtherDetails, CandidateJobPreference
 Candidate.hasMany(CandidateWorkHistory, { foreignKey: "candidateId" })
 CandidateWorkHistory.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasMany(CandidateCertificate, { foreignKey: "candidateId" })
 CandidateCertificate.belongsTo(Candidate, { foreignKey: "candidateId" })
 Candidate.hasOne(CandidateOtherDetails, { foreignKey: "candidateId" })
 CandidateOtherDetails.belongsTo(Candidate, { foreignKey: "candidateId" })
+Candidate.hasOne(CandidateJobPreference, { foreignKey: "candidate_id" })
+CandidateJobPreference.belongsTo(Candidate, { foreignKey: "candidate_id" })
+
+// CandidateJobPreference - Industry
+Industry.hasMany(CandidateJobPreference, { foreignKey: "industry_id" })
+CandidateJobPreference.belongsTo(Industry, { foreignKey: "industry_id" })
 
 //CandidateWorkHistory - Company
 CandidateWorkHistory.belongsTo(Company, {
@@ -97,6 +104,7 @@ const customerDB = {
     Agent,
     Candidate,
     CandidateCertificate,
+    CandidateJobPreference,
     CandidateOtherDetails,
     CandidateWorkHistory,
     CandidateWorkHistorySkill,

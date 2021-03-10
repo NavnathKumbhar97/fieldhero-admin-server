@@ -5,7 +5,7 @@ import { httpStatus } from "../helper"
 const handleRouterError = (res: Response, error: any) => {
     res.status(httpStatus.Bad_Request).json({
         code: httpStatus.Bad_Request,
-        message: error.message,
+        message: JSON.stringify(error),
     })
 }
 const express = {

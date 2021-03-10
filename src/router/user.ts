@@ -74,4 +74,24 @@ UserRouter.get(
     }
 )
 
+//* User self - change password
+UserRouter.post(
+    "/users/change-password",
+    middleware.permission(helper.permissions.user_self_change_password),
+    async (req: Request<any>, res: Response) => {
+        try {
+            const _user: any = req.user
+            const result = await handler.User.changePassword(
+                _user.id,
+                req.body.old_password,
+                req.body.new_password
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 export { UserRouter }

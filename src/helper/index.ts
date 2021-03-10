@@ -10,7 +10,7 @@ const getExpiryTime = () => {
 }
 
 const getGender = () => {
-    return ["male","female","other"]
+    return ["male", "female", "other"]
 }
 
 const parseDate = (date: string): moment.Moment | null => {
@@ -29,6 +29,30 @@ const parseDate = (date: string): moment.Moment | null => {
     else return null
 }
 
+interface IResponseObject {
+    status: boolean
+    code: number
+    message: string
+    data: any | null
+}
+const getHandlerResponseObject = (
+    status: boolean,
+    code: number,
+    message: string,
+    data: any = null
+): IResponseObject => {
+    return {
+        status,
+        code,
+        message,
+        data,
+    }
+}
+
+const getUserLoginId = (user: any): number => {
+    return user.loginId
+}
+
 export {
     log,
     httpStatus,
@@ -36,7 +60,10 @@ export {
     getPagingData,
     getExpiryTime,
     getGender,
+    IResponseObject,
+    getHandlerResponseObject,
     permissions,
     parseDate,
     candidate,
+    getUserLoginId,
 }

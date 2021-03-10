@@ -4,7 +4,7 @@ interface Attributes {
     id?: number
     name: string
     description?: string | null
-    uuid: string
+    uuid?: string
     isActive?: boolean
     createdOn?: Date
     modifiedOn?: Date

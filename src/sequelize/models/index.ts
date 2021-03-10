@@ -17,10 +17,12 @@ import { UserLoginFactory } from "./user_login"
 import { PermissionFactory } from "./permission"
 import { RolePermissionFactory } from "./role_permission"
 import { AgentFactory } from "./agent"
+import { CandiateJobPreferenceFactory } from "./candidate_job_pref"
 export {
     AgentFactory,
     CandidateCertificateFactory,
     CandidateFactory,
+    CandiateJobPreferenceFactory,
     CandidateOtherFactory,
     CandidateWorkFactory,
     CandidateWorkSkillFactory,
