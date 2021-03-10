@@ -2,7 +2,7 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    type: string
+    type: "training" | "certificate" | "other"
     title: string
     issueDate?: Date | null
     issuedBy?: string | null
@@ -11,6 +11,8 @@ interface Attributes {
     skillId?: number | null
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

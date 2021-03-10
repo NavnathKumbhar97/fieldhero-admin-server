@@ -9,6 +9,10 @@ const getExpiryTime = () => {
     return Date.now() + 3600000
 }
 
+const getGender = () => {
+    return ["male", "female", "other"]
+}
+
 const parseDate = (date: string): moment.Moment | null => {
     if (moment(date, "DD.MM.YYYY", true).isValid())
         return moment(date, "DD.MM.YYYY", true)
@@ -25,13 +29,41 @@ const parseDate = (date: string): moment.Moment | null => {
     else return null
 }
 
+interface IResponseObject {
+    status: boolean
+    code: number
+    message: string
+    data: any | null
+}
+const getHandlerResponseObject = (
+    status: boolean,
+    code: number,
+    message: string,
+    data: any = null
+): IResponseObject => {
+    return {
+        status,
+        code,
+        message,
+        data,
+    }
+}
+
+const getUserLoginId = (user: any): number => {
+    return user.loginId
+}
+
 export {
     log,
     httpStatus,
     passwordfunction,
     getPagingData,
     getExpiryTime,
+    getGender,
+    IResponseObject,
+    getHandlerResponseObject,
     permissions,
     parseDate,
     candidate,
+    getUserLoginId,
 }

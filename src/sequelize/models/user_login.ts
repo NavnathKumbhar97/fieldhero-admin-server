@@ -29,16 +29,16 @@ export const UserLoginFactory = (orm: Sequelize): UserLoginModel => {
             email: {
                 type: DataTypes.STRING(80),
                 allowNull: false,
+                unique: true,
             },
             passwordHash: {
                 type: DataTypes.STRING(200),
                 allowNull: false,
             },
-            createdOn: {
-                type: DataTypes.DATE,
-            },
-            modifiedOn: {
-                type: DataTypes.DATE,
+            is_system_generated: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
             },
             resetToken: {
                 type: DataTypes.STRING(500),
@@ -47,6 +47,28 @@ export const UserLoginFactory = (orm: Sequelize): UserLoginModel => {
             resetExpires: {
                 type: DataTypes.DATE,
                 allowNull: true,
+            },
+            createdOn: {
+                type: DataTypes.DATE,
+            },
+            modifiedOn: {
+                type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

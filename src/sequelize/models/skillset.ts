@@ -11,8 +11,8 @@ export const SkillSetFactory = (orm: Sequelize): SkillSetModel => {
             },
             title: {
                 type: DataTypes.STRING(45),
-                unique: true,
                 allowNull: false,
+                unique: true,
             },
             description: {
                 type: DataTypes.STRING(100),
@@ -20,7 +20,7 @@ export const SkillSetFactory = (orm: Sequelize): SkillSetModel => {
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
-                allowNull: true,
+                allowNull: false,
                 defaultValue: true,
             },
             createdOn: {
@@ -28,6 +28,22 @@ export const SkillSetFactory = (orm: Sequelize): SkillSetModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

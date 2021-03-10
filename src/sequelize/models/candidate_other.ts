@@ -31,15 +31,30 @@ export const CandidateOtherFactory = (orm: Sequelize): CandidateOtherModel => {
                 allowNull: false,
             },
             profileImage: {
-                type: DataTypes.STRING(200),
+                type: DataTypes.STRING(500),
                 allowNull: true,
-                defaultValue: null,
             },
             createdOn: {
                 type: DataTypes.DATE,
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

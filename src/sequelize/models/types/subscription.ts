@@ -3,13 +3,15 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     planName: string
-    dataCount: number
-    durationMonths: number
-    isActive: boolean
-    price: number
+    dataCount?: number
+    durationMonths?: number
+    isActive?: boolean
+    price?: number
     note?: string | null
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

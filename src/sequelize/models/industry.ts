@@ -10,7 +10,7 @@ export const IndustryFactory = (orm: Sequelize): IndustryModel => {
                 autoIncrement: true,
             },
             title: {
-                type: DataTypes.STRING(45),
+                type: DataTypes.STRING(80),
                 unique: true,
                 allowNull: false,
             },
@@ -20,7 +20,7 @@ export const IndustryFactory = (orm: Sequelize): IndustryModel => {
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
-                allowNull: true,
+                allowNull: false,
                 defaultValue: true,
             },
             createdOn: {
@@ -28,6 +28,22 @@ export const IndustryFactory = (orm: Sequelize): IndustryModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

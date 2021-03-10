@@ -4,15 +4,18 @@ interface Attributes {
     id?: number
     fullName: string
     birthDate?: Date | null
-    gender?: "male" | "female" | "transgender" | null
+    gender?: "male" | "female" | "other" | null
     address?: string | null
     state?: string | null
     country?: string | null
+    pan_card?: string | null
     profileImage?: string | null
     uuid?: string
     isActive?: boolean
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

@@ -3,7 +3,7 @@ import { Model, BuildOptions } from "sequelize"
 interface Attributes {
     id?: number
     name: string
-    description?: string
+    description?: string | null
     displayName: string
     group: string
     isActive?: boolean

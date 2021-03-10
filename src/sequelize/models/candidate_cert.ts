@@ -12,7 +12,9 @@ export const CandidateCertificateFactory = (
                 autoIncrement: true,
             },
             type: {
-                type: DataTypes.STRING(50),
+                type: DataTypes.ENUM,
+                values: ["training", "certificate", "other"],
+                defaultValue: "other",
                 allowNull: false,
             },
             title: {
@@ -52,6 +54,22 @@ export const CandidateCertificateFactory = (
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

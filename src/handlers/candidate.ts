@@ -2,6 +2,8 @@ import paginate from "jw-paginate"
 import * as helper from "../helper"
 import { customerDB, ormCustomer } from "../sequelize"
 import { log, httpStatus } from "../helper"
+import { Op } from "sequelize"
+import { IRejected } from "../helper/candidate"
 
 /*
  * get All Get Candidates
@@ -216,11 +218,8 @@ const deleteCandiateById = async (id: number) => {
  */
 interface createCandidateParam {
     fullName: string
-    firstName: string
-    middleName: string
-    lastName: string
     birthDate: Date
-    gender: "male" | "female" | "transgender" | null
+    gender: "male" | "female" | "other" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -249,9 +248,6 @@ const createCandidate = async (param: createCandidateParam) => {
         const candidate = await customerDB.Candidate.create(
             {
                 fullName: param.fullName,
-                firstName: param.firstName || "NULL",
-                middleName: param.middleName || "NULL",
-                lastName: param.lastName || "NULL",
                 birthDate: param.birthDate,
                 gender: param.gender,
                 perm_address: param.perm_address,
@@ -279,7 +275,7 @@ const createCandidate = async (param: createCandidateParam) => {
                 totalExpMonths: param.totalExpMonths,
                 totalExpYears: param.totalExpYears,
                 registrationStatus: param.registrationStatus,
-                candidateId: candidate.get("id"),
+                candidateId: candidate.get("id") as number,
             },
             { transaction }
         )
@@ -298,11 +294,8 @@ const createCandidate = async (param: createCandidateParam) => {
 interface updateCandidateParam {
     id: number
     fullName: string
-    firstName: string
-    middleName: string
-    lastName: string
     birthDate: Date
-    gender: "male" | "female" | "transgender" | null
+    gender: "male" | "female" | "other" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -334,9 +327,6 @@ const updateCandidateById = async (param: updateCandidateParam) => {
         let updateCandidate = null
         if (candidateInfo) {
             candidateInfo.fullName = param.fullName
-            candidateInfo.firstName = param.firstName
-            candidateInfo.middleName = param.middleName
-            candidateInfo.lastName = param.lastName
             candidateInfo.birthDate = param.birthDate
             candidateInfo.gender = param.gender
             candidateInfo.perm_address = param.perm_address
@@ -417,111 +407,434 @@ interface bulkCreateCandidateParam {
     candidateId?: number | null
 }
 
-const createBulkCandidate = async (param: Array<any>) => {
+const createBulkCandidate = async (param: Array<any>, userId: number) => {
     const transaction = await ormCustomer.transaction()
+    const arrRejected: Array<any> = []
+    const arrIgnored: Array<any> = []
     try {
-        const _params: any = param
-            .map((item, i) => {
-                // fullName
-                const fullName = helper.candidate.handleString(item.fullName)
-                // birthdate
-                const birthDate = helper.candidate.handleDate(item.birthdate)
-                // gender
-                let gender = item.gender ? item.gender.trim() : null
-                gender = gender ? (gender as string).toLowerCase() : null
-                // perm_address
-                const perm_address = helper.candidate.handleString(
-                    item.perm_address
-                )
-                // perm_city
-                const perm_city = helper.candidate.handleString(item.perm_city)
-                // perm_state
-                const perm_state = helper.candidate.handleString(
-                    item.perm_state
-                )
-                // perm_country
-                const perm_country = "India"
-                // perm_zip
-                const perm_zip = helper.candidate.handleNumber(
-                    item.perm_pincode
-                )
-                // curr_address
-                const curr_address = helper.candidate.handleString(
-                    item.curr_address
-                )
-                // curr_city
-                const curr_city = helper.candidate.handleString(
-                    item.curr_city,
-                    45
-                )
-                if (curr_city === undefined) console.log(i, item.curr_city)
-                // curr_state
-                const curr_state = helper.candidate.handleString(
-                    item.curr_state
-                )
-                // curr_country
-                const curr_country = "India"
-                // curr_zip
-                const curr_zip = helper.candidate.handleNumber(
-                    item.curr_pincode
-                )
-                // email1
-                const email1 = helper.candidate.handleEmail(item.primary_email)
-                // email2
-                const email2 = helper.candidate.handleEmail(
-                    item.secondary_email
-                )
-                // contactNo1
-                const contactNo1 = helper.candidate.handleNumber(
-                    item.primary_mobile
-                )
-                // contactNo2
-                const contactNo2 = helper.candidate.handleNumber(
-                    item.secondary_mobile
-                )
-                // aadharNo
-                const aadharNo = helper.candidate.handleAadhar(item.aadharNo)
-                // isActive
-                const isActive = true
-                // registrationStatus
-                const registrationStatus = helper.candidate.handleString(
-                    item.registrationStatus
-                )
-                // totalExpMonths
-                const totalExpMonths = helper.candidate.handleNumber(
-                    item.exp_months
-                )
-                // totalExpYears
-                const totalExpYears = helper.candidate.handleNumber(
-                    item.exp_years
-                )
-                return {
-                    fullName,
-                    birthDate,
-                    gender,
-                    perm_address,
-                    perm_city,
-                    perm_state,
-                    perm_country,
-                    perm_zip,
-                    curr_address,
-                    curr_city,
-                    curr_state,
-                    curr_country,
-                    curr_zip,
-                    email1,
-                    email2,
-                    contactNo1,
-                    contactNo2,
-                    aadharNo,
-                    isActive,
-                    registrationStatus,
-                    totalExpMonths,
-                    totalExpYears,
-                }
-            })
-            .filter((item) => item.fullName && item.contactNo1)
-        const candidate = await customerDB.Candidate.bulkCreate(_params, {
+        const _params: any = param.map((item, i) => {
+            const rejected: any = {}
+            const ignored: any = {}
+
+            // industry
+            let industry: any = helper.candidate.handleNotNullString(
+                item.industry,
+                80
+            )
+            if (industry && typeof industry === "object") {
+                industry = "Other"
+            }
+
+            // category
+            let category: any = helper.candidate.handleNotNullString(
+                item.category,
+                80
+            )
+            if (category && typeof category === "object") {
+                rejected["category"] = category.error
+                category = null
+            }
+
+            // fullName
+            let fullName: any = helper.candidate.handleNotNullString(
+                item.full_name,
+                200
+            )
+            if (fullName && typeof fullName === "object") {
+                rejected["full_name"] = fullName.error
+                fullName = null
+            }
+
+            // contactNo1
+            let contactNo1: any = helper.candidate.handleNotNullNumber(
+                item.primary_mobile,
+                45
+            )
+            if (contactNo1 && typeof contactNo1 === "object") {
+                rejected["primary_mobile"] = contactNo1.error
+                contactNo1 = null
+            }
+
+            // curr_address
+            let curr_address: any = helper.candidate.handleString(
+                item.curr_address,
+                500
+            )
+            if (curr_address && typeof curr_address === "object") {
+                ignored["curr_address"] = curr_address.error
+                curr_address = null
+            }
+
+            // curr_city
+            let curr_city: any = helper.candidate.handleNotNullString(
+                item.curr_city,
+                45
+            )
+            if (curr_city && typeof curr_city === "object") {
+                rejected["curr_city"] = curr_city.error
+                curr_city = null
+            }
+
+            // curr_state
+            let curr_state: any = helper.candidate.handleString(
+                item.curr_state,
+                45
+            )
+            if (curr_state && typeof curr_state === "object") {
+                ignored["curr_state"] = curr_state.error
+                curr_state = null
+            }
+
+            // curr_country
+            const curr_country = "India"
+
+            // curr_zip
+            let curr_zip: any = helper.candidate.handleNumber(
+                item.curr_pincode,
+                10
+            )
+            if (curr_zip && typeof curr_zip === "object") {
+                ignored["curr_pincode"] = curr_zip.error
+                curr_zip = null
+            }
+
+            // birthdate
+            let birthDate: any = helper.candidate.handleDate(item.birth_date)
+            if (birthDate && typeof birthDate == "object") {
+                ignored["birth_date"] = birthDate.error
+                birthDate = null
+            }
+
+            // gender
+            let gender: any = helper.candidate.handleGender(item.gender)
+            if (gender && typeof gender === "object") {
+                ignored["gender"] = gender.error
+                gender = null
+            }
+
+            // perm_address
+            let perm_address: any = helper.candidate.handleString(
+                item.perm_address,
+                500
+            )
+            if (perm_address && typeof perm_address === "object") {
+                ignored["perm_address"] = perm_address.error
+                perm_address = null
+            }
+
+            // perm_city
+            let perm_city: any = helper.candidate.handleString(
+                item.perm_city,
+                45
+            )
+            if (perm_city && typeof perm_city === "object") {
+                ignored["perm_city"] = perm_city.error
+                perm_city = null
+            }
+
+            // perm_state
+            let perm_state: any = helper.candidate.handleString(
+                item.perm_state,
+                45
+            )
+            if (perm_state && typeof perm_state === "object") {
+                ignored["perm_state"] = perm_state.error
+                perm_state = null
+            }
+
+            // perm_country
+            const perm_country = "India"
+
+            // perm_zip
+            let perm_zip: any = helper.candidate.handleNumber(
+                item.perm_pincode,
+                10
+            )
+            if (perm_zip && typeof perm_zip === "object") {
+                ignored["perm_pincode"] = perm_zip.error
+                perm_zip = null
+            }
+
+            // email1
+            let email1: any = helper.candidate.handleEmail(
+                item.primary_email,
+                80
+            )
+            if (email1 && typeof email1 === "object") {
+                ignored["primary_email"] = email1.error
+                email1 = null
+            }
+
+            // email2
+            let email2: any = helper.candidate.handleEmail(
+                item.secondary_email,
+                80
+            )
+            if (email2 && typeof email2 === "object") {
+                ignored["secondary_email"] = email2.error
+                email2 = null
+            }
+
+            // contactNo2
+            let contactNo2: any = helper.candidate.handleNumber(
+                item.secondary_mobile,
+                45
+            )
+            if (contactNo2 && typeof contactNo2 === "object") {
+                ignored["secondary_mobile"] = contactNo2.error
+                contactNo2 = null
+            }
+
+            // aadharNo
+            let aadharNo: any = helper.candidate.handleAadhar(item.aadhar_no)
+            if (aadharNo && typeof aadharNo === "object") {
+                ignored["aadhar_no"] = aadharNo.error
+                aadharNo = null
+            }
+
+            // isActive
+            const isActive = true
+
+            // registrationStatus
+            let registrationStatus: any = helper.candidate.handleString(
+                item.registration_status,
+                15
+            )
+            if (registrationStatus && typeof registrationStatus == "object") {
+                ignored["registration_status"] = registrationStatus.error
+                registrationStatus = null
+            }
+
+            // totalExpMonths
+            let totalExpMonths: any = helper.candidate.handleNumber(
+                item.exp_months
+            )
+            if (totalExpMonths && typeof totalExpMonths == "object") {
+                ignored["exp_months"] = totalExpMonths.error
+                totalExpMonths = null
+            }
+
+            // totalExpYears
+            let totalExpYears: any = helper.candidate.handleNumber(
+                item.exp_years
+            )
+            if (totalExpYears && typeof totalExpYears == "object") {
+                ignored["exp_years"] = totalExpYears.error
+                totalExpYears = null
+            }
+
+            // pref_location_1
+            let pref_location_1: any = helper.candidate.handleString(
+                item.pref_location_1,
+                45
+            )
+            if (pref_location_1 && typeof pref_location_1 == "object") {
+                ignored["pref_location_1"] = pref_location_1.error
+                pref_location_1 = null
+            }
+
+            // pref_location_2
+            let pref_location_2: any = helper.candidate.handleString(
+                item.pref_location_2,
+                45
+            )
+            if (pref_location_2 && typeof pref_location_2 == "object") {
+                ignored["pref_location_2"] = pref_location_2.error
+                pref_location_2 = null
+            }
+
+            // pref_location_3
+            let pref_location_3: any = helper.candidate.handleString(
+                item.pref_location_3,
+                45
+            )
+            if (pref_location_3 && typeof pref_location_3 == "object") {
+                ignored["pref_location_3"] = pref_location_3.error
+                pref_location_3 = null
+            }
+
+            // rowNum
+            const rowNum = i + 2
+
+            if (Object.keys(rejected).length) {
+                rejected["rowNum"] = rowNum
+                arrRejected.push(rejected)
+            }
+            if (Object.keys(ignored).length) {
+                ignored["rowNum"] = rowNum
+                arrIgnored.push(ignored)
+            }
+            return {
+                fullName,
+                birthDate,
+                gender,
+                perm_address,
+                perm_city,
+                perm_state,
+                perm_country,
+                perm_zip,
+                curr_address,
+                curr_city,
+                curr_state,
+                curr_country,
+                curr_zip,
+                email1,
+                email2,
+                contactNo1,
+                contactNo2,
+                aadharNo,
+                isActive,
+                registrationStatus,
+                totalExpMonths,
+                totalExpYears,
+                industry,
+                category,
+                pref_location_1,
+                pref_location_2,
+                pref_location_3,
+                rowNum,
+                created_by: userId,
+                modified_by: userId,
+            }
+        })
+
+        // * remove null fullName, contactNo1, categoty and curr_city
+        let filteredData = _params.filter(
+            (item: any) =>
+                item.fullName &&
+                item.contactNo1 &&
+                item.category &&
+                item.curr_city
+        )
+
+        // * remove duplicate email1(primary_email) from excel
+        const _deEmails = helper.candidate.findDuplicateFromExcel(
+            filteredData,
+            "email1",
+            "primary_email",
+            false
+        )
+        filteredData = _deEmails.arr
+        _deEmails.arrIgnored.forEach((item) => arrIgnored.push(item))
+
+        // * remove duplicate aadharNo(aadhar_no) from excel
+        const _deAadharNos = helper.candidate.findDuplicateFromExcel(
+            filteredData,
+            "aadharNo",
+            "aadhar_no",
+            false
+        )
+        filteredData = _deAadharNos.arr
+        _deAadharNos.arrIgnored.forEach((item) => arrIgnored.push(item))
+
+        // * remove duplicate contactNo1(primary_mobile) from excel
+        const _deContactNos = helper.candidate.findDuplicateFromExcel(
+            filteredData,
+            "contactNo1",
+            "primary_mobile",
+            true
+        )
+        filteredData = _deContactNos.arr
+        _deContactNos.arrIgnored.forEach((item) => arrRejected.push(item))
+
+        // * remove null fullName, contactNo1, categoty and curr_city
+        filteredData = filteredData.filter(
+            (item: any) =>
+                item.fullName &&
+                item.contactNo1 &&
+                item.category &&
+                item.curr_city
+        )
+
+        const duplicateFromDB = await customerDB.Candidate.findAndCountAll({
+            attributes: ["email1", "contactNo1", "aadharNo"],
+            where: {
+                [Op.or]: [
+                    {
+                        email1: {
+                            [Op.in]: filteredData.map(
+                                (item: any) => item.fullName
+                            ),
+                        },
+                    },
+                    {
+                        contactNo1: {
+                            [Op.in]: filteredData.map(
+                                (item: any) => item.contactNo1
+                            ),
+                        },
+                    },
+                    {
+                        aadharNo: {
+                            [Op.in]: filteredData.map(
+                                (item: any) => item.aadharNo
+                            ),
+                        },
+                    },
+                ],
+            },
+            transaction,
+        })
+        const arrDuplicateFromDB = duplicateFromDB.rows.map((item) =>
+            item.toJSON()
+        )
+        if (duplicateFromDB.count) {
+            // * remove duplicate email1(primary_email) from db
+            const _ddEmails = helper.candidate.findDuplicateFromDB(
+                filteredData,
+                arrDuplicateFromDB,
+                "email1",
+                "primary_email",
+                false
+            )
+            filteredData = _ddEmails.arr
+            _ddEmails.arrIgnored.forEach((item) => arrIgnored.push(item))
+
+            // * remove duplicate aadharNo(aadhar_no) from db
+            const _ddAadharNos = helper.candidate.findDuplicateFromDB(
+                filteredData,
+                arrDuplicateFromDB,
+                "aadharNo",
+                "aadhar_no",
+                false
+            )
+            filteredData = _ddAadharNos.arr
+            _ddAadharNos.arrIgnored.forEach((item) => arrIgnored.push(item))
+
+            // * remove duplicate contactNo1(primary_mobile) from db
+            const _ddContactNos = helper.candidate.findDuplicateFromDB(
+                filteredData,
+                arrDuplicateFromDB,
+                "contactNo1",
+                "primary_mobile",
+                true
+            )
+            console.log(_ddContactNos.arrIgnored.length)
+            filteredData = _ddContactNos.arr
+            _ddContactNos.arrIgnored.forEach((item) => arrRejected.push(item))
+
+            // * remove null fullName, contactNo1, categoty and curr_city
+            filteredData = filteredData.filter(
+                (item: any) =>
+                    item.fullName &&
+                    item.contactNo1 &&
+                    item.category &&
+                    item.curr_city
+            )
+        }
+
+        const rowNums = [
+            ...new Set([
+                ...arrRejected.map((item) => item.rowNum),
+                ...arrIgnored.map((item) => item.rowNum),
+            ]),
+        ]
+
+        const arrSummary = param.filter((item: any, i: number) =>
+            rowNums.includes(i + 2)
+        )
+
+        const candidate = await customerDB.Candidate.bulkCreate(filteredData, {
             fields: [
                 "fullName",
                 "birthDate",
@@ -542,6 +855,8 @@ const createBulkCandidate = async (param: Array<any>) => {
                 "contactNo2",
                 "aadharNo",
                 "isActive",
+                "created_by",
+                "modified_by",
             ],
             transaction,
         })
@@ -555,7 +870,9 @@ const createBulkCandidate = async (param: Array<any>) => {
                 totalExpMonths,
                 totalExpYears,
                 registrationStatus,
-                candidateId: item.id,
+                candidateId: item.id as number,
+                created_by: userId,
+                modified_by: userId,
             }
         })
         const candidateother = await customerDB.CandidateOtherDetails.bulkCreate(
@@ -566,6 +883,8 @@ const createBulkCandidate = async (param: Array<any>) => {
                     "totalExpYears",
                     "registrationStatus",
                     "candidateId",
+                    "created_by",
+                    "modified_by",
                 ],
                 transaction,
             }
@@ -573,16 +892,15 @@ const createBulkCandidate = async (param: Array<any>) => {
 
         await transaction.commit()
         // return Object.assign({ candidate, candidateother })
-        return {
-            status: true,
-            code: httpStatus.Created,
-            message: `${candidate.length} candidates uploaded successfully`,
-            data: {
-                totalCreated: candidate.length,
-            },
-        }
+        return helper.getHandlerResponseObject(
+            true,
+            helper.httpStatus.Created,
+            `${candidate.length} Candidates uploaded successfully`,
+            { arrRejected, arrIgnored, arrSummary }
+        )
     } catch (err: any) {
         await transaction.rollback()
+        // console.log(err)
         // log.error(err, "Error while createBulkCandidate")
         throw err
     }
@@ -592,7 +910,7 @@ const createBulkCandidate = async (param: Array<any>) => {
  * create Candidate Traning certificate
  */
 interface createCandidateTrainingCertParam {
-    type: string
+    type: "training" | "certificate" | "other"
     title: string
     issueDate: Date
     issuedBy: string
@@ -652,7 +970,7 @@ const getCandidateTrainingCertById = async (id: number, certId: number) => {
  */
 interface updateCandidateTrainingCertParam {
     id: number
-    type: string
+    type: "training" | "certificate" | "other"
     title: string
     issueDate: Date
     issuedBy: string

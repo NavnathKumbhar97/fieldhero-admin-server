@@ -45,6 +45,22 @@ export const SubscriptionFactory = (orm: Sequelize): SubscriptionModel => {
             modifiedOn: {
                 type: DataTypes.DATE,
             },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
         },
         {
             timestamps: true,

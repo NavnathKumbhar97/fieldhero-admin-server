@@ -27,10 +27,14 @@ export const CustomerSubscriptionFactory = (
                 type: DataTypes.DATEONLY,
                 allowNull: false,
             },
+            planName: {
+                type: DataTypes.STRING(40),
+                allowNull: false,
+            },
             allocatedData: {
                 type: DataTypes.INTEGER,
                 allowNull: false,
-                defaultValue: 0,
+                defaultValue: 10,
             },
             usedData: {
                 type: DataTypes.INTEGER,
@@ -45,15 +49,27 @@ export const CustomerSubscriptionFactory = (
                 type: DataTypes.STRING(200),
                 allowNull: true,
             },
-            planName: {
-                type: DataTypes.STRING(40),
-                allowNull: false,
-            },
             createdOn: {
                 type: DataTypes.DATE,
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

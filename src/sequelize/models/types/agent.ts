@@ -2,12 +2,14 @@ import { Model, BuildOptions } from "sequelize"
 
 interface Attributes {
     id?: number
-    roleId: number
-    permissionId: number
-    createdOn?: Date
-    modifiedOn?: Date
-    created_by?: number | null
-    modified_by?: number | null
+    user_id: number
+    prof_status?: string | null
+    gstin?: string | null
+    company_name?: string | null
+    note?: string | null
+    status: "pending" | "registered"
+    approved_on?: Date | null
+    approved_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
@@ -18,4 +20,4 @@ type ModelTypes = typeof Model & {
     new (values?: Record<string, unknown>, options?: BuildOptions): CustomModel
 }
 
-export { ModelTypes as RolePermissionModel }
+export { ModelTypes as AgentModel }

@@ -5,10 +5,12 @@ interface Attributes {
     totalExpMonths?: number | null
     totalExpYears?: number | null
     registrationStatus?: string | null
-    candidateId?: number
+    candidateId: number
     profileImage?: string | null
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
