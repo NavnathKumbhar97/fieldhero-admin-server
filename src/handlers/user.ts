@@ -68,7 +68,7 @@ const createUser = async (param: createUserParam) => {
             .sendMail({
                 to: [param.email],
                 from: config.EMAIL_FROM,
-                subject: "Your Password",
+                subject: "Fieldhero - Your Password",
                 html: html.html,
             })
             .then((success) => log.info(success))
@@ -244,7 +244,7 @@ const createResetPasswordToken = async (email: string) => {
                 .sendMail({
                     to: [_user.email],
                     from: config.EMAIL_FROM,
-                    subject: "Reset Password Request",
+                    subject: "Fieldhero - Reset Password Request",
                     html,
                 })
                 .catch((err) => {
@@ -329,7 +329,7 @@ const resetPasswordForUser = async (token: string, email: string) => {
                         .sendMail({
                             to: [_userLogin.email],
                             from: config.EMAIL_FROM,
-                            subject: "Password Reset Successfully",
+                            subject: "Fieldhero - Password Reset Successfully",
                             html,
                         })
                         .catch((err) => {

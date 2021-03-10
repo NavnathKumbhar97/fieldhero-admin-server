@@ -277,11 +277,11 @@ const findDuplicateFromExcel = (
     arr: Array<any>,
     field: string,
     excelField: string,
-    isMandatory: boolean = false
+    isMandatory = false
 ) => {
     const arrIgnored: Array<any> = []
     // get array of field only
-    let _items = arr.map((item: any) => item[field])
+    const _items = arr.map((item: any) => item[field])
     // get all unique fields
     const _uniqueItems = new Set([..._items])
     // find duplicate fields from array of field only
@@ -312,11 +312,11 @@ const findDuplicateFromDB = (
     dbArr: Array<any>,
     field: string,
     excelField: string,
-    isMandatory: boolean = false
+    isMandatory = false
 ) => {
     const arrIgnored: Array<any> = []
     // get array of field only
-    let _items = dbArr.map((item: any) => item[field])
+    const _items = dbArr.map((item: any) => item[field])
     // set duplicate field to null and add into array of ignored
     arr = arr.map((item: any, ind: number) => {
         const rowNum = ind + 2

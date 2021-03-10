@@ -206,7 +206,7 @@ const updateCustomerSubscriptionsById = async (
             )
             const updateSubScription = null
             if (custSubscription) {
-                ;(custSubscription[0].planName = param.planName),
+                (custSubscription[0].planName = param.planName),
                     (custSubscription[0].startDate = param.startDate),
                     (custSubscription[0].expiryDate = param.expiryDate),
                     (custSubscription[0].allocatedData = param.allocatedData),
@@ -270,7 +270,7 @@ const resetLoginPasswordForCustomer = async (param: any) => {
                 .sendMail({
                     to: [_customerLogin.email],
                     from: config.EMAIL_FROM,
-                    subject: "Password Reset Successfully",
+                    subject: "Fieldhero - Password Reset Successfully",
                     html,
                 })
                 .catch((err) => {
