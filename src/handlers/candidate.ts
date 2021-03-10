@@ -412,6 +412,10 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
     const arrRejected: Array<any> = []
     const arrIgnored: Array<any> = []
     try {
+        param = param.map((item, i) => {
+            const row_num = i + 2
+            return { ...item, row_num }
+        })
         const _params: any = param.map((item, i) => {
             const rejected: any = {}
             const ignored: any = {}
@@ -653,15 +657,12 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
                 pref_location_3 = null
             }
 
-            // rowNum
-            const rowNum = i + 2
-
             if (Object.keys(rejected).length) {
-                rejected["rowNum"] = rowNum
+                rejected["rowNum"] = item.row_num
                 arrRejected.push(rejected)
             }
             if (Object.keys(ignored).length) {
-                ignored["rowNum"] = rowNum
+                ignored["rowNum"] = item.row_num
                 arrIgnored.push(ignored)
             }
             return {
@@ -692,7 +693,7 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
                 pref_location_1,
                 pref_location_2,
                 pref_location_3,
-                rowNum,
+                rowNum: item.row_num,
                 created_by: userId,
                 modified_by: userId,
             }
@@ -889,6 +890,8 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
                 transaction,
             }
         )
+
+        //
 
         await transaction.commit()
         // return Object.assign({ candidate, candidateother })
