@@ -11,7 +11,7 @@ const CandidateRouter = Router()
 //* Fetch all Candidate
 CandidateRouter.get(
     "/candidates",
-    middleware.permission(helper.permissions.candidate_basic_read_all),
+    middleware.permission(helper.permissions.candidate_read_all),
     async (req: Request<any>, res: Response) => {
         try {
             const candidates = await handler.Candidate.getCandidates(req.query)
@@ -113,7 +113,8 @@ CandidateRouter.post(
     async (req: Request, res: Response) => {
         try {
             const response = await handler.Candidate.createBulkCandidate(
-                req.body
+                req.body,
+                helper.getUserLoginId(req.user)
             )
             if (response) {
                 if (response.status) {

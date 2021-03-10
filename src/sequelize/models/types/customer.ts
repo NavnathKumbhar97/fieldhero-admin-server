@@ -5,13 +5,15 @@ interface Attributes {
     fullName: string
     companyName?: string | null
     birthDate?: Date | null
-    gender?: string | null
+    gender?: "male" | "female" | "other" | null
     state?: string | null
     country?: string | null
     profileImage?: string | null
-    isActive?: boolean | null
+    isActive?: boolean
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}

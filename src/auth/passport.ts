@@ -24,7 +24,7 @@ passport.use(
                     include: [
                         {
                             model: customerDB.User,
-                            attributes: ["id", "uuid"],
+                            attributes: ["id", "fullName", "uuid"],
                         },
                         {
                             model: customerDB.Role,
@@ -64,6 +64,7 @@ passport.use(
                         const { role_permissions } = role_master
                         done(null, {
                             email,
+                            name: user_master.fullName,
                             id: user_master.id,
                             uuid: user_master.uuid,
                             roleId: role_master.uuid,
@@ -117,6 +118,7 @@ passport.use(
                 done(null, {
                     id: _user.id,
                     uuid: _user.uuid,
+                    loginId: _user.user_login.id,
                     role: {
                         ..._user.user_login.role_master,
                     },

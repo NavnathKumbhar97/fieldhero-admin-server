@@ -11,6 +11,7 @@ LoginRouter.use(passport.initialize())
 
 interface IUserParam {
     email: string
+    name: string
     id: number
     uuid: string
     roleId: string
@@ -46,6 +47,7 @@ LoginRouter.post(
                             token,
                             user: {
                                 email: user.email,
+                                name: user.name,
                                 id: user.id,
                                 permissions: user.permissions,
                             },
@@ -59,7 +61,7 @@ LoginRouter.post(
         )(req, res, next)
     }
 )
-
+// * Forgot password
 LoginRouter.post(
     "/users/forgot-password",
     async (req: Request, res: Response) => {
@@ -96,7 +98,7 @@ LoginRouter.post(
         }
     }
 )
-
+// * Verify reset password request
 LoginRouter.get(
     "/users/verify-reset-password",
     async (req: Request, res: Response) => {

@@ -1,4 +1,6 @@
 import { DataTypes, Sequelize } from "sequelize"
+// local imports
+import * as helper from "../../helper"
 import { UserModel } from "./types"
 export const UserFactory = (orm: Sequelize): UserModel => {
     return <UserModel>orm.define(
@@ -11,7 +13,7 @@ export const UserFactory = (orm: Sequelize): UserModel => {
                 allowNull: false,
             },
             fullName: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(200),
                 allowNull: false,
             },
             birthDate: {
@@ -20,23 +22,27 @@ export const UserFactory = (orm: Sequelize): UserModel => {
             },
             gender: {
                 type: DataTypes.ENUM,
-                values: ["male", "female", "transgender"],
+                values: helper.getGender(),
                 allowNull: true,
             },
             address: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(500),
                 allowNull: true,
             },
             state: {
-                type: DataTypes.STRING(30),
+                type: DataTypes.STRING(45),
                 allowNull: true,
             },
             country: {
-                type: DataTypes.STRING(30),
+                type: DataTypes.STRING(45),
+                allowNull: true,
+            },
+            pan_card: {
+                type: DataTypes.STRING(20),
                 allowNull: true,
             },
             profileImage: {
-                type: DataTypes.STRING(200),
+                type: DataTypes.STRING(500),
                 allowNull: true,
             },
             uuid: {
@@ -54,6 +60,22 @@ export const UserFactory = (orm: Sequelize): UserModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

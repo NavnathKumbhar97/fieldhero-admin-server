@@ -1,8 +1,10 @@
 import { DataTypes, Sequelize } from "sequelize"
-import { RolePermissionModel } from "./types"
-export const RolePermissionFactory = (orm: Sequelize): RolePermissionModel => {
-    return <RolePermissionModel>orm.define(
-        "role_permission",
+import { CandidateJobPreferenceModel } from "./types"
+export const CandiateJobPreferenceFactory = (
+    orm: Sequelize
+): CandidateJobPreferenceModel => {
+    return <CandidateJobPreferenceModel>orm.define(
+        "candidate_job_preference",
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -10,21 +12,37 @@ export const RolePermissionFactory = (orm: Sequelize): RolePermissionModel => {
                 autoIncrement: true,
                 allowNull: false,
             },
-            roleId: {
+            candidate_id: {
                 type: DataTypes.INTEGER,
+                allowNull: false,
                 references: {
-                    model: "role_master",
+                    model: "candidate_master",
                     key: "id",
                 },
-                allowNull: false,
             },
-            permissionId: {
+            industry_id: {
                 type: DataTypes.INTEGER,
+                allowNull: true,
                 references: {
-                    model: "permission_master",
+                    model: "industry_type_master",
                     key: "id",
                 },
-                allowNull: false,
+            },
+            category: {
+                type: DataTypes.STRING(50),
+                allowNull: true,
+            },
+            pref_location_1: {
+                type: DataTypes.STRING(50),
+                allowNull: true,
+            },
+            pref_location_2: {
+                type: DataTypes.STRING(50),
+                allowNull: true,
+            },
+            pref_location_3: {
+                type: DataTypes.STRING(50),
+                allowNull: true,
             },
             createdOn: {
                 type: DataTypes.DATE,

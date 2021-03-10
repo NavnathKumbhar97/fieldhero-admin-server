@@ -206,7 +206,7 @@ const updateCustomerSubscriptionsById = async (
             )
             const updateSubScription = null
             if (custSubscription) {
-                (custSubscription[0].planName = param.planName),
+                ;(custSubscription[0].planName = param.planName),
                     (custSubscription[0].startDate = param.startDate),
                     (custSubscription[0].expiryDate = param.expiryDate),
                     (custSubscription[0].allocatedData = param.allocatedData),
@@ -305,7 +305,7 @@ interface IUpdateCustomerparam {
     fullName: string
     companyName: string
     birthDate: Date
-    gender: string
+    gender: "male" | "female" | "other" | null
     state: string
     country: string
 }

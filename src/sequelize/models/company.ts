@@ -10,16 +10,17 @@ export const CompanyFactory = (orm: Sequelize): CompanyModel => {
                 autoIncrement: true,
             },
             companyName: {
-                type: DataTypes.STRING(45),
+                type: DataTypes.STRING(100),
                 allowNull: false,
+                unique: true,
             },
             description: {
-                type: DataTypes.STRING(100),
+                type: DataTypes.STRING(200),
                 allowNull: true,
             },
             isActive: {
                 type: DataTypes.BOOLEAN,
-                allowNull: true,
+                allowNull: false,
                 defaultValue: true,
             },
             industryId: {
@@ -35,6 +36,22 @@ export const CompanyFactory = (orm: Sequelize): CompanyModel => {
             },
             modifiedOn: {
                 type: DataTypes.DATE,
+            },
+            created_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
+            },
+            modified_by: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: {
+                    model: "user_login",
+                    key: "id",
+                },
             },
         },
         {

@@ -9,6 +9,8 @@ interface Attributes {
     companyId?: number | null
     createdOn?: Date
     modifiedOn?: Date
+    created_by?: number | null
+    modified_by?: number | null
 }
 
 interface CustomModel extends Model<Attributes>, Attributes {}
