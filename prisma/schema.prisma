@@ -1,0 +1,642 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+}
+
+// ENUMs
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum CandidateBatchStatus {
+  PENDING_PROCESSING
+  IN_PROGRESS
+  PROCESSED
+}
+
+enum BatchPaymentStatus {
+  PENDING
+  PAID
+}
+
+enum CandidateRejectType {
+  REJECT
+  IGNORE
+}
+
+enum CandidateRejectReason {
+  MANDATORY
+  DUPLICATE
+  WRONG_INPUT
+  LENGTH_EXCEEDED
+  CONSENT_DECLINED
+}
+
+enum CandidateRejectBy {
+  SYSTEM
+  USER
+}
+
+enum CandidateConsent {
+  PENDING
+  DECLINED
+  RECEIVED
+}
+
+enum TrainingType {
+  TRAINING
+  CERTIFICATE
+  OTHER
+}
+
+enum AgentStatus {
+  PENDING
+  REGISTERED
+}
+
+enum CustomerStatus {
+  PENDING
+  VERIFIED
+}
+
+// Models
+
+model Permission {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique @db.VarChar(40)
+  description    String?          @db.VarChar(200)
+  displayName    String           @db.VarChar(40)
+  group          String           @db.VarChar(30)
+  isActive       Boolean          @default(true)
+  createdOn      DateTime         @default(now())
+  modifiedOn     DateTime         @updatedAt
+  RolePermission RolePermission[]
+}
+
+model Role {
+  id                Int              @id @default(autoincrement())
+  name              String           @unique @db.VarChar(40)
+  description       String?          @db.VarChar(200)
+  isSystemGenerated Boolean          @default(false)
+  uuid              String           @unique @default(uuid())
+  isActive          Boolean          @default(true)
+  createdOn         DateTime         @default(now())
+  modifiedOn        DateTime         @updatedAt
+  UserLogin         UserLogin[]
+  createdBy         Int?
+  CreatedBy         UserLogin?       @relation("createdByRoleToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy        Int?
+  ModifiedBy        UserLogin?       @relation("modifiedByRoleToUserLogin", fields: [modifiedBy], references: [id])
+  RolePermission    RolePermission[]
+}
+
+model User {
+  id            Int        @id @default(autoincrement())
+  fullName      String     @db.VarChar(200)
+  dob           DateTime?  @db.Date
+  gender        Gender?
+  permAddress   String?    @db.VarChar(500)
+  permCity      String?    @db.VarChar(45)
+  permState     String?    @db.VarChar(45)
+  permCountry   String?    @db.VarChar(45)
+  permZip       String?    @db.VarChar(10)
+  currAddress   String?    @db.VarChar(500)
+  currCity      String?    @db.VarChar(45)
+  currState     String?    @db.VarChar(45)
+  currCountry   String?    @db.VarChar(45)
+  currZip       String?    @db.VarChar(10)
+  panCard       String?    @unique @db.VarChar(20)
+  aadharCard    String?    @unique @db.VarChar(15)
+  primaryLang   String?    @db.VarChar(30)
+  secondaryLang String?    @db.VarChar(30)
+  thirdLang     String?    @db.VarChar(30)
+  profileImage  String?    @db.VarChar(500)
+  note          String?    @db.VarChar(500)
+  uuid          String     @default(uuid())
+  isActive      Boolean    @default(true)
+  createdOn     DateTime   @default(now())
+  modifiedOn    DateTime   @updatedAt
+  UserLogin     UserLogin?
+  createdBy     Int?
+  CreatedBy     UserLogin? @relation("createdByUserToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy    Int?
+  ModifiedBy    UserLogin? @relation("modifiedByUserToUserLogin", fields: [modifiedBy], references: [id])
+  Agent         Agent?
+}
+
+model UserLogin {
+  id                                   Int                          @id @default(autoincrement())
+  userId                               Int                          @unique
+  User                                 User                         @relation(fields: [userId], references: [id])
+  roleId                               Int
+  Role                                 Role                         @relation(fields: [roleId], references: [id])
+  email                                String                       @unique @db.VarChar(80)
+  contactNo                            String?                      @unique @db.VarChar(20)
+  passwordHash                         String                       @db.VarChar(200)
+  isSystemGenerated                    Boolean                      @default(false)
+  resetToken                           String?                      @db.VarChar(500)
+  resetExpires                         DateTime?
+  createdOn                            DateTime                     @default(now())
+  modifiedOn                           DateTime                     @updatedAt
+  createdBy                            Int?
+  CreatedBy                            UserLogin?                   @relation("createdByUserLoginToUserLogin", fields: [createdBy], references: [id])
+  UserLoginCreatedBy                   UserLogin[]                  @relation("createdByUserLoginToUserLogin")
+  modifiedBy                           Int?
+  ModifiedBy                           UserLogin?                   @relation("modifiedByUserLoginToUserLogin", fields: [modifiedBy], references: [id])
+  UserLoginModifiedBy                  UserLogin[]                  @relation("modifiedByUserLoginToUserLogin")
+  RoleCreatedBy                        Role[]                       @relation("createdByRoleToUserLogin")
+  RoleModifiedBy                       Role[]                       @relation("modifiedByRoleToUserLogin")
+  RolePermissionCreatedBy              RolePermission[]             @relation("createdByRolePermissionToUserLogin")
+  RolePermissionModifiedBy             RolePermission[]             @relation("modifiedByRolePermissionToUserLogin")
+  UserCreatedBy                        User[]                       @relation("createdByUserToUserLogin")
+  UserModifiedBy                       User[]                       @relation("modifiedByUserToUserLogin")
+  IndustryCreatedBy                    Industry[]                   @relation("createdByIndustryToUserLogin")
+  IndustryModifiedBy                   Industry[]                   @relation("modifiedByIndustryToUserLogin")
+  SkillCreatedBy                       Skill[]                      @relation("createdBySkillToUserLogin")
+  SkillModifiedBy                      Skill[]                      @relation("modifiedBySkillToUserLogin")
+  SubscriptionCreatedBy                Subscription[]               @relation("createdBySubscriptionToUserLogin")
+  SubscriptionModifiedBy               Subscription[]               @relation("modifiedBySubscriptionToUserLogin")
+  CandidateUploadBatchCreatedBy        CandidateUploadBatch[]       @relation("createdByCandidateUploadBatchToUserLogin")
+  CandidateUploadBatchModifiedBy       CandidateUploadBatch[]       @relation("modifiedByCandidateUploadBatchToUserLogin")
+  CandidateRawCreatedBy                CandidateRaw[]               @relation("createdByCandidateRawToUserLogin")
+  CandidateRawModifiedBy               CandidateRaw[]               @relation("modifiedByCandidateRawToUserLogin")
+  CandidateRejectionSummary            CandidateRejectionSummary[]
+  CandidateRejectionSummaryCreatedBy   CandidateRejectionSummary[]  @relation("createdByCandidateRejectionSummaryToUserLogin")
+  CandidateRejectionSummaryModifiedBy  CandidateRejectionSummary[]  @relation("modifiedByCandidateRejectionSummaryToUserLogin")
+  CandidateVersioningCreatedBy         CandidateVersioning[]        @relation("createdByCandidateVersioningToUserLogin")
+  CandidateVersioningModifiedBy        CandidateVersioning[]        @relation("modifiedByCandidateVersioningToUserLogin")
+  CandidateCallCentreHistoryCreatedBy  CandidateCallCentreHistory[] @relation("createdByCandidateCallCentreHistoryToUserLogin")
+  CandidateCallCentreHistoryModifiedBy CandidateCallCentreHistory[] @relation("modifiedByCandidateCallCentreHistoryToUserLogin")
+  CandidateCreatedBy                   Candidate[]                  @relation("createdByCandidateToUserLogin")
+  CandidateModifiedBy                  Candidate[]                  @relation("modifiedByCandidateToUserLogin")
+  CandidateApprovedBy                  Candidate[]                  @relation("approvedByCandidateToUserLogin")
+  CandidateOtherCreatedBy              CandidateOther[]             @relation("createdByCandidateOtherToUserLogin")
+  CandidateOtherModifiedBy             CandidateOther[]             @relation("modifiedByCandidateOtherToUserLogin")
+  CandidateTrainingCreatedBy           CandidateTraining[]          @relation("createdByCandidateTrainingToUserLogin")
+  CandidateTrainingModifiedBy          CandidateTraining[]          @relation("modifiedByCandidateTrainingToUserLogin")
+  CandidateJobPreferenceCreatedBy      CandidateJobPreference[]     @relation("createdByCandidateJobPreferenceToUserLogin")
+  CandidateJobPreferenceModifiedBy     CandidateJobPreference[]     @relation("modifiedByCandidateJobPreferenceToUserLogin")
+  CategoryCreatedBy                    Category[]                   @relation("createdByCategoryToUserLogin")
+  CategoryModifiedBy                   Category[]                   @relation("modifiedByCategoryToUserLogin")
+  AgentCreatedBy                       Agent[]                      @relation("createdByAgentToUserLogin")
+  AgentModifiedBy                      Agent[]                      @relation("modifiedByAgentToUserLogin")
+  CustomerCreatedBy                    Customer[]                   @relation("createdByCustomerToUserLogin")
+  CustomerModifiedBy                   Customer[]                   @relation("modifiedByCustomerToUserLogin")
+  CustomerLoginCreatedBy               CustomerLogin[]              @relation("createdByCustomerLoginToUserLogin")
+  CustomerLoginModifiedBy              CustomerLogin[]              @relation("modifiedByCustomerLoginToUserLogin")
+  CustomerSubscriptionCreatedBy        CustomerSubscription[]       @relation("createdByCustomerSubscriptionToUserLogin")
+  CustomerSubscriptionModifiedBy       CustomerSubscription[]       @relation("modifiedByCustomerSubscriptionToUserLogin")
+  CustomerTokenCreatedBy               CustomerToken[]              @relation("createdByCustomerTokenToUserLogin")
+  CustomerTokenModifiedBy              CustomerToken[]              @relation("modifiedByCustomerTokenToUserLogin")
+}
+
+model RolePermission {
+  id           Int        @id @default(autoincrement())
+  roleId       Int
+  Role         Role       @relation(fields: [roleId], references: [id])
+  permissionId Int
+  Permission   Permission @relation(fields: [permissionId], references: [id])
+  createdOn    DateTime   @default(now())
+  modifiedOn   DateTime   @updatedAt
+  createdBy    Int?
+  CreatedBy    UserLogin? @relation("createdByRolePermissionToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy   Int?
+  ModifiedBy   UserLogin? @relation("modifiedByRolePermissionToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model Industry {
+  id          Int        @id @default(autoincrement())
+  title       String     @unique @db.VarChar(80)
+  description String?    @db.VarChar(100)
+  isActive    Boolean    @default(true)
+  createdOn   DateTime   @default(now())
+  modifiedOn  DateTime   @updatedAt
+  createdBy   Int?
+  CreatedBy   UserLogin? @relation("createdByIndustryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy  Int?
+  ModifiedBy  UserLogin? @relation("modifiedByIndustryToUserLogin", fields: [modifiedBy], references: [id])
+  Category    Category[]
+}
+
+model Skill {
+  id                           Int                      @id @default(autoincrement())
+  title                        String                   @unique @db.VarChar(45)
+  description                  String?                  @db.VarChar(100)
+  isActive                     Boolean                  @default(true)
+  createdOn                    DateTime                 @default(now())
+  modifiedOn                   DateTime                 @updatedAt
+  createdBy                    Int?
+  CreatedBy                    UserLogin?               @relation("createdBySkillToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy                   Int?
+  ModifiedBy                   UserLogin?               @relation("modifiedBySkillToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateTraining            CandidateTraining[]
+  CandidateJobPreferenceSkill1 CandidateJobPreference[] @relation("skill1ToSkill")
+  CandidateJobPreferenceSkill2 CandidateJobPreference[] @relation("skill2ToSkill")
+}
+
+model Subscription {
+  id             Int        @id @default(autoincrement())
+  planName       String     @unique @db.VarChar(40)
+  dataCount      Int        @default(0)
+  durationMonths Int        @default(0)
+  price          Float      @default(0)
+  note           String?    @db.VarChar(200)
+  isActive       Boolean    @default(true)
+  createdOn      DateTime   @default(now())
+  modifiedOn     DateTime   @updatedAt
+  createdBy      Int?
+  CreatedBy      UserLogin? @relation("createdBySubscriptionToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy     Int?
+  ModifiedBy     UserLogin? @relation("modifiedBySubscriptionToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CandidateUploadBatch {
+  id             Int                  @id @default(autoincrement())
+  timestamp      DateTime
+  count          Int
+  status         CandidateBatchStatus @default(PENDING_PROCESSING)
+  approvedCount  Int?
+  rejectedCount  Int?
+  paymentAmount  Float?
+  paymentStatus  BatchPaymentStatus?
+  paymentDate    DateTime?            @db.Date
+  paymentRemarks String?              @db.VarChar(200)
+  createdOn      DateTime             @default(now())
+  modifiedOn     DateTime             @updatedAt
+  createdBy      Int?
+  CreatedBy      UserLogin?           @relation("createdByCandidateUploadBatchToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy     Int?
+  ModifiedBy     UserLogin?           @relation("modifiedByCandidateUploadBatchToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateRaw   CandidateRaw[]
+}
+
+model CandidateRaw {
+  id                        Int                         @id @default(autoincrement())
+  industry                  String?                     @db.Text
+  category                  String?                     @db.Text
+  fullName                  String?                     @db.Text
+  dob                       String?                     @db.Text
+  gender                    String?                     @db.Text
+  permAddress               String?                     @db.Text
+  permCity                  String?                     @db.Text
+  permState                 String?                     @db.Text
+  permCountry               String?                     @db.Text
+  permZip                   String?                     @db.Text
+  currAddress               String?                     @db.Text
+  currCity                  String?                     @db.Text
+  currState                 String?                     @db.Text
+  currCountry               String?                     @db.Text
+  currZip                   String?                     @db.Text
+  email1                    String?                     @db.Text
+  email2                    String?                     @db.Text
+  contactNo1                String?                     @db.Text
+  contactNo2                String?                     @db.Text
+  aadharNo                  String?                     @db.Text
+  panNo                     String?                     @db.Text
+  dlNo                      String?                     @db.Text
+  expYears                  String?                     @db.Text
+  expMonths                 String?                     @db.Text
+  prefLocation1             String?                     @db.Text
+  prefLocation2             String?                     @db.Text
+  prefLocation3             String?                     @db.Text
+  skill1                    String?                     @db.Text
+  skill2                    String?                     @db.Text
+  primaryLang               String?                     @db.Text
+  secondaryLang             String?                     @db.Text
+  thirdLang                 String?                     @db.Text
+  lastCompany               String?                     @db.Text
+  designation               String?                     @db.Text
+  startDate                 String?                     @db.Text
+  endDate                   String?                     @db.Text
+  jobDescription            String?                     @db.Text
+  rowNum                    Int
+  batchId                   Int
+  BatchId                   CandidateUploadBatch        @relation(fields: [batchId], references: [id])
+  isSystemApproved          Boolean
+  createdOn                 DateTime                    @default(now())
+  modifiedOn                DateTime                    @updatedAt
+  createdBy                 Int?
+  CreatedBy                 UserLogin?                  @relation("createdByCandidateRawToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy                Int?
+  ModifiedBy                UserLogin?                  @relation("modifiedByCandidateRawToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateRejectionSummary CandidateRejectionSummary[]
+  CandidateVersioning       CandidateVersioning[]
+}
+
+model CandidateRejectionSummary {
+  id              Int                   @id @default(autoincrement())
+  columnName      String                @db.VarChar(40)
+  rejectionType   CandidateRejectType
+  rejectionReason CandidateRejectReason
+  rejectedBy      CandidateRejectBy
+  rejectById      Int?
+  RejectedById    UserLogin?            @relation(fields: [rejectById], references: [id])
+  candidateRawId  Int
+  CandidateRawId  CandidateRaw          @relation(fields: [candidateRawId], references: [id])
+  createdOn       DateTime              @default(now())
+  modifiedOn      DateTime              @updatedAt
+  createdBy       Int?
+  CreatedBy       UserLogin?            @relation("createdByCandidateRejectionSummaryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy      Int?
+  ModifiedBy      UserLogin?            @relation("modifiedByCandidateRejectionSummaryToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CandidateVersioning {
+  id                         Int                          @id @default(autoincrement())
+  industry                   String?                      @db.VarChar(80)
+  category                   String                       @db.VarChar(80)
+  fullName                   String                       @db.VarChar(200)
+  dob                        DateTime?                    @db.Date
+  gender                     Gender?
+  permAddress                String?                      @db.VarChar(500)
+  permCity                   String?                      @db.VarChar(45)
+  permState                  String?                      @db.VarChar(45)
+  permCountry                String?                      @db.VarChar(45)
+  permZip                    String?                      @db.VarChar(10)
+  currAddress                String?                      @db.VarChar(500)
+  currCity                   String                       @db.VarChar(45)
+  currState                  String?                      @db.VarChar(45)
+  currCountry                String?                      @db.VarChar(45)
+  currZip                    String?                      @db.VarChar(10)
+  email1                     String?                      @unique @db.VarChar(80)
+  email2                     String?                      @db.VarChar(80)
+  contactNo1                 String                       @unique @db.VarChar(45)
+  contactNo2                 String?                      @db.VarChar(45)
+  aadharNo                   String?                      @unique @db.VarChar(15)
+  panNo                      String?                      @unique @db.VarChar(12)
+  dlNo                       String?                      @unique @db.VarChar(20)
+  registrationStatus         String?                      @unique @db.VarChar(15)
+  expYears                   Int?
+  expMonths                  Int?
+  preferLocation1            String?                      @db.VarChar(80)
+  preferLocation2            String?                      @db.VarChar(80)
+  preferLocation3            String?                      @db.VarChar(80)
+  skill1                     String?                      @db.VarChar(45)
+  skill2                     String?                      @db.VarChar(45)
+  primaryLanguage            String?                      @db.VarChar(30)
+  secondaryLanguage          String?                      @db.VarChar(30)
+  thirdLanguage              String?                      @db.VarChar(30)
+  lastCompany                String?                      @db.VarChar(100)
+  designation                String?                      @db.VarChar(80)
+  startDate                  DateTime                     @db.Date
+  endDate                    DateTime                     @db.Date
+  jobDescription             String?                      @db.VarChar(200)
+  candidateRawId             Int
+  CandidateRawId             CandidateRaw                 @relation(fields: [candidateRawId], references: [id])
+  version                    Int
+  createdOn                  DateTime                     @default(now())
+  modifiedOn                 DateTime                     @updatedAt
+  createdBy                  Int?
+  CreatedBy                  UserLogin?                   @relation("createdByCandidateVersioningToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy                 Int?
+  ModifiedBy                 UserLogin?                   @relation("modifiedByCandidateVersioningToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateCallCentreHistory CandidateCallCentreHistory[]
+}
+
+model CandidateCallCentreHistory {
+  id                    Int                 @id @default(autoincrement())
+  candidateVersioningId Int
+  CandidateVersioningId CandidateVersioning @relation(fields: [candidateVersioningId], references: [id])
+  callStatus            String              @db.VarChar(40)
+  comment               String?             @db.VarChar(500)
+  candidateConsent      CandidateConsent    @default(PENDING)
+  consentReason         String?             @db.VarChar(100)
+  isSubmitted           Boolean             @default(false)
+  createdOn             DateTime            @default(now())
+  modifiedOn            DateTime            @updatedAt
+  createdBy             Int?
+  CreatedBy             UserLogin?          @relation("createdByCandidateCallCentreHistoryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy            Int?
+  ModifiedBy            UserLogin?          @relation("modifiedByCandidateCallCentreHistoryToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model Candidate {
+  id                     Int                      @id @default(autoincrement())
+  fullName               String                   @db.VarChar(200)
+  dob                    DateTime?                @db.Date
+  gender                 Gender?
+  permAddress            String?                  @db.VarChar(500)
+  permCity               String?                  @db.VarChar(45)
+  permState              String?                  @db.VarChar(45)
+  permCountry            String?                  @db.VarChar(45)
+  permZip                String?                  @db.VarChar(10)
+  currAddress            String?                  @db.VarChar(500)
+  currCity               String                   @db.VarChar(45)
+  currState              String?                  @db.VarChar(45)
+  currCountry            String?                  @db.VarChar(45)
+  currZip                String?                  @db.VarChar(10)
+  email1                 String?                  @unique @db.VarChar(80)
+  email2                 String?                  @db.VarChar(80)
+  contactNo1             String                   @unique @db.VarChar(45)
+  contactNo2             String?                  @db.VarChar(45)
+  aadharNo               String?                  @unique @db.VarChar(15)
+  panNo                  String?                  @unique @db.VarChar(12)
+  dlNo                   String?                  @unique @db.VarChar(20)
+  note                   String?                  @db.VarChar(500)
+  isActive               Boolean                  @default(true)
+  createdOn              DateTime                 @default(now())
+  modifiedOn             DateTime                 @updatedAt
+  approvedOn             DateTime
+  createdBy              Int?
+  CreatedBy              UserLogin?               @relation("createdByCandidateToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy             Int?
+  ModifiedBy             UserLogin?               @relation("modifiedByCandidateToUserLogin", fields: [modifiedBy], references: [id])
+  approvedBy             Int?
+  ApprovedBy             UserLogin?               @relation("approvedByCandidateToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateOther         CandidateOther[]
+  CandidateTraining      CandidateTraining[]
+  CandidateJobPreference CandidateJobPreference[]
+}
+
+model CandidateOther {
+  id                 Int        @id @default(autoincrement())
+  candidateId        Int
+  CandidateId        Candidate  @relation(fields: [candidateId], references: [id])
+  expMonths          Int?
+  expYears           Int?
+  registrationStatus String?    @db.VarChar(15)
+  profileImage       String?    @db.VarChar(500)
+  createdOn          DateTime   @default(now())
+  modifiedOn         DateTime   @updatedAt
+  createdBy          Int?
+  CreatedBy          UserLogin? @relation("createdByCandidateOtherToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy         Int?
+  ModifiedBy         UserLogin? @relation("modifiedByCandidateOtherToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CandidateTraining {
+  id          Int          @id @default(autoincrement())
+  type        TrainingType @default(OTHER)
+  title       String       @db.VarChar(100)
+  issueDate   DateTime?    @db.Date
+  issuedBy    String?      @db.VarChar(80)
+  description String?      @db.VarChar(200)
+  candidateId Int
+  CandidateId Candidate    @relation(fields: [candidateId], references: [id])
+  skillId     Int?
+  SkillId     Skill?       @relation(fields: [skillId], references: [id])
+  createdOn   DateTime     @default(now())
+  modifiedOn  DateTime     @updatedAt
+  createdBy   Int?
+  CreatedBy   UserLogin?   @relation("createdByCandidateTrainingToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy  Int?
+  ModifiedBy  UserLogin?   @relation("modifiedByCandidateTrainingToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CandidateJobPreference {
+  id              Int        @id @default(autoincrement())
+  candidateId     Int
+  CandidateId     Candidate  @relation(fields: [candidateId], references: [id])
+  categoryId      Int
+  CategoryId      Category   @relation(fields: [categoryId], references: [id])
+  preferLocation1 String?    @db.VarChar(80)
+  preferLocation2 String?    @db.VarChar(80)
+  preferLocation3 String?    @db.VarChar(80)
+  skill1          Int?
+  Skill1          Skill?     @relation("skill1ToSkill", fields: [skill1], references: [id])
+  skill2          Int?
+  Skill2          Skill?     @relation("skill2ToSkill", fields: [skill2], references: [id])
+  lastCompany     String?    @db.VarChar(100)
+  designation     String?    @db.VarChar(80)
+  startDate       DateTime   @db.Date
+  endDate         DateTime   @db.Date
+  jobDescription  String?    @db.VarChar(200)
+  createdOn       DateTime   @default(now())
+  modifiedOn      DateTime   @updatedAt
+  createdBy       Int?
+  CreatedBy       UserLogin? @relation("createdByCandidateJobPreferenceToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy      Int?
+  ModifiedBy      UserLogin? @relation("modifiedByCandidateJobPreferenceToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model Category {
+  id                     Int                      @id @default(autoincrement())
+  industryId             Int
+  IndustryId             Industry                 @relation(fields: [industryId], references: [id])
+  title                  String                   @db.VarChar(80)
+  description            String?                  @db.VarChar(100)
+  isActive               Boolean                  @default(true)
+  createdOn              DateTime                 @default(now())
+  modifiedOn             DateTime                 @updatedAt
+  createdBy              Int?
+  CreatedBy              UserLogin?               @relation("createdByCategoryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy             Int?
+  ModifiedBy             UserLogin?               @relation("modifiedByCategoryToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateJobPreference CandidateJobPreference[]
+
+  @@unique([industryId, title])
+}
+
+model Agent {
+  id                 Int          @id @default(autoincrement())
+  userId             Int
+  UserId             User         @relation(fields: [userId], references: [id])
+  agentNo            String?      @db.VarChar(15)
+  professionalStatus String?      @db.VarChar(40)
+  gstin              String?      @unique @db.VarChar(20)
+  companyName        String?      @db.VarChar(100)
+  bankName           String?      @db.VarChar(100)
+  bankAc             String?      @db.VarChar(30)
+  bankIfsc           String?      @db.VarChar(20)
+  bankAcType         String?      @db.VarChar(20)
+  workLocation1      String?      @db.VarChar(60)
+  workLocation2      String?      @db.VarChar(60)
+  panCardPath        String?      @db.VarChar(500)
+  docPoitype         String?      @db.VarChar(30)
+  docPoiValue        String?      @db.VarChar(30)
+  docPoiPath         String?      @db.VarChar(500)
+  docPoatype         String?      @db.VarChar(30)
+  docPoaValue        String?      @db.VarChar(30)
+  docPoaPath         String?      @db.VarChar(500)
+  docBanktype        String?      @db.VarChar(30)
+  docBankValue       String?      @db.VarChar(30)
+  docBankPath        String?      @db.VarChar(500)
+  status             AgentStatus?
+  createdOn          DateTime     @default(now())
+  modifiedOn         DateTime     @updatedAt
+  createdBy          Int?
+  CreatedBy          UserLogin?   @relation("createdByAgentToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy         Int?
+  ModifiedBy         UserLogin?   @relation("modifiedByAgentToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model Customer {
+  id                   Int                    @id @default(autoincrement())
+  fullName             String                 @db.VarChar(200)
+  companyName          String?                @db.VarChar(100)
+  dob                  DateTime?              @db.Date
+  gender               Gender?
+  state                String?                @db.VarChar(45)
+  country              String?                @db.VarChar(45)
+  profileImage         String?                @db.VarChar(500)
+  isActive             Boolean                @default(true)
+  createdOn            DateTime               @default(now())
+  modifiedOn           DateTime               @updatedAt
+  createdBy            Int?
+  CreatedBy            UserLogin?             @relation("createdByCustomerToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy           Int?
+  ModifiedBy           UserLogin?             @relation("modifiedByCustomerToUserLogin", fields: [modifiedBy], references: [id])
+  CustomerLogin        CustomerLogin[]
+  CustomerSubscription CustomerSubscription[]
+  CustomerToken        CustomerToken[]
+}
+
+model CustomerLogin {
+  id            Int            @id @default(autoincrement())
+  customerId    Int
+  CustomerId    Customer       @relation(fields: [customerId], references: [id])
+  email         String         @unique @db.VarChar(80)
+  passwordHash  String         @db.VarChar(200)
+  resetToken    String?        @db.VarChar(500)
+  resetExpires  DateTime?
+  status        CustomerStatus @default(PENDING)
+  newEmail      String?        @db.VarChar(80)
+  newEmailToken String?        @db.VarChar(500)
+  createdOn     DateTime       @default(now())
+  modifiedOn    DateTime       @updatedAt
+  createdBy     Int?
+  CreatedBy     UserLogin?     @relation("createdByCustomerLoginToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy    Int?
+  ModifiedBy    UserLogin?     @relation("modifiedByCustomerLoginToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CustomerSubscription {
+  id            Int        @id @default(autoincrement())
+  customerId    Int
+  CustomerId    Customer   @relation(fields: [customerId], references: [id])
+  startDate     DateTime   @db.Date
+  expiryDate    DateTime   @db.Date
+  planName      String?    @db.VarChar(40)
+  allocatedData Int
+  usedData      Int
+  status        String     @db.VarChar(20)
+  comment       String?    @db.VarChar(200)
+  createdOn     DateTime   @default(now())
+  modifiedOn    DateTime   @updatedAt
+  createdBy     Int?
+  CreatedBy     UserLogin? @relation("createdByCustomerSubscriptionToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy    Int?
+  ModifiedBy    UserLogin? @relation("modifiedByCustomerSubscriptionToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model CustomerToken {
+  id         Int        @id @default(autoincrement())
+  customerId Int
+  CustomerId Customer   @relation(fields: [customerId], references: [id])
+  token      String     @db.VarChar(500)
+  createdOn  DateTime   @default(now())
+  modifiedOn DateTime   @updatedAt
+  createdBy  Int?
+  CreatedBy  UserLogin? @relation("createdByCustomerTokenToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy Int?
+  ModifiedBy UserLogin? @relation("modifiedByCustomerTokenToUserLogin", fields: [modifiedBy], references: [id])
+}

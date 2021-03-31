@@ -810,7 +810,6 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
                 "primary_mobile",
                 true
             )
-            console.log(_ddContactNos.arrIgnored.length)
             filteredData = _ddContactNos.arr
             _ddContactNos.arrIgnored.forEach((item) => arrRejected.push(item))
 
@@ -903,8 +902,7 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
         )
     } catch (err: any) {
         await transaction.rollback()
-        // console.log(err)
-        // log.error(err, "Error while createBulkCandidate")
+        log.error(err, "Error while createBulkCandidate")
         throw err
     }
 }

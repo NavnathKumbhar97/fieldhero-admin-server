@@ -10,6 +10,7 @@ import { Permission } from "./permission"
 import { User } from "./user"
 import { emailTemplate } from "./mjml"
 import { express } from "./express"
+import { Agent } from "./agent"
 
 export {
     Candidate,
@@ -24,4 +25,5 @@ export {
     Subscription,
     UploadImage,
     User,
+    Agent,
 }

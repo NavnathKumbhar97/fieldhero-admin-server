@@ -91,3 +91,9 @@ Node.js - Role Based Authorization Tutorial with Example API
 
 How to restrict access using Passport.js role-based authorisation
 [https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/](https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/)
+
+https://itnext.io/testing-with-jest-in-typescript-cc1cd0095421
+
+https://www.albertgao.xyz/2017/05/24/how-to-test-expressjs-with-jest-and-supertest/
+
+https://lusbuab.medium.com/using-dotenv-with-jest-7e735b34e55f

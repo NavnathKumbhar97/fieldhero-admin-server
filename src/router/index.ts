@@ -15,6 +15,7 @@ import { RoleRouter } from "./role"
 import { PermissionRouter } from "./permission"
 import { UploadRouter } from "./upload"
 import { UserRouter } from "./user"
+import { AgentRouter } from "./agent"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -34,6 +35,7 @@ router.use(CustomerRouter)
 router.use(PermissionRouter)
 router.use(RoleRouter)
 router.use(UserRouter)
+router.use(AgentRouter)
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {
