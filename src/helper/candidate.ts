@@ -1,8 +1,13 @@
 import * as helper from "../helper"
 
 export interface IRejected {
-    value: any
-    error: "length_exceed" | "mandatory" | "duplicate" | "wrong_input"
+    value: unknown
+    error:
+        | "CONSENT_DECLINED"
+        | "LENGTH_EXCEEDED"
+        | "MANDATORY"
+        | "DUPLICATE"
+        | "WRONG_INPUT"
 }
 
 const validateEmail = (email: string) => {
@@ -19,45 +24,47 @@ const handleNotNullString = (
         if (maxLength) {
             if (result) {
                 return result.length > maxLength
-                    ? { value: input, error: "length_exceed" }
+                    ? { value: input, error: "LENGTH_EXCEEDED" }
                     : result
             }
-            return { value: input, error: "mandatory" }
+            return { value: input, error: "MANDATORY" }
         }
-        return result ? result : { value: input, error: "mandatory" }
+        return result ? result : { value: input, error: "MANDATORY" }
     } else if (
         input &&
         typeof input === "object" &&
         Object.keys(input).length
     ) {
         if (input.richText) {
-            const result = input.richText
-                .map((x: any) => x.text)
+            const result = (input as {
+                richText: Array<{ text: string }>
+            }).richText
+                .map((x) => x.text)
                 .join("")
                 .trim()
             if (maxLength) {
                 if (result) {
                     return result.length > maxLength
-                        ? { value: input, error: "length_exceed" }
+                        ? { value: input, error: "LENGTH_EXCEEDED" }
                         : result
                 }
-                return { value: input, error: "mandatory" }
+                return { value: input, error: "MANDATORY" }
             }
-            return result ? result : { value: input, error: "mandatory" }
+            return result ? result : { value: input, error: "MANDATORY" }
         } else {
             const result = input.text.trim()
             if (maxLength) {
                 if (result) {
                     return result.length > maxLength
-                        ? { value: input, error: "length_exceed" }
+                        ? { value: input, error: "LENGTH_EXCEEDED" }
                         : result
                 }
-                return { value: input, error: "mandatory" }
+                return { value: input, error: "MANDATORY" }
             }
-            return result ? result : { value: input, error: "mandatory" }
+            return result ? result : { value: input, error: "MANDATORY" }
         }
     }
-    return { value: input, error: "mandatory" }
+    return { value: input, error: "MANDATORY" }
 }
 
 const handleString = (
@@ -74,7 +81,7 @@ const handleString = (
             // check if string length is within max_length limit
             if (maxLength) {
                 return result.length > maxLength
-                    ? { value: input, error: "length_exceed" }
+                    ? { value: input, error: "LENGTH_EXCEEDED" }
                     : result
             }
             return result
@@ -94,7 +101,7 @@ const handleString = (
             } else {
                 if (maxLength) {
                     return result.length > maxLength
-                        ? { value: input, error: "length_exceed" }
+                        ? { value: input, error: "LENGTH_EXCEEDED" }
                         : result
                 }
                 return result
@@ -106,7 +113,7 @@ const handleString = (
             } else {
                 if (maxLength) {
                     return result.length > maxLength
-                        ? { value: input, error: "length_exceed" }
+                        ? { value: input, error: "LENGTH_EXCEEDED" }
                         : result
                 }
                 return result
@@ -123,9 +130,9 @@ const handleGender = (input: any): string | null | IRejected => {
             return null
         } else {
             if (input === "male" || input === "female" || input === "other") {
-                return input
+                return input.toUpperCase()
             }
-            return { value: input, error: "wrong_input" }
+            return { value: input, error: "WRONG_INPUT" }
         }
     }
     return null
@@ -139,7 +146,7 @@ const handleDate = (input: any): string | null | IRejected => {
             if (_parsedDate) {
                 return _parsedDate.format("YYYY-MM-DD")
             }
-            return { value: input, error: "wrong_input" }
+            return { value: input, error: "WRONG_INPUT" }
         }
         return null
     }
@@ -155,20 +162,20 @@ const handleNotNullNumber = (
             if (maxLength) {
                 return input.toString().length <= maxLength
                     ? input
-                    : { value: input, error: "length_exceed" }
+                    : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return input
         } else if (typeof input === "string") {
             if (maxLength) {
                 return input.length <= maxLength
                     ? parseInt(input)
-                    : { value: input, error: "length_exceed" }
+                    : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return parseInt(input)
         }
-        return { value: input, error: "wrong_input" }
+        return { value: input, error: "WRONG_INPUT" }
     }
-    return { value: input, error: "mandatory" }
+    return { value: input, error: "MANDATORY" }
 }
 
 const handleNumber = (
@@ -180,18 +187,18 @@ const handleNumber = (
             if (maxLength) {
                 return input.toString().length <= maxLength
                     ? input
-                    : { value: input, error: "length_exceed" }
+                    : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return input
         } else if (typeof input === "string") {
             if (maxLength) {
                 return input.length <= maxLength
                     ? parseInt(input)
-                    : { value: input, error: "length_exceed" }
+                    : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return parseInt(input)
         }
-        return { value: input, error: "wrong_input" }
+        return { value: input, error: "WRONG_INPUT" }
     }
     return null
 }
@@ -204,14 +211,14 @@ const handleEmail = (
         const result = input.trim()
         if (maxLength) {
             return result.length > maxLength
-                ? { value: input, error: "length_exceed" }
+                ? { value: input, error: "LENGTH_EXCEEDED" }
                 : validateEmail(result)
                 ? result
-                : { value: input, error: "wrong_input" }
+                : { value: input, error: "WRONG_INPUT" }
         }
         return validateEmail(result)
             ? result
-            : { value: input, error: "wrong_input" }
+            : { value: input, error: "WRONG_INPUT" }
     } else if (
         input &&
         typeof input === "object" &&
@@ -224,26 +231,26 @@ const handleEmail = (
                 .trim()
             if (maxLength) {
                 return result.length > maxLength
-                    ? { value: input, error: "length_exceed" }
+                    ? { value: input, error: "LENGTH_EXCEEDED" }
                     : validateEmail(result)
                     ? result
-                    : { value: input, error: "wrong_input" }
+                    : { value: input, error: "WRONG_INPUT" }
             }
             return validateEmail(result)
                 ? result
-                : { value: input, error: "wrong_input" }
+                : { value: input, error: "WRONG_INPUT" }
         } else {
             const result = input.text.trim()
             if (maxLength) {
                 return result.length > maxLength
-                    ? { value: input, error: "length_exceed" }
+                    ? { value: input, error: "LENGTH_EXCEEDED" }
                     : validateEmail(result)
                     ? result
-                    : { value: input, error: "wrong_input" }
+                    : { value: input, error: "WRONG_INPUT" }
             }
             return validateEmail(result)
                 ? result
-                : { value: input, error: "wrong_input" }
+                : { value: input, error: "WRONG_INPUT" }
         }
     }
     return null
@@ -254,21 +261,21 @@ const handleAadhar = (input: any): string | null | IRejected => {
         const result = input.trim().replace(/\s/g, "").replace(/-/g, "")
         if (result) {
             if (result.length > 12) {
-                return { value: input, error: "length_exceed" }
+                return { value: input, error: "LENGTH_EXCEEDED" }
             }
             return result.length === 12
                 ? result
-                : { value: input, error: "wrong_input" }
+                : { value: input, error: "WRONG_INPUT" }
         }
         return null
     } else if (input && typeof input === "number") {
         const result = input.toString()
         if (result.length > 12) {
-            return { value: input, error: "length_exceed" }
+            return { value: input, error: "LENGTH_EXCEEDED" }
         }
         return result.length === 12
             ? result
-            : { value: input, error: "wrong_input" }
+            : { value: input, error: "WRONG_INPUT" }
     }
     return null
 }
@@ -279,7 +286,7 @@ const findDuplicateFromExcel = (
     excelField: string,
     isMandatory = false
 ) => {
-    const arrIgnored: Array<any> = []
+    const arrIgnored: Array<{ column: string; value: any; rawId: number }> = []
     // get array of field only
     const _items = arr.map((item: any) => item[field])
     // get all unique fields
@@ -292,11 +299,14 @@ const findDuplicateFromExcel = (
     // remove null and blank
     const duplicateItems = _items.filter((item: any) => item)
     // set duplicate field to null and add into array of ignored
-    arr = arr.map((item: any, ind: number) => {
-        const rowNum = ind + 2
+    arr = arr.map((item: any) => {
         const isDuplicate = duplicateItems.includes(item[field])
         if (isDuplicate) {
-            arrIgnored.push({ [excelField]: item[field], rowNum })
+            arrIgnored.push({
+                column: excelField,
+                value: item[field],
+                rawId: item.id,
+            })
             item[field] = null
         }
         return item
@@ -314,17 +324,20 @@ const findDuplicateFromDB = (
     excelField: string,
     isMandatory = false
 ) => {
-    const arrIgnored: Array<any> = []
+    const arrIgnored: Array<{ column: string; value: any; rawId: number }> = []
     // get array of field only
     const _items = dbArr.map((item: any) => item[field])
     // set duplicate field to null and add into array of ignored
-    arr = arr.map((item: any, ind: number) => {
-        const rowNum = ind + 2
+    arr = arr.map((item: any) => {
         const isDuplicate = _items.includes(
             field === "contactNo1" ? item[field].toString() : item[field]
         )
         if (item[field] && isDuplicate) {
-            arrIgnored.push({ [excelField]: "duplicate", rowNum })
+            arrIgnored.push({
+                column: excelField,
+                value: "DUPLICATE",
+                rawId: item.id,
+            })
             item[field] = null
         }
         return item

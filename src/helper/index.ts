@@ -1,16 +1,15 @@
 import moment from "moment"
 import log from "./log"
 import httpStatus from "./http_status"
-import getPagingData from "./pagination"
 import permissions from "./permissions"
 import { passwordfunction } from "./password"
 import candidate from "./candidate"
-const getExpiryTime = () => {
+const getExpiryTime = (): number => {
     return Date.now() + 3600000
 }
 
-const getGender = () => {
-    return ["male", "female", "other"]
+const getGender = (): Array<string> => {
+    return ["MALE", "FEMALE", "OTHER"]
 }
 
 const parseDate = (date: string): moment.Moment | null => {
@@ -33,7 +32,7 @@ interface IResponseObject {
     status: boolean
     code: number
     message: string
-    data: any | null
+    data?: any | null
 }
 const getHandlerResponseObject = (
     status: boolean,
@@ -49,15 +48,14 @@ const getHandlerResponseObject = (
     }
 }
 
-const getUserLoginId = (user: any): number => {
-    return user.loginId
+const getUserLoginId = (user: unknown): number => {
+    return (user as { loginId: number }).loginId
 }
 
 export {
     log,
     httpStatus,
     passwordfunction,
-    getPagingData,
     getExpiryTime,
     getGender,
     IResponseObject,

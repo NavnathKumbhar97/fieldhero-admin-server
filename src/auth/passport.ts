@@ -1,9 +1,11 @@
 import passport from "passport"
 import { Strategy as LocalStrategy } from "passport-local"
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt"
-import { customerDB } from "../sequelize"
-// import crypto from "crypto"
-import { log, passwordfunction } from "../helper"
+// local imports
+import * as helper from "../helper"
+
+import prisma from "../prisma"
+const { log, passwordfunction } = helper
 
 /**
  * Login Api
@@ -19,67 +21,53 @@ passport.use(
         },
         async (email, password, done) => {
             try {
-                const userLogin = await customerDB.UserLogin.findOne({
-                    where: { email: email },
-                    include: [
-                        {
-                            model: customerDB.User,
-                            attributes: ["id", "fullName", "uuid"],
+                const userLogin = await prisma.userLogin.findFirst({
+                    where: { email, roleId: { not: 3 } },
+                    include: {
+                        User: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                uuid: true,
+                            },
                         },
-                        {
-                            model: customerDB.Role,
-                            attributes: ["id", "uuid"],
-                            include: [
-                                {
-                                    model: customerDB.RolePermission,
-                                    attributes: ["permissionId"],
+                        Role: {
+                            select: {
+                                id: true,
+                                uuid: true,
+                                RolePermission: {
+                                    select: {
+                                        permissionId: true,
+                                    },
                                 },
-                            ],
+                            },
                         },
-                    ],
-                    attributes: [
-                        "id",
-                        "userId",
-                        "roleId",
-                        "email",
-                        "passwordHash",
-                    ],
+                    },
                 })
-                if (!userLogin) {
-                    done(null, false, { message: "Email not found" })
-                } else {
-                    const isVerified = await passwordfunction.verifyPassword(
-                        password,
-                        userLogin.passwordHash
-                    )
-                    if (isVerified) {
-                        const userJson: any = userLogin.toJSON()
-                        const {
-                            email,
-                            user_master,
-                            roleId,
-                            role_master,
-                            ...rest
-                        } = userJson
-                        const { role_permissions } = role_master
-                        done(null, {
-                            email,
-                            name: user_master.fullName,
-                            id: user_master.id,
-                            uuid: user_master.uuid,
-                            roleId: role_master.uuid,
-                            permissions: role_permissions.map(
-                                (x: any) => x.permissionId
-                            ),
-                        })
-                    } else {
-                        done(null, false, {
-                            message: "Password does not match",
-                        })
-                    }
-                }
+
+                if (!userLogin)
+                    return done(null, false, { message: "Email not found" })
+                const isVerified = await passwordfunction.verifyPassword(
+                    password,
+                    userLogin.passwordHash
+                )
+                if (!isVerified)
+                    return done(null, false, {
+                        message: "Password does not match",
+                    })
+
+                const { email: emailId, User, Role } = userLogin
+                const { RolePermission } = Role
+                done(null, {
+                    email: emailId,
+                    name: User.fullName,
+                    id: User.id,
+                    uuid: User.uuid,
+                    roleId: Role.uuid,
+                    permissions: RolePermission.map((x) => x.permissionId),
+                })
             } catch (error) {
-                log.error(error, "error while login")
+                log.error(error.message, "error while login")
                 done(error)
             }
         }
@@ -96,33 +84,39 @@ passport.use(
             secretOrKey: process.env.JWT_SECRET_KEY,
         },
         async (jwtPayload, done) => {
-            const user = await customerDB.User.findOne({
-                attributes: ["id", "uuid"],
-                include: [
-                    {
-                        model: customerDB.UserLogin,
-                        attributes: ["id", "userId"],
-                        include: [
-                            {
-                                model: customerDB.Role,
-                            },
-                        ],
+            try {
+                const user = await prisma.user.findFirst({
+                    where: {
+                        uuid: jwtPayload.sub,
                     },
-                ],
-                where: { uuid: jwtPayload.sub },
-            }).catch((err) => done(err))
-            if (!user) {
-                done(null, false, { message: "Authorization failed" })
-            } else {
-                const _user: any = user.toJSON()
-                done(null, {
-                    id: _user.id,
-                    uuid: _user.uuid,
-                    loginId: _user.user_login.id,
-                    role: {
-                        ..._user.user_login.role_master,
+                    select: {
+                        id: true,
+                        uuid: true,
+                        UserLogin: {
+                            select: {
+                                id: true,
+                                Role: true,
+                            },
+                        },
                     },
                 })
+
+                if (!user)
+                    return done(null, false, {
+                        message: "Authorization failed",
+                    })
+
+                done(null, {
+                    id: user.id,
+                    uuid: user.uuid,
+                    loginId: user.UserLogin?.id,
+                    role: {
+                        ...user.UserLogin?.Role,
+                    },
+                })
+            } catch (error) {
+                log.error(error.message, "error while jwt")
+                done(error)
             }
         }
     )

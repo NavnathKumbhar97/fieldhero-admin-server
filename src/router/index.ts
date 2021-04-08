@@ -6,7 +6,7 @@ import passport from "passport"
 import { httpStatus } from "../helper"
 import { LoginRouter } from "./passport"
 import { IndustryRouter } from "./industry"
-import { SkillSetRouter } from "./skillset"
+import { SkillRouter } from "./skillset"
 import { CompanyRouter } from "./company"
 import { CandidateRouter } from "./candidate"
 import { SubscriptionRouter } from "./subscriptions"
@@ -26,7 +26,7 @@ router.use(LoginRouter)
 router.use(passport.authenticate("jwt", { session: false }))
 // router below will use passport jwt authorization
 router.use(IndustryRouter)
-router.use(SkillSetRouter)
+router.use(SkillRouter)
 router.use(CompanyRouter)
 router.use(CandidateRouter)
 router.use(UploadRouter)

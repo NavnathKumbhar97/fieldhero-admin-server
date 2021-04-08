@@ -1,119 +1,168 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
-/*
- * get All Industries Details
- */
-const getIndustries = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
-    }
-    const industries = await customerDB.Industry.findAll({
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["title", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getIndustries")
-        throw err
-    })
-    return industries
-}
-/*
- * get All Industry Details By Id
- */
-const getIndustryById = async (id: number) => {
-    const industry = await customerDB.Industry.findOne({
-        where: {
-            id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getIndustryById")
-        throw err
-    })
-    return industry
-}
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
 
-/*
- * Create Industry Details
- */
-interface createIndustryParam {
-    method: string
-    title: string
-    description: string
-    isActive: boolean
-}
+const { log, httpStatus } = helper
 
-const createIndustry = async (param: createIndustryParam) => {
-    const findIndustry = await customerDB.Industry.findOne({
-        where: {
-            title: param.title,
-        },
-    })
-    console.log(param, findIndustry)
-    if (findIndustry) {
-        return null
-    } else {
-        console.log(param)
-        const industry = await customerDB.Industry.create({
-            title: param.title,
-            description: param.description,
-            isActive: param.isActive,
-        }).catch((err) => {
-            log.error(err, "Error while createIndustry")
-            throw err
+// * get All Industries Details
+const getIndustries = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const industries = await prisma.industry.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: { title: "asc" },
         })
-        return industry
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            industries
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getIndustries")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getIndustries"
+        )
     }
 }
 
-/*
- * Update Industry Details
- */
+//* get Industry Details By Id
+const getIndustryById = async (id: number): Promise<helper.IResponseObject> => {
+    try {
+        const industry = await prisma.industry.findFirst({
+            where: { id },
+        })
+        if (!industry)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Industry not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            industry
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getIndustryById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getIndustryById"
+        )
+    }
+}
+
+//* Create Industry Details
+interface createIndustryParam {
+    title: string
+    description?: string
+    isActive?: boolean
+}
+
+const createIndustry = async (
+    userLoginId: number,
+    param: createIndustryParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const industryFound = await prisma.industry.findFirst({
+            where: {
+                title: param.title,
+            },
+        })
+        if (industryFound) {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Industry already exist"
+            )
+        }
+
+        const industry = await prisma.industry.create({
+            data: {
+                title: param.title,
+                description: param.description || undefined,
+                isActive: "isActive" in param ? param.isActive : true,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Industry created successfully",
+            industry
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createIndustry")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createIndustry"
+        )
+    }
+}
+
+//* Update Industry Details
 interface updateIndustryParam {
     id: number
     title: string
-    description: string
-    isActive: boolean
+    description?: string
+    isActive?: boolean
 }
-const updateIndustryById = async (param: updateIndustryParam) => {
-    const industry = await customerDB.Industry.update(
-        {
-            title: param.title,
-            description: param.description,
-            isActive: param.isActive,
-        },
-        {
+const updateIndustryById = async (
+    userLoginId: number,
+    param: updateIndustryParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const industryFound = await prisma.industry.findFirst({
             where: {
                 id: param.id,
             },
-        }
-    ).catch((err) => {
-        log.error(err, "Error while updateIndustryById")
-        throw err
-    })
-    return industry
-}
-/*
- * Delete Industry Details
- */
-const deleteIndustryById = async (id: number) => {
-    const industry = await customerDB.Industry.findOne({
-        where: {
-            id: id,
-        },
-    })
-    let deleteIndustry = null
-    if (industry) {
-        industry.isActive = false
-        deleteIndustry = await industry.save().catch((err: any) => {
-            log.error(err, "Error while deleteIndustryById")
-            throw err
         })
+        if (!industryFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Industry not found"
+            )
+
+        const industry = await prisma.industry.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                title: param.title,
+                description: param.description || undefined,
+                isActive: "isActive" in param ? param.isActive : undefined,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Industry updated successfully",
+            industry
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updateIndustryById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateIndustryById"
+        )
     }
-    return deleteIndustry
 }
 
 const Industry = {
@@ -121,6 +170,6 @@ const Industry = {
     getIndustryById,
     createIndustry,
     updateIndustryById,
-    deleteIndustryById,
+    // deleteIndustryById,
 }
 export { Industry }

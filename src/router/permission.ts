@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
-const { httpStatus } = helper
 
 const PermissionRouter = Router()
 
@@ -13,14 +12,11 @@ PermissionRouter.get(
     middleware.permission(helper.permissions.permission_read_all),
     async (req: Request, res: Response) => {
         try {
-            const permissions = await handler.Permission.getPermissions(
-                req.query.all
+            const result = await handler.Permission.getPermissions(
+                req.query.all as string
             )
-            if (!permissions.length) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(permissions)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -31,16 +27,13 @@ PermissionRouter.get(
 PermissionRouter.get(
     "/permissions/:id",
     middleware.permission(helper.permissions.permission_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const permission = await handler.Permission.getPermissionsById(
-                req.params.id
+            const result = await handler.Permission.getPermissionsById(
+                parseInt(req.params.id)
             )
-            if (permission == null) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(permission)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }

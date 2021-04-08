@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
-const { httpStatus } = helper
 const CompanyRouter = Router()
 
 // Company
@@ -13,12 +12,11 @@ CompanyRouter.get(
     middleware.permission(helper.permissions.company_read_all),
     async (req: Request, res: Response) => {
         try {
-            const companies = await handler.Company.getCompanies(req.query.all)
-            if (!companies.length) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(companies)
-            }
+            const result = await handler.Company.getCompanies(
+                req.query.all as string
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -29,14 +27,13 @@ CompanyRouter.get(
 CompanyRouter.get(
     "/companies/:id",
     middleware.permission(helper.permissions.company_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const company = await handler.Company.getCompanyById(req.params.id)
-            if (company == null) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(company)
-            }
+            const result = await handler.Company.getCompanyById(
+                parseInt(req.params.id)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -49,15 +46,12 @@ CompanyRouter.post(
     middleware.permission(helper.permissions.company_create),
     async (req: Request, res: Response) => {
         try {
-            const company = await handler.Company.createCompany({ ...req.body })
-            if (!company) {
-                res.status(httpStatus.Conflict).json({
-                    code: httpStatus.Conflict,
-                    message: "Company already exist",
-                })
-            } else {
-                res.status(httpStatus.Created).json(company)
-            }
+            const result = await handler.Company.createCompany(
+                helper.getUserLoginId(req.user),
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -70,29 +64,15 @@ CompanyRouter.put(
     middleware.permission(helper.permissions.company_update),
     async (req: Request, res: Response) => {
         try {
-            const company = await handler.Company.updatedCompanyById({
-                id: req.params.id,
-                ...req.body,
-            })
-            res.status(httpStatus.OK).json(company)
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-// * Delete Company
-CompanyRouter.delete(
-    "/companies/:id",
-    async (req: Request<any>, res: Response) => {
-        try {
-            const company = await handler.Company.deleteCompanyById(
-                req.params.id
+            const result = await handler.Company.updatedCompanyById(
+                helper.getUserLoginId(req.user),
+                {
+                    id: parseInt(req.params.id),
+                    ...req.body,
+                }
             )
-            res.status(httpStatus.OK).json({
-                success: company,
-                message: "Row Delete Successfully",
-            })
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }

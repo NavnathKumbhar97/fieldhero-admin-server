@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
 import * as handler from "../handlers"
-const { httpStatus } = helper
 
 const AgentRouter = Router()
 // Agent
@@ -46,8 +45,10 @@ AgentRouter.post(
     middleware.permission(helper.permissions.agent_create),
     async (req: Request, res: Response) => {
         try {
-            const _user: any = req.user
-            const result = await handler.Agent.createAgent(_user.id, req.body)
+            const result = await handler.Agent.createAgent(
+                helper.getUserLoginId(req.user),
+                req.body
+            )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
         } catch (error) {
@@ -62,9 +63,8 @@ AgentRouter.put(
     middleware.permission(helper.permissions.agent_update),
     async (req: Request, res: Response) => {
         try {
-            const _user: any = req.user
             const result = await handler.Agent.updateAgent(
-                _user.id,
+                helper.getUserLoginId(req.user),
                 parseInt(req.params.id),
                 req.body
             )

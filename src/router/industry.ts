@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
-const { httpStatus } = helper
 
 const IndustryRouter = Router()
 // Industry
@@ -14,14 +13,11 @@ IndustryRouter.get(
     middleware.permission(helper.permissions.industry_read_all),
     async (req: Request, res: Response) => {
         try {
-            const industries = await handler.Industry.getIndustries(
-                req.query.all
+            const result = await handler.Industry.getIndustries(
+                req.query.all as string
             )
-            if (!industries.length) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(industries)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -32,16 +28,13 @@ IndustryRouter.get(
 IndustryRouter.get(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const industry = await handler.Industry.getIndustryById(
-                req.params.id
+            const result = await handler.Industry.getIndustryById(
+                parseInt(req.params.id)
             )
-            if (industry == null) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(industry)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -54,57 +47,37 @@ IndustryRouter.post(
     middleware.permission(helper.permissions.industry_create),
     async (req: Request, res: Response) => {
         try {
-            const industry = await handler.Industry.createIndustry({
-                ...req.body,
-            })
-            if (industry == null) {
-                res.status(httpStatus.Conflict).json({
-                    code: httpStatus.Conflict,
-                    message: "Industry already exist",
-                })
-            } else {
-                res.status(httpStatus.Created).json(industry)
-            }
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-//* Update Industry
-IndustryRouter.put(
-    "/industries/:id",
-    middleware.permission(helper.permissions.industry_update),
-    async (req: Request, res: Response) => {
-        try {
-            const industry = await handler.Industry.updateIndustryById({
-                id: req.params.id,
-                ...req.body,
-            })
-            res.status(httpStatus.OK).json({
-                Message: "Data Updated Successfully",
-                Success: industry,
-            })
+            const result = await handler.Industry.createIndustry(
+                helper.getUserLoginId(req.user),
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
     }
 )
 
-//* Delete Industry
-IndustryRouter.delete(
+//* Update Industry
+IndustryRouter.put(
     "/industries/:id",
-    async (req: Request<any>, res: Response) => {
+    middleware.permission(helper.permissions.industry_update),
+    async (req: Request, res: Response) => {
         try {
-            const industry = await handler.Industry.deleteIndustryById(
-                req.params.id
+            const result = await handler.Industry.updateIndustryById(
+                helper.getUserLoginId(req.user),
+                {
+                    id: parseInt(req.params.id),
+                    ...req.body,
+                }
             )
-            res.status(httpStatus.OK).json({
-                message: "Row Delete Successfully",
-                success: industry,
-            })
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
     }
 )
+
 export { IndustryRouter }

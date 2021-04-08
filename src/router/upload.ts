@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express"
+import { Router, Request, Response, Express } from "express"
 import multer from "multer"
 import path from "path"
 import fs from "fs"
@@ -11,14 +11,14 @@ const UploadRouter = Router()
 
 // configure storage for multer
 const storage = multer.diskStorage({
-    destination: (req: Request, file: any, cb: any) => {
+    destination: (req: Request, file: Express.Multer.File, cb) => {
         const p = `public/uploads/candidates/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
         }
         cb(null, p)
     },
-    filename: (req: Request, file: any, cb: any) => {
+    filename: (req: Request, file: Express.Multer.File, cb) => {
         const datetimestamp = Date.now()
         const newFilename = `${file.fieldname}-${
             req.params.id
@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
     },
 })
 
-const fileFilter = (req: Request, file: any, cb: any) => {
+const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
     if (
         file.mimetype == "image/jpeg" ||
         file.mimetype == "image/png" ||
@@ -52,19 +52,20 @@ UploadRouter.post(
     async (req: Request, res: Response) => {
         try {
             const file = req.file
-            if (!file) {
-                res.status(httpStatus.Bad_Request).json({
-                    status: "failed",
-                    message: "Please upload file",
+            if (!file)
+                return res.status(httpStatus.Not_Found).json({
+                    code: httpStatus.Not_Found,
+                    message: "File not found",
+                    data: null,
                 })
-            } else {
-                const path = req.file.destination + "/" + req.file.filename
-                const image = await handler.UploadImage.updateCandidateProfileById(
-                    parseInt(req.params.id),
-                    path
-                )
-                res.status(httpStatus.OK).json(image)
-            }
+
+            const path = req.file.destination + "/" + req.file.filename
+            const result = await handler.UploadImage.updateCandidateProfileById(
+                parseInt(req.params.id),
+                path
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }

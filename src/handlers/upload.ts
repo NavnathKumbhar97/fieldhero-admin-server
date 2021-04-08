@@ -1,29 +1,60 @@
 import fs from "fs"
 import path from "path"
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
 /*
  * Upload Candiate Profile By Id
  */
-const updateCandidateProfileById = async (id: number, profileImage: string) => {
-    const CandidateProfile = await customerDB.CandidateOtherDetails.findOne({
-        where: { candidateId: id },
-    })
-    let updatedCandidateProfile = null
-    if (CandidateProfile) {
-        const imagePath = CandidateProfile.profileImage
-        fs.unlink(path.join(process.cwd(), imagePath || ""), (err) => {
-            return err
+const updateCandidateProfileById = async (
+    id: number,
+    profileImage: string
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateOtherFound = await prisma.candidateOther.findFirst({
+            where: {
+                candidateId: id,
+            },
         })
-        CandidateProfile.profileImage = profileImage
-        updatedCandidateProfile = await CandidateProfile.save().catch(
-            (err: any) => {
-                log.error(err, "Error while update profile")
-                throw err
+        if (!candidateOtherFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate not found"
+            )
+        // delete old file
+        fs.unlink(
+            path.join(process.cwd(), candidateOtherFound.profileImage || ""),
+            (err) => {
+                return err
             }
         )
+
+        const candidateOther = await prisma.candidateOther.updateMany({
+            where: {
+                id: candidateOtherFound.id,
+            },
+            data: {
+                profileImage,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "Profile image updated successfully",
+            candidateOther
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updateCandidateProfileById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCandidateProfileById"
+        )
     }
-    return updatedCandidateProfile
 }
 
 const UploadImage = {

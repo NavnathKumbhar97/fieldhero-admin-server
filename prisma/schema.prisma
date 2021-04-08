@@ -7,7 +7,7 @@ datasource db {
 }
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 // ENUMs
@@ -134,69 +134,75 @@ model User {
 }
 
 model UserLogin {
-  id                                   Int                          @id @default(autoincrement())
-  userId                               Int                          @unique
-  User                                 User                         @relation(fields: [userId], references: [id])
-  roleId                               Int
-  Role                                 Role                         @relation(fields: [roleId], references: [id])
-  email                                String                       @unique @db.VarChar(80)
-  contactNo                            String?                      @unique @db.VarChar(20)
-  passwordHash                         String                       @db.VarChar(200)
-  isSystemGenerated                    Boolean                      @default(false)
-  resetToken                           String?                      @db.VarChar(500)
-  resetExpires                         DateTime?
-  createdOn                            DateTime                     @default(now())
-  modifiedOn                           DateTime                     @updatedAt
-  createdBy                            Int?
-  CreatedBy                            UserLogin?                   @relation("createdByUserLoginToUserLogin", fields: [createdBy], references: [id])
-  UserLoginCreatedBy                   UserLogin[]                  @relation("createdByUserLoginToUserLogin")
-  modifiedBy                           Int?
-  ModifiedBy                           UserLogin?                   @relation("modifiedByUserLoginToUserLogin", fields: [modifiedBy], references: [id])
-  UserLoginModifiedBy                  UserLogin[]                  @relation("modifiedByUserLoginToUserLogin")
-  RoleCreatedBy                        Role[]                       @relation("createdByRoleToUserLogin")
-  RoleModifiedBy                       Role[]                       @relation("modifiedByRoleToUserLogin")
-  RolePermissionCreatedBy              RolePermission[]             @relation("createdByRolePermissionToUserLogin")
-  RolePermissionModifiedBy             RolePermission[]             @relation("modifiedByRolePermissionToUserLogin")
-  UserCreatedBy                        User[]                       @relation("createdByUserToUserLogin")
-  UserModifiedBy                       User[]                       @relation("modifiedByUserToUserLogin")
-  IndustryCreatedBy                    Industry[]                   @relation("createdByIndustryToUserLogin")
-  IndustryModifiedBy                   Industry[]                   @relation("modifiedByIndustryToUserLogin")
-  SkillCreatedBy                       Skill[]                      @relation("createdBySkillToUserLogin")
-  SkillModifiedBy                      Skill[]                      @relation("modifiedBySkillToUserLogin")
-  SubscriptionCreatedBy                Subscription[]               @relation("createdBySubscriptionToUserLogin")
-  SubscriptionModifiedBy               Subscription[]               @relation("modifiedBySubscriptionToUserLogin")
-  CandidateUploadBatchCreatedBy        CandidateUploadBatch[]       @relation("createdByCandidateUploadBatchToUserLogin")
-  CandidateUploadBatchModifiedBy       CandidateUploadBatch[]       @relation("modifiedByCandidateUploadBatchToUserLogin")
-  CandidateRawCreatedBy                CandidateRaw[]               @relation("createdByCandidateRawToUserLogin")
-  CandidateRawModifiedBy               CandidateRaw[]               @relation("modifiedByCandidateRawToUserLogin")
-  CandidateRejectionSummary            CandidateRejectionSummary[]
-  CandidateRejectionSummaryCreatedBy   CandidateRejectionSummary[]  @relation("createdByCandidateRejectionSummaryToUserLogin")
-  CandidateRejectionSummaryModifiedBy  CandidateRejectionSummary[]  @relation("modifiedByCandidateRejectionSummaryToUserLogin")
-  CandidateVersioningCreatedBy         CandidateVersioning[]        @relation("createdByCandidateVersioningToUserLogin")
-  CandidateVersioningModifiedBy        CandidateVersioning[]        @relation("modifiedByCandidateVersioningToUserLogin")
-  CandidateCallCentreHistoryCreatedBy  CandidateCallCentreHistory[] @relation("createdByCandidateCallCentreHistoryToUserLogin")
-  CandidateCallCentreHistoryModifiedBy CandidateCallCentreHistory[] @relation("modifiedByCandidateCallCentreHistoryToUserLogin")
-  CandidateCreatedBy                   Candidate[]                  @relation("createdByCandidateToUserLogin")
-  CandidateModifiedBy                  Candidate[]                  @relation("modifiedByCandidateToUserLogin")
-  CandidateApprovedBy                  Candidate[]                  @relation("approvedByCandidateToUserLogin")
-  CandidateOtherCreatedBy              CandidateOther[]             @relation("createdByCandidateOtherToUserLogin")
-  CandidateOtherModifiedBy             CandidateOther[]             @relation("modifiedByCandidateOtherToUserLogin")
-  CandidateTrainingCreatedBy           CandidateTraining[]          @relation("createdByCandidateTrainingToUserLogin")
-  CandidateTrainingModifiedBy          CandidateTraining[]          @relation("modifiedByCandidateTrainingToUserLogin")
-  CandidateJobPreferenceCreatedBy      CandidateJobPreference[]     @relation("createdByCandidateJobPreferenceToUserLogin")
-  CandidateJobPreferenceModifiedBy     CandidateJobPreference[]     @relation("modifiedByCandidateJobPreferenceToUserLogin")
-  CategoryCreatedBy                    Category[]                   @relation("createdByCategoryToUserLogin")
-  CategoryModifiedBy                   Category[]                   @relation("modifiedByCategoryToUserLogin")
-  AgentCreatedBy                       Agent[]                      @relation("createdByAgentToUserLogin")
-  AgentModifiedBy                      Agent[]                      @relation("modifiedByAgentToUserLogin")
-  CustomerCreatedBy                    Customer[]                   @relation("createdByCustomerToUserLogin")
-  CustomerModifiedBy                   Customer[]                   @relation("modifiedByCustomerToUserLogin")
-  CustomerLoginCreatedBy               CustomerLogin[]              @relation("createdByCustomerLoginToUserLogin")
-  CustomerLoginModifiedBy              CustomerLogin[]              @relation("modifiedByCustomerLoginToUserLogin")
-  CustomerSubscriptionCreatedBy        CustomerSubscription[]       @relation("createdByCustomerSubscriptionToUserLogin")
-  CustomerSubscriptionModifiedBy       CustomerSubscription[]       @relation("modifiedByCustomerSubscriptionToUserLogin")
-  CustomerTokenCreatedBy               CustomerToken[]              @relation("createdByCustomerTokenToUserLogin")
-  CustomerTokenModifiedBy              CustomerToken[]              @relation("modifiedByCustomerTokenToUserLogin")
+  id                                    Int                           @id @default(autoincrement())
+  userId                                Int                           @unique
+  User                                  User                          @relation(fields: [userId], references: [id])
+  roleId                                Int
+  Role                                  Role                          @relation(fields: [roleId], references: [id])
+  email                                 String                        @unique @db.VarChar(80)
+  contactNo                             String?                       @unique @db.VarChar(20)
+  passwordHash                          String                        @db.VarChar(200)
+  isSystemGenerated                     Boolean                       @default(false)
+  resetToken                            String?                       @db.VarChar(500)
+  resetExpires                          DateTime?
+  createdOn                             DateTime                      @default(now())
+  modifiedOn                            DateTime                      @updatedAt
+  createdBy                             Int?
+  CreatedBy                             UserLogin?                    @relation("createdByUserLoginToUserLogin", fields: [createdBy], references: [id])
+  UserLoginCreatedBy                    UserLogin[]                   @relation("createdByUserLoginToUserLogin")
+  modifiedBy                            Int?
+  ModifiedBy                            UserLogin?                    @relation("modifiedByUserLoginToUserLogin", fields: [modifiedBy], references: [id])
+  UserLoginModifiedBy                   UserLogin[]                   @relation("modifiedByUserLoginToUserLogin")
+  RoleCreatedBy                         Role[]                        @relation("createdByRoleToUserLogin")
+  RoleModifiedBy                        Role[]                        @relation("modifiedByRoleToUserLogin")
+  RolePermissionCreatedBy               RolePermission[]              @relation("createdByRolePermissionToUserLogin")
+  RolePermissionModifiedBy              RolePermission[]              @relation("modifiedByRolePermissionToUserLogin")
+  UserCreatedBy                         User[]                        @relation("createdByUserToUserLogin")
+  UserModifiedBy                        User[]                        @relation("modifiedByUserToUserLogin")
+  IndustryCreatedBy                     Industry[]                    @relation("createdByIndustryToUserLogin")
+  IndustryModifiedBy                    Industry[]                    @relation("modifiedByIndustryToUserLogin")
+  SkillCreatedBy                        Skill[]                       @relation("createdBySkillToUserLogin")
+  SkillModifiedBy                       Skill[]                       @relation("modifiedBySkillToUserLogin")
+  SubscriptionCreatedBy                 Subscription[]                @relation("createdBySubscriptionToUserLogin")
+  SubscriptionModifiedBy                Subscription[]                @relation("modifiedBySubscriptionToUserLogin")
+  CandidateUploadBatchCreatedBy         CandidateUploadBatch[]        @relation("createdByCandidateUploadBatchToUserLogin")
+  CandidateUploadBatchModifiedBy        CandidateUploadBatch[]        @relation("modifiedByCandidateUploadBatchToUserLogin")
+  CandidateRawCreatedBy                 CandidateRaw[]                @relation("createdByCandidateRawToUserLogin")
+  CandidateRawModifiedBy                CandidateRaw[]                @relation("modifiedByCandidateRawToUserLogin")
+  CandidateRejectionSummary             CandidateRejectionSummary[]
+  CandidateRejectionSummaryCreatedBy    CandidateRejectionSummary[]   @relation("createdByCandidateRejectionSummaryToUserLogin")
+  CandidateRejectionSummaryModifiedBy   CandidateRejectionSummary[]   @relation("modifiedByCandidateRejectionSummaryToUserLogin")
+  CandidateVersioningCreatedBy          CandidateVersioning[]         @relation("createdByCandidateVersioningToUserLogin")
+  CandidateVersioningModifiedBy         CandidateVersioning[]         @relation("modifiedByCandidateVersioningToUserLogin")
+  CandidateCallCentreHistoryCreatedBy   CandidateCallCentreHistory[]  @relation("createdByCandidateCallCentreHistoryToUserLogin")
+  CandidateCallCentreHistoryModifiedBy  CandidateCallCentreHistory[]  @relation("modifiedByCandidateCallCentreHistoryToUserLogin")
+  CandidateCreatedBy                    Candidate[]                   @relation("createdByCandidateToUserLogin")
+  CandidateModifiedBy                   Candidate[]                   @relation("modifiedByCandidateToUserLogin")
+  CandidateApprovedBy                   Candidate[]                   @relation("approvedByCandidateToUserLogin")
+  CandidateOtherCreatedBy               CandidateOther[]              @relation("createdByCandidateOtherToUserLogin")
+  CandidateOtherModifiedBy              CandidateOther[]              @relation("modifiedByCandidateOtherToUserLogin")
+  CandidateTrainingCreatedBy            CandidateTraining[]           @relation("createdByCandidateTrainingToUserLogin")
+  CandidateTrainingModifiedBy           CandidateTraining[]           @relation("modifiedByCandidateTrainingToUserLogin")
+  CandidateJobPreferenceCreatedBy       CandidateJobPreference[]      @relation("createdByCandidateJobPreferenceToUserLogin")
+  CandidateJobPreferenceModifiedBy      CandidateJobPreference[]      @relation("modifiedByCandidateJobPreferenceToUserLogin")
+  CategoryCreatedBy                     Category[]                    @relation("createdByCategoryToUserLogin")
+  CategoryModifiedBy                    Category[]                    @relation("modifiedByCategoryToUserLogin")
+  AgentCreatedBy                        Agent[]                       @relation("createdByAgentToUserLogin")
+  AgentModifiedBy                       Agent[]                       @relation("modifiedByAgentToUserLogin")
+  CustomerCreatedBy                     Customer[]                    @relation("createdByCustomerToUserLogin")
+  CustomerModifiedBy                    Customer[]                    @relation("modifiedByCustomerToUserLogin")
+  CustomerLoginCreatedBy                CustomerLogin[]               @relation("createdByCustomerLoginToUserLogin")
+  CustomerLoginModifiedBy               CustomerLogin[]               @relation("modifiedByCustomerLoginToUserLogin")
+  CustomerSubscriptionCreatedBy         CustomerSubscription[]        @relation("createdByCustomerSubscriptionToUserLogin")
+  CustomerSubscriptionModifiedBy        CustomerSubscription[]        @relation("modifiedByCustomerSubscriptionToUserLogin")
+  CustomerTokenCreatedBy                CustomerToken[]               @relation("createdByCustomerTokenToUserLogin")
+  CustomerTokenModifiedBy               CustomerToken[]               @relation("modifiedByCustomerTokenToUserLogin")
+  CompanyCreatedBy                      Company[]                     @relation("createdByCompanyToUserLogin")
+  CompanyModifiedBy                     Company[]                     @relation("modifiedByCompanyToUserLogin")
+  CandidateWorkHistoryCreatedBy         CandidateWorkHistory[]        @relation("createdByCandidateWorkHistoryToUserLogin")
+  CandidateWorkHistoryModifiedBy        CandidateWorkHistory[]        @relation("modifiedByCandidateWorkHistoryToUserLogin")
+  SkillOnCandidateWorkHistoryCreatedBy  SkillOnCandidateWorkHistory[] @relation("createdBySkillOnCandidateWorkHistoryToUserLogin")
+  SkillOnCandidateWorkHistoryModifiedBy SkillOnCandidateWorkHistory[] @relation("modifiedBySkillOnCandidateWorkHistoryToUserLogin")
 }
 
 model RolePermission {
@@ -225,22 +231,24 @@ model Industry {
   modifiedBy  Int?
   ModifiedBy  UserLogin? @relation("modifiedByIndustryToUserLogin", fields: [modifiedBy], references: [id])
   Category    Category[]
+  Company     Company[]
 }
 
 model Skill {
-  id                           Int                      @id @default(autoincrement())
-  title                        String                   @unique @db.VarChar(45)
-  description                  String?                  @db.VarChar(100)
-  isActive                     Boolean                  @default(true)
-  createdOn                    DateTime                 @default(now())
-  modifiedOn                   DateTime                 @updatedAt
+  id                           Int                           @id @default(autoincrement())
+  title                        String                        @unique @db.VarChar(45)
+  description                  String?                       @db.VarChar(100)
+  isActive                     Boolean                       @default(true)
+  createdOn                    DateTime                      @default(now())
+  modifiedOn                   DateTime                      @updatedAt
   createdBy                    Int?
-  CreatedBy                    UserLogin?               @relation("createdBySkillToUserLogin", fields: [createdBy], references: [id])
+  CreatedBy                    UserLogin?                    @relation("createdBySkillToUserLogin", fields: [createdBy], references: [id])
   modifiedBy                   Int?
-  ModifiedBy                   UserLogin?               @relation("modifiedBySkillToUserLogin", fields: [modifiedBy], references: [id])
+  ModifiedBy                   UserLogin?                    @relation("modifiedBySkillToUserLogin", fields: [modifiedBy], references: [id])
   CandidateTraining            CandidateTraining[]
-  CandidateJobPreferenceSkill1 CandidateJobPreference[] @relation("skill1ToSkill")
-  CandidateJobPreferenceSkill2 CandidateJobPreference[] @relation("skill2ToSkill")
+  CandidateJobPreferenceSkill1 CandidateJobPreference[]      @relation("skill1ToSkill")
+  CandidateJobPreferenceSkill2 CandidateJobPreference[]      @relation("skill2ToSkill")
+  CandidateWorkHistory         SkillOnCandidateWorkHistory[]
 }
 
 model Subscription {
@@ -387,8 +395,8 @@ model CandidateVersioning {
   thirdLanguage              String?                      @db.VarChar(30)
   lastCompany                String?                      @db.VarChar(100)
   designation                String?                      @db.VarChar(80)
-  startDate                  DateTime                     @db.Date
-  endDate                    DateTime                     @db.Date
+  startDate                  DateTime?                    @db.Date
+  endDate                    DateTime?                    @db.Date
   jobDescription             String?                      @db.VarChar(200)
   candidateRawId             Int
   CandidateRawId             CandidateRaw                 @relation(fields: [candidateRawId], references: [id])
@@ -452,9 +460,10 @@ model Candidate {
   ModifiedBy             UserLogin?               @relation("modifiedByCandidateToUserLogin", fields: [modifiedBy], references: [id])
   approvedBy             Int?
   ApprovedBy             UserLogin?               @relation("approvedByCandidateToUserLogin", fields: [modifiedBy], references: [id])
-  CandidateOther         CandidateOther[]
+  CandidateOther         CandidateOther?
   CandidateTraining      CandidateTraining[]
   CandidateJobPreference CandidateJobPreference[]
+  CandidateWorkHistory   CandidateWorkHistory[]
 }
 
 model CandidateOther {
@@ -507,8 +516,8 @@ model CandidateJobPreference {
   Skill2          Skill?     @relation("skill2ToSkill", fields: [skill2], references: [id])
   lastCompany     String?    @db.VarChar(100)
   designation     String?    @db.VarChar(80)
-  startDate       DateTime   @db.Date
-  endDate         DateTime   @db.Date
+  startDate       DateTime?  @db.Date
+  endDate         DateTime?  @db.Date
   jobDescription  String?    @db.VarChar(200)
   createdOn       DateTime   @default(now())
   modifiedOn      DateTime   @updatedAt
@@ -585,7 +594,7 @@ model Customer {
   CreatedBy            UserLogin?             @relation("createdByCustomerToUserLogin", fields: [createdBy], references: [id])
   modifiedBy           Int?
   ModifiedBy           UserLogin?             @relation("modifiedByCustomerToUserLogin", fields: [modifiedBy], references: [id])
-  CustomerLogin        CustomerLogin[]
+  CustomerLogin        CustomerLogin?
   CustomerSubscription CustomerSubscription[]
   CustomerToken        CustomerToken[]
 }
@@ -639,4 +648,53 @@ model CustomerToken {
   CreatedBy  UserLogin? @relation("createdByCustomerTokenToUserLogin", fields: [createdBy], references: [id])
   modifiedBy Int?
   ModifiedBy UserLogin? @relation("modifiedByCustomerTokenToUserLogin", fields: [modifiedBy], references: [id])
+}
+
+model Company {
+  id                   Int                    @id @default(autoincrement())
+  companyName          String                 @unique @db.VarChar(100)
+  description          String?                @db.VarChar(200)
+  isActive             Boolean                @default(true)
+  industryId           Int?
+  IndustryId           Industry?              @relation(fields: [industryId], references: [id])
+  createdOn            DateTime               @default(now())
+  modifiedOn           DateTime               @updatedAt
+  createdBy            Int?
+  CreatedBy            UserLogin?             @relation("createdByCompanyToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy           Int?
+  ModifiedBy           UserLogin?             @relation("modifiedByCompanyToUserLogin", fields: [modifiedBy], references: [id])
+  CandidateWorkHistory CandidateWorkHistory[]
+}
+
+model CandidateWorkHistory {
+  id          Int                           @id @default(autoincrement())
+  startDate   DateTime?                     @db.Date
+  endDate     DateTime?                     @db.Date
+  designation String?                       @db.VarChar(80)
+  description String?                       @db.VarChar(200)
+  candidateId Int
+  CandidateId Candidate                     @relation(fields: [candidateId], references: [id])
+  companyId   Int?
+  CompanyId   Company?                      @relation(fields: [companyId], references: [id])
+  createdOn   DateTime                      @default(now())
+  modifiedOn  DateTime                      @updatedAt
+  createdBy   Int?
+  CreatedBy   UserLogin?                    @relation("createdByCandidateWorkHistoryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy  Int?
+  ModifiedBy  UserLogin?                    @relation("modifiedByCandidateWorkHistoryToUserLogin", fields: [modifiedBy], references: [id])
+  Skill       SkillOnCandidateWorkHistory[]
+}
+
+model SkillOnCandidateWorkHistory {
+  id                     Int                  @id @default(autoincrement())
+  candidateWorkHistoryId Int
+  CandidateWorkHistoryId CandidateWorkHistory @relation(fields: [candidateWorkHistoryId], references: [id])
+  skillId                Int
+  SkillId                Skill                @relation(fields: [skillId], references: [id])
+  createdOn              DateTime             @default(now())
+  modifiedOn             DateTime             @updatedAt
+  createdBy              Int?
+  CreatedBy              UserLogin?           @relation("createdBySkillOnCandidateWorkHistoryToUserLogin", fields: [createdBy], references: [id])
+  modifiedBy             Int?
+  ModifiedBy             UserLogin?           @relation("modifiedBySkillOnCandidateWorkHistoryToUserLogin", fields: [modifiedBy], references: [id])
 }

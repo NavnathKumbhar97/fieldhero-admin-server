@@ -3,7 +3,7 @@ const generatePassword = (
     fullName: string,
     email: string,
     password: string
-) => {
+): string => {
     return `<mjml>
     <mj-body>
       <mj-section>
@@ -32,7 +32,9 @@ interface IForgotPasswordEmailParam {
     email: string
     token: string
 }
-const generateForgotPasswordEmail = (param: IForgotPasswordEmailParam) => {
+const generateForgotPasswordEmail = (
+    param: IForgotPasswordEmailParam
+): string => {
     const url = `${config.CLIENT_URL}/reset-password?token=${param.token}&email=${param.email}`
     return `<mjml>
   <mj-body>    
@@ -64,7 +66,7 @@ interface IResetPasswordSuccessEmailparam {
 }
 const generateResetPasswordSuccessEmail = (
     param: IResetPasswordSuccessEmailparam
-) => {
+): string => {
     return `<mjml>
   <mj-body>    
     <mj-section>
@@ -94,7 +96,7 @@ interface IResetPasswordByAdminSuccessEmailparam {
 }
 const generateResetPasswordByAdminSuccessEmail = (
     param: IResetPasswordByAdminSuccessEmailparam
-) => {
+): string => {
     return `<mjml>
     <mj-body>    
       <mj-section>
@@ -117,7 +119,11 @@ const generateResetPasswordByAdminSuccessEmail = (
   </mjml>`
 }
 
-const createAgent = (fullName: string, email: string, password: string) => {
+const createAgent = (
+    fullName: string,
+    email: string,
+    password: string
+): string => {
     return `<mjml>
   <mj-body>
     <mj-section>

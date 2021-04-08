@@ -1,29 +1,45 @@
-import { customerDB, ormCustomer } from "../sequelize"
-import { log } from "../helper"
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
 
 /**
  * Get All Roles
  * @param all
  */
 
-const getRoles = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
+const getRoles = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const roles = await prisma.role.findMany({
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                isActive: true,
+                isSystemGenerated: true,
+            },
+            where: {
+                isActive: whereCondition,
+                id: {
+                    notIn: whereCondition ? [1, 3] : undefined,
+                },
+            },
+            orderBy: { name: "asc" },
+        })
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", roles)
+    } catch (error) {
+        log.error(error.message, "Error while getRoles")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getRoles"
+        )
     }
-    const roles = await customerDB.Role.findAll({
-        attributes: { exclude: ["uuid"] },
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["name", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getRoles")
-        throw err
-    })
-    return roles
 }
 
 /**
@@ -31,29 +47,42 @@ const getRoles = async (all: any) => {
  * @param id
  */
 
-const getRoleById = async (id: number) => {
-    const role = await customerDB.Role.findOne({
-        attributes: {
-            exclude: ["uuid"],
-        },
-        include: [
-            {
-                model: customerDB.RolePermission,
-                attributes: ["permissionId"],
+const getRoleById = async (id: number): Promise<helper.IResponseObject> => {
+    try {
+        const _role = await prisma.role.findFirst({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                isActive: true,
+                isSystemGenerated: true,
+                RolePermission: {
+                    select: { permissionId: true },
+                },
             },
-        ],
-        where: {
-            id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getRoleById")
-        throw err
-    })
-    const { role_permissions, ...rest } = role?.toJSON() as any
+        })
+        if (!_role)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Role not found"
+            )
 
-    return {
-        ...rest,
-        permissions: role_permissions.map((x: any) => x.permissionId),
+        const { RolePermission, ...rest } = _role
+        const result = {
+            ...rest,
+            permissions: RolePermission.map((x) => x.permissionId),
+        }
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error) {
+        log.error(error.message, "Error while getRoleById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getRoleById"
+        )
     }
 }
 
@@ -64,46 +93,46 @@ interface createRoleParam {
     name: string
     description: string
     isActive?: boolean
-    permissionId: any
+    permissionId: Array<number>
 }
 
-const createRole = async (param: createRoleParam) => {
-    const transaction = await ormCustomer.transaction()
+const createRole = async (
+    userLoginId: number,
+    param: createRoleParam
+): Promise<helper.IResponseObject> => {
     try {
-        const role = await customerDB.Role.create(
-            {
+        const role = await prisma.role.create({
+            data: {
                 name: param.name,
                 description: param.description,
-                isActive: param.isActive,
+                isActive: "isActive" in param ? param.isActive : undefined,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+                RolePermission: {
+                    createMany: {
+                        data: param.permissionId.map((perm) => ({
+                            permissionId: perm,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        })),
+                    },
+                },
             },
-            {
-                fields: ["name", "description", "uuid"],
-                transaction,
-            }
-        )
-        const permissionArray = param.permissionId
-        const permissionArrayObjecct = permissionArray.map((item: number) => {
-            return {
-                roleId: role.id,
-                permissionId: item,
-            }
         })
-        const rolePrmission = await customerDB.RolePermission.bulkCreate(
-            permissionArrayObjecct,
-            {
-                fields: ["roleId", "permissionId"],
-                transaction,
-            }
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Role created successfully",
+            role
         )
-        await transaction.commit()
-        return Object.assign({
-            role,
-            rolePrmission,
-        })
-    } catch (err: any) {
-        await transaction.rollback()
-        log.error(err, "Error while createRole")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while createRole")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createRole"
+        )
     }
 }
 /**
@@ -113,56 +142,66 @@ interface updateRoleParam {
     id: number
     name: string
     description: string
-    permissionId: any
+    permissionId: Array<number>
 }
 
-const UpdateRoleById = async (param: updateRoleParam) => {
-    const transaction = await ormCustomer.transaction()
+const updateRoleById = async (
+    userLoginId: number,
+    param: updateRoleParam
+): Promise<helper.IResponseObject> => {
     try {
-        const role = await customerDB.Role.findOne({
-            where: { id: param.id },
-        })
-        //Delete All Permission
-        const deleteRolePermission = await customerDB.RolePermission.destroy({
+        const role = await prisma.role.findFirst({
             where: {
-                roleId: param.id,
+                id: param.id,
             },
-            transaction,
         })
+        if (!role)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Bad_Request,
+                "Role not found"
+            )
+        // Delete all permissions
+        await prisma.rolePermission.deleteMany({
+            where: {
+                roleId: role.id,
+            },
+        })
+
         // update role details
-        let updateRole = null
-        if (role) {
-            role.name = param.name
-            role.description = param.description
-            updateRole = await role.save()
-        }
-        {
-            transaction
-        }
-        const permissionArray = param.permissionId
-        const permissionArrayObjecct = permissionArray.map((item: number) => {
-            return {
-                roleId: role?.id,
-                permissionId: item,
-            }
+        const updatedRole = await prisma.role.update({
+            where: {
+                id: role.id,
+            },
+            data: {
+                name: param.name,
+                description: param.description,
+                createdBy: userLoginId,
+                RolePermission: {
+                    createMany: {
+                        data: param.permissionId.map((perm) => ({
+                            permissionId: perm,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        })),
+                    },
+                },
+            },
         })
-        // inserted New Role Permission
-        const rolePrmission = await customerDB.RolePermission.bulkCreate(
-            permissionArrayObjecct,
-            {
-                fields: ["roleId", "permissionId"],
-                transaction,
-            }
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Role updated successfully",
+            updatedRole
         )
-        await transaction.commit()
-        return Object.assign({
-            role,
-            rolePrmission,
-        })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while UpdateRoleById")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while updateRoleById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateRoleById"
+        )
     }
 }
 
@@ -170,6 +209,6 @@ const Role = {
     getRoles,
     getRoleById,
     createRole,
-    UpdateRoleById,
+    updateRoleById,
 }
 export { Role }
