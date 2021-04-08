@@ -1,5 +1,4 @@
 import { Router, Request, Response, json as bodyParserJson } from "express"
-// import bodyParser from "body-parser"
 // local imports
 import * as middleware from "./middleware"
 import * as handler from "../handlers"

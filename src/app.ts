@@ -1,7 +1,6 @@
 import express, { Express, Request, Response } from "express"
 import cors from "cors"
 import helmet from "helmet"
-// import bodyparser from "body-parser"
 import pino from "pino-http"
 // local imports
 
