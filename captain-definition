@@ -2,6 +2,7 @@
     "schemaVersion": 2,
     "dockerfileLines": [
         "FROM node:13.14.0",
+        "ARG DATABASE_URL=${DATABASE_URL}",
         "RUN mkdir -p /usr/src/app",
         "WORKDIR /usr/src/app",
         "COPY ./ /usr/src/app/",
