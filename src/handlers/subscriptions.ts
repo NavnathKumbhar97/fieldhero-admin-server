@@ -1,5 +1,87 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
+
+/*
+ * get All Subscription Plan Details
+ */
+const getSubscriptions = async (
+    all: string
+): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const subscriptions = await prisma.subscription.findMany({
+            select: {
+                id: true,
+                planName: true,
+                dataCount: true,
+                durationMonths: true,
+                price: true,
+                note: true,
+                isActive: true,
+            },
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: {
+                planName: "asc",
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            subscriptions
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getSubscriptions")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSubscriptions"
+        )
+    }
+}
+
+/*
+ * get All Subscription Plans By Id
+ */
+const getSubscriptionById = async (
+    id: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const subscripition = await prisma.subscription.findFirst({
+            where: {
+                id,
+            },
+        })
+        if (!subscripition)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Industry not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            subscripition
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getSubscriptionById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSubscriptionById"
+        )
+    }
+}
 
 /*
  * Create Subscripition Plan Details
@@ -13,74 +95,50 @@ interface createSubscripitionParam {
     isActive: boolean
 }
 
-const createSubscripition = async (param: createSubscripitionParam) => {
-    const findSubscripition = await customerDB.Subscription.findOne({
-        where: {
-            planName: param.planName,
-        },
-    })
-    if (findSubscripition) {
-        return null
-    } else {
-        const subscription = await customerDB.Subscription.create({
-            planName: param.planName,
-            dataCount: param.dataCount,
-            durationMonths: param.durationMonths,
-            price: param.price,
-            note: param.note ? param.note : null,
-            isActive: param.isActive,
-        }).catch((err) => {
-            log.error(err, "Error while createSubscripition")
-            throw err
+const createSubscripition = async (
+    userLoginId: number,
+    param: createSubscripitionParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const subscriptionFound = await prisma.subscription.findFirst({
+            where: {
+                planName: param.planName,
+            },
         })
-        return subscription
-    }
-}
+        if (subscriptionFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Plan name already exist"
+            )
 
-/*
- * get All Subscription Plan Details
- */
-const getSubscriptions = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
-    }
-    const subscriptions = await customerDB.Subscription.findAll({
-        attributes: [
-            "id",
-            "planName",
-            "dataCount",
-            "durationMonths",
-            "price",
-            "note",
-            "isActive",
-        ],
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["planName", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getSubscriptions")
-        throw err
-    })
-    return subscriptions
-}
+        const subscripition = await prisma.subscription.create({
+            data: {
+                planName: param.planName,
+                dataCount: param.dataCount,
+                durationMonths: param.durationMonths,
+                price: param.price,
+                note: param.note,
+                isActive: "isActive" in param ? param.isActive : undefined,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            },
+        })
 
-/*
- * get All Subscription Plans By Id
- */
-const getSubscriptionById = async (id: number) => {
-    const subscription = await customerDB.Subscription.findOne({
-        where: {
-            id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getSubscriptionById")
-        throw err
-    })
-    return subscription
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Subscription created successfully",
+            subscripition
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createSubscripition")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createSubscripition"
+        )
+    }
 }
 
 /*
@@ -92,21 +150,46 @@ interface IUpdateSubscriptionParam {
     isActive: boolean
 }
 
-const updatedSubscriptionById = async (param: IUpdateSubscriptionParam) => {
-    const subscripition = await customerDB.Subscription.findOne({
-        where: { id: param.id },
-    })
-    let updatedsubscripition = null
-    if (subscripition) {
-        subscripition.isActive = param.isActive
-            ? param.isActive
-            : !subscripition.isActive
-        if (param.note) subscripition.note = param.note
-        updatedsubscripition = await subscripition.save().catch((err: any) => {
-            log.error(err, "Error while updatedSubscriptionById")
-            throw err
+const updatedSubscriptionById = async (
+    userLoginId: number,
+    param: IUpdateSubscriptionParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const subscriptionFound = await prisma.subscription.findFirst({
+            where: {
+                id: param.id,
+            },
         })
-        return updatedsubscripition
+        if (!subscriptionFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Subscription not found"
+            )
+
+        const subscripition = await prisma.subscription.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                note: param.note,
+                isActive: "isActive" in param ? param.isActive : undefined,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Subscription updated successfully",
+            subscripition
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updatedSubscriptionById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updatedSubscriptionById"
+        )
     }
 }
 

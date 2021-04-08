@@ -1,27 +1,40 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
 
 /**
  * Get All Permission
  * @param all
  */
 
-const getPermissions = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
+const getPermissions = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const permissions = await prisma.permission.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: { id: "asc" },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            permissions
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getPermissions")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getPermissions"
+        )
     }
-    const permissions = await customerDB.Permission.findAll({
-        where: {
-            isActive: whereCondition,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getPermission")
-        throw err
-    })
-    return permissions
 }
 
 /**
@@ -29,16 +42,34 @@ const getPermissions = async (all: any) => {
  * @param id
  */
 
-const getPermissionsById = async (id: number) => {
-    const permission = await customerDB.Permission.findOne({
-        where: {
-            id: id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getPermissionById")
-        throw err
-    })
-    return permission
+const getPermissionsById = async (
+    id: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const permission = await prisma.permission.findFirst({
+            where: { id },
+        })
+        if (!permission)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Permission not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            permission
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getPermissionsById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getPermissionsById"
+        )
+    }
 }
 
 const Permission = {

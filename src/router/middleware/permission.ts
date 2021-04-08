@@ -1,44 +1,45 @@
 import { Request, Response, NextFunction } from "express"
 // local imports
-import { customerDB } from "../../sequelize"
-import { httpStatus } from "../../helper"
-import * as handler from "../../handlers"
+import { httpStatus, log } from "../../helper"
+import prisma from "../../prisma"
 
 export default (permissionTocheck: number) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-        const _user: any = req.user
+    return async (
+        req: Request,
+        res: Response,
+        next: NextFunction
+    ): Promise<void> => {
+        const _user = req.user as { role: { uuid: string } }
         try {
-            const role = await customerDB.Role.findOne({
-                where: { uuid: _user.role.uuid },
-                include: [
-                    {
-                        model: customerDB.RolePermission,
-                        attributes: ["permissionId"],
+            const role = await prisma.role.findFirst({
+                where: {
+                    uuid: _user.role.uuid,
+                },
+                include: {
+                    RolePermission: {
+                        select: {
+                            permissionId: true,
+                        },
                     },
-                ],
+                },
             })
-            if (role && Object.keys(role).length) {
-                try {
-                    const _role: any = role.toJSON()
-                    const permissions = _role.role_permissions.map(
-                        (perm: any) => perm.permissionId
-                    )
-                    const isPermitted = permissions.includes(permissionTocheck)
-                    if (isPermitted) {
-                        next()
-                    } else {
-                        // if permission not available in role
-                        res.status(httpStatus.Forbidden).send("Forbidden")
-                    }
-                } catch (error) {
-                    res.status(httpStatus.Forbidden).send("Forbidden")
-                }
-            } else {
-                // if role not found
+            if (!role) {
                 res.status(httpStatus.Forbidden).send("Forbidden")
+                return
             }
+
+            const permissions = role.RolePermission.map(
+                (perm) => perm.permissionId
+            )
+            const isPermitted = permissions.includes(permissionTocheck)
+            if (!isPermitted) {
+                res.status(httpStatus.Forbidden).send("Forbidden")
+                return
+            }
+            next()
         } catch (error) {
-            handler.express.handleRouterError(res, error)
+            log.error(error.message, "Error in permission middleware")
+            res.status(httpStatus.Forbidden).send("Forbidden")
         }
     }
 }

@@ -1,225 +1,121 @@
+import { Prisma } from "@prisma/client"
+import moment from "moment"
 import paginate from "jw-paginate"
+// local imports
+import prisma from "../prisma"
 import * as helper from "../helper"
-import { customerDB, ormCustomer } from "../sequelize"
 import { log, httpStatus } from "../helper"
-import { Op } from "sequelize"
-import { IRejected } from "../helper/candidate"
+
+const {
+    handleString,
+    handleNotNullString,
+    handleNotNullNumber,
+    handleNumber,
+    handleDate,
+    handleGender,
+    handleEmail,
+    handleAadhar,
+} = helper.candidate
 
 /*
  * get All Get Candidates
  */
 
-const getCandidates = async (pagination: any) => {
-    let whereCondition = {}
-    if (pagination.all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
-    }
-    let page = 1,
-        limit = 10
-    if (pagination.page) page = parseInt(pagination.page)
-    if (pagination.limit) limit = parseInt(pagination.limit)
-    const count = await customerDB.Candidate.count()
-    const _paginate = paginate(count, page, limit)
-    const candidates = await customerDB.Candidate.findAndCountAll({
-        limit: limit,
-        offset: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
-        include: [
-            { model: customerDB.CandidateOtherDetails },
-            { model: customerDB.CandidateCertificate },
-            {
-                model: customerDB.CandidateWorkHistory,
-                include: [
-                    {
-                        model: customerDB.Company,
-                        required: false,
-                    },
-                ],
-            },
-        ],
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["fullName", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getCandidates")
-        throw err
-    })
-    const response = {
-        Candidates: candidates.rows,
-        ..._paginate,
-    }
-
-    return response
+interface IGetCandidatesParam {
+    all: string
+    page: string
+    limit: string
 }
-
-/*
- * get All Get Candidates By Id
- */
-
-const getCandidateById = async (id: number) => {
-    const candidate = await customerDB.Candidate.findOne({
-        where: {
-            id,
-        },
-        include: [
-            { model: customerDB.CandidateOtherDetails },
-            { model: customerDB.CandidateCertificate },
-            {
-                model: customerDB.CandidateWorkHistory,
-                include: [{ model: customerDB.Company }],
-            },
-        ],
-    }).catch((err: any) => {
-        log.error(err, "Error while getCandidateById")
-        throw err
-    })
-    return candidate
-}
-
-/*
- * Delete All Candidate truncate
- */
-const deleteAllCandiate = async () => {
-    const transaction = await ormCustomer.transaction()
+const getCandidates = async (
+    param: IGetCandidatesParam
+): Promise<helper.IResponseObject> => {
     try {
-        await ormCustomer.query("SET FOREIGN_KEY_CHECKS = 0", {
-            raw: true,
-            transaction,
+        let whereCondition: true | undefined = true
+        if (param.all == "*") whereCondition = undefined
+        const page = "page" in param ? parseInt(param.page) : 1,
+            limit = "limit" in param ? parseInt(param.limit) : 10
+
+        const count = await prisma.candidate.count()
+
+        const _paginate = paginate(count, page, limit)
+        const candidates = await prisma.candidate.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            include: {
+                CandidateOther: true,
+                CandidateTraining: true,
+                CandidateJobPreference: true,
+            },
+            take: limit,
+            skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
+            orderBy: {
+                fullName: "asc",
+            },
         })
-        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.truncate(
-            {
-                transaction,
-            }
+
+        const result = {
+            Candidates: candidates,
+            ..._paginate,
+        }
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error) {
+        log.error(error.message, "Error while getCandidates")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidates"
         )
-
-        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.truncate(
-            {
-                transaction,
-            }
-        )
-        const deleteCandiateCertificate = await customerDB.CandidateCertificate.truncate(
-            {
-                transaction,
-            }
-        )
-
-        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.truncate(
-            {
-                transaction,
-            }
-        )
-
-        const deleteCandiateInfo = await customerDB.Candidate.truncate({
-            transaction,
-        })
-        await ormCustomer.query("SET FOREIGN_KEY_CHECKS = 1", {
-            raw: true,
-            transaction,
-        }) //<---- Do not check referential constraints
-
-        await transaction.commit()
-        return Object.assign({
-            deleteSkillsWorkHistory,
-            deleteCandiateWorkHistroy,
-            deleteCandiateOtherDetails,
-            deleteCandiateCertificate,
-            deleteCandiateInfo,
-        })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while deleteCandiate")
-
-        throw err
     }
 }
 
 /*
- * Delete All Candidate By Id
+ * get Candidate By Id
  */
-const deleteCandiateById = async (id: number) => {
-    const transaction = await ormCustomer.transaction()
+
+const getCandidateById = async (
+    id: number
+): Promise<helper.IResponseObject> => {
     try {
-        const getCandiateDetails = await customerDB.Candidate.findOne({
-            where: {
-                id: id,
+        const candidate = await prisma.candidate.findFirst({
+            where: { id },
+            include: {
+                CandidateOther: true,
+                CandidateTraining: true,
+                CandidateJobPreference: true,
             },
-            transaction,
         })
-        const candidateId = getCandiateDetails?.id
-        const getCandidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll(
-            {
-                where: {
-                    candidateId: candidateId,
-                },
-                transaction,
-            }
+        if (!candidate)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidate
         )
-        const getCandidatesWorkHistoryArray = getCandidatesWorkHistory.map(
-            (item) => {
-                return item.id!
-            }
+    } catch (error) {
+        log.error(error.message, "Error while getIndustries")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getIndustries"
         )
-        const deleteSkillsWorkHistory = await customerDB.CandidateWorkHistorySkill.destroy(
-            {
-                where: {
-                    workHistoryId: getCandidatesWorkHistoryArray,
-                },
-                transaction,
-            }
-        )
-        const deleteCandiateWorkHistroy = await customerDB.CandidateWorkHistory.destroy(
-            {
-                where: {
-                    candidateId: candidateId,
-                },
-                transaction,
-            }
-        )
-        const deleteCandiateOtherDetails = await customerDB.CandidateOtherDetails.destroy(
-            {
-                where: {
-                    candidateId: candidateId,
-                },
-                transaction,
-            }
-        )
-        const deleteCandiateCertificate = await customerDB.CandidateCertificate.destroy(
-            {
-                where: {
-                    candidateId: candidateId,
-                },
-                transaction,
-            }
-        )
-        const deleteCandiateInfo = await customerDB.Candidate.destroy({
-            where: {
-                id: id,
-            },
-            transaction,
-        })
-        await transaction.commit()
-        return Object.assign({
-            deleteSkillsWorkHistory,
-            deleteCandiateWorkHistroy,
-            deleteCandiateOtherDetails,
-            deleteCandiateCertificate,
-            deleteCandiateInfo,
-        })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while deleteCandiateById")
-        throw err
     }
 }
+
 /*
  * Create Candidate
  */
 interface createCandidateParam {
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "other" | null
+    gender: "MALE" | "FEMALE" | "OTHER" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -242,50 +138,61 @@ interface createCandidateParam {
     candidateId: number
 }
 
-const createCandidate = async (param: createCandidateParam) => {
-    const transaction = await ormCustomer.transaction()
+const createCandidate = async (
+    userLoginId: number,
+    param: createCandidateParam
+): Promise<helper.IResponseObject> => {
     try {
-        const candidate = await customerDB.Candidate.create(
-            {
+        const candidate = await prisma.candidate.create({
+            data: {
                 fullName: param.fullName,
-                birthDate: param.birthDate,
+                dob: param.birthDate,
                 gender: param.gender,
-                perm_address: param.perm_address,
-                perm_city: param.perm_city,
-                perm_state: param.perm_state,
-                perm_country: param.perm_country,
-                perm_zip: param.perm_zip,
-                curr_address: param.curr_address,
-                curr_city: param.curr_city,
-                curr_state: param.curr_state,
-                curr_country: param.curr_country,
-                curr_zip: param.curr_zip,
+                permAddress: param.perm_address,
+                permCity: param.perm_city,
+                permState: param.perm_state,
+                permCountry: param.perm_country,
+                permZip: param.perm_zip,
+                currAddress: param.curr_address,
+                currCity: param.curr_city,
+                currState: param.curr_state,
+                currCountry: param.curr_country,
+                currZip: param.curr_zip,
                 email1: param.email1,
                 email2: param.email2,
                 contactNo1: param.contactNo1,
                 contactNo2: param.contactNo2,
                 aadharNo: param.aadharNo,
                 isActive: param.isActive,
+                approvedOn: moment().utc().format(),
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+                approvedBy: userLoginId,
+                CandidateOther: {
+                    create: {
+                        expYears: param.totalExpYears,
+                        expMonths: param.totalExpMonths,
+                        registrationStatus: param.registrationStatus,
+                        createdBy: userLoginId,
+                        modifiedBy: userLoginId,
+                    },
+                },
             },
-            { transaction }
-        )
+        })
 
-        const candidateother = await customerDB.CandidateOtherDetails.create(
-            {
-                totalExpMonths: param.totalExpMonths,
-                totalExpYears: param.totalExpYears,
-                registrationStatus: param.registrationStatus,
-                candidateId: candidate.get("id") as number,
-            },
-            { transaction }
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Candidate created successfully",
+            candidate
         )
-
-        await transaction.commit()
-        return Object.assign({ candidate, candidateother })
-    } catch (err: any) {
-        await transaction.rollback()
-        log.error(err, "Error while createCandidate")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while createCandidate")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createCandidate"
+        )
     }
 }
 /*
@@ -295,7 +202,7 @@ interface updateCandidateParam {
     id: number
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "other" | null
+    gender: "MALE" | "FEMALE" | "OTHER" | null
     perm_address: string
     perm_city: string
     perm_state: string
@@ -318,594 +225,1079 @@ interface updateCandidateParam {
     candidateId: number
 }
 
-const updateCandidateById = async (param: updateCandidateParam) => {
-    const transaction = await ormCustomer.transaction()
+const updateCandidateById = async (
+    userLoginId: number,
+    param: updateCandidateParam
+): Promise<helper.IResponseObject> => {
     try {
-        const candidateInfo = await customerDB.Candidate.findOne({
-            where: { id: param.id },
+        const candidateFound = await prisma.candidate.findFirst({
+            where: {
+                id: param.id,
+            },
         })
-        let updateCandidate = null
-        if (candidateInfo) {
-            candidateInfo.fullName = param.fullName
-            candidateInfo.birthDate = param.birthDate
-            candidateInfo.gender = param.gender
-            candidateInfo.perm_address = param.perm_address
-            candidateInfo.perm_city = param.perm_city
-            candidateInfo.perm_state = param.perm_state
-            candidateInfo.perm_country = param.perm_country
-            candidateInfo.perm_zip = param.perm_zip
-            candidateInfo.curr_address = param.curr_address
-            candidateInfo.curr_city = param.curr_city
-            candidateInfo.curr_state = param.curr_state
-            candidateInfo.curr_country = param.curr_country
-            candidateInfo.curr_zip = param.curr_zip
-            candidateInfo.email1 = param.email1
-            candidateInfo.email2 = param.email2
-            candidateInfo.contactNo1 = param.contactNo1
-            candidateInfo.contactNo2 = param.contactNo2
-            candidateInfo.aadharNo = param.aadharNo
-            candidateInfo.isActive = param.isActive
-            updateCandidate = await candidateInfo.save()
-        }
-        {
-            transaction
-        }
+        if (!candidateFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate not found"
+            )
 
-        const candidateOtherDetailsInfo = await customerDB.CandidateOtherDetails.findOne(
-            {
-                where: { candidateId: param.id },
-            }
+        const candidate = await prisma.candidate.update({
+            where: {
+                id: candidateFound.id,
+            },
+            data: {
+                fullName: param.fullName,
+                dob: param.birthDate,
+                gender: param.gender,
+                permAddress: param.perm_address,
+                permCity: param.perm_city,
+                permState: param.perm_state,
+                permCountry: param.perm_country,
+                permZip: param.perm_zip,
+                currAddress: param.curr_address,
+                currCity: param.curr_city,
+                currState: param.curr_state,
+                currCountry: param.curr_country,
+                currZip: param.curr_zip,
+                email1: param.email1,
+                email2: param.email2,
+                contactNo1: param.contactNo1,
+                contactNo2: param.contactNo2,
+                aadharNo: param.aadharNo,
+                isActive: param.isActive,
+                approvedOn: moment().utc().format(),
+                modifiedBy: userLoginId,
+                approvedBy: userLoginId,
+                CandidateOther: {
+                    update: {
+                        expYears: param.totalExpYears,
+                        expMonths: param.totalExpMonths,
+                        registrationStatus: param.registrationStatus,
+                        modifiedBy: userLoginId,
+                    },
+                },
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate updated successfully",
+            candidate
         )
-        let updateCandidateOtherDetails = null
-        if (candidateOtherDetailsInfo) {
-            if (param.totalExpMonths)
-                candidateOtherDetailsInfo.totalExpMonths = param.totalExpMonths
-            if (param.totalExpYears)
-                candidateOtherDetailsInfo.totalExpYears = param.totalExpYears
-            candidateOtherDetailsInfo.registrationStatus =
-                param.registrationStatus
-            updateCandidateOtherDetails = await candidateOtherDetailsInfo.save()
-        }
-        {
-            transaction
-        }
-
-        await transaction.commit()
-        return Object.assign({ updateCandidate, updateCandidateOtherDetails })
-    } catch (err: any) {
-        await transaction.rollback()
-        log.error(err, "Error while updateCandidateById")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while updateCandidateById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCandidateById"
+        )
     }
 }
-/*
- * bulk Candidate
- */
-interface bulkCreateCandidateParam {
-    fullName: string
-    birthDate?: Date | null
-    gender?: "male" | "female" | "transgender" | null
-    perm_address?: string | null
-    perm_city?: string | null
-    perm_state?: string | null
-    perm_country?: string | null
-    perm_zip?: string | null
-    curr_address?: string | null
-    curr_city?: string | null
-    curr_state?: string | null
-    curr_country?: string | null
-    curr_zip?: string | null
-    primary_email?: string | null
-    secondary_email?: string | null
-    primary_mobile: string
-    secondary_mobile?: string | null
-    aadharNo?: string | null
-    isActive?: boolean | null
-    totalExpMonths?: number | null
-    totalExpYears?: number | null
-    registrationStatus?: string | null
-    candidateId?: number | null
+
+//* bulk Candidate
+const createCandidateRaw = async (
+    userLoginId: number,
+    param: Array<any>
+): Promise<helper.IResponseObject> => {
+    try {
+        const data = param
+            .map((p, i: number) => ({
+                industry: `${handleString(p["industry"])}`,
+                category: `${handleString(p["category"])}`,
+                fullName: `${handleString(p["full_name"])}`,
+                contactNo1: `${p["primary_mobile"]}`,
+                currAddress: `${handleString(p["curr_address"])}`,
+                currCity: `${handleString(p["curr_city"])}`,
+                currState: `${handleString(p["curr_state"])}`,
+                currCountry: "India",
+                currZip: `${p["curr_pincode"]}`,
+                dob: `${handleString(p["birth_date"])}`,
+                gender: `${handleString(p["gender"])}`,
+                permAddress: `${handleString(p["perm_address"])}`,
+                permCity: `${handleString(p["perm_city"])}`,
+                permState: `${handleString(p["perm_state"])}`,
+                permCountry: "India",
+                permZip: `${p["perm_pincode"]}`,
+                email1: `${handleString(p["primary_email"])}`,
+                email2: `${handleString(p["secondary_email"])}`,
+                contactNo2: `${p["secondary_mobile"]}`,
+                aadharNo: `${p["aadhar_no"]}`,
+                panNo: `${handleString(p["pan_no"])}`,
+                dlNo: `${handleString(p["driving_licence_no"])}`,
+                expYears: `${p["exp_years"]}`,
+                expMonths: `${p["exp_months"]}`,
+                prefLocation1: `${handleString(p["pref_location_1"])}`,
+                prefLocation2: `${handleString(p["pref_location_2"])}`,
+                prefLocation3: `${handleString(p["pref_location_3"])}`,
+                skill1: `${handleString(p["skill_1"])}`,
+                skill2: `${handleString(p["skill_2"])}`,
+                primaryLang: `${handleString(p["primary_lang"])}`,
+                secondaryLang: `${handleString(p["secondary_lang"])}`,
+                thirdLang: `${handleString(p["third_lang"])}`,
+                lastCompany: `${handleString(p["last_company"])}`,
+                designation: `${handleString(p["designation"])}`,
+                startDate: `${handleString(p["start_date"])}`,
+                endDate: `${handleString(p["end_date"])}`,
+                jobDescription: `${handleString(p["job_description"])}`,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+                isSystemApproved: false,
+                rowNum: i + 2,
+            }))
+            .map((p: any) => {
+                Object.keys(p).forEach((key: string) => {
+                    if (p[key] === "null") p[key] = null
+                })
+                return p
+            })
+        const response = await prisma.candidateUploadBatch.create({
+            data: {
+                count: data.length,
+                timestamp: moment().utc().format(),
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+                CandidateRaw: {
+                    createMany: {
+                        data,
+                    },
+                },
+            },
+        })
+        candidateBatchSystemCheck(userLoginId, response.id)
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            `Bulk upload successfully. Total uploaded: ${response.count}`,
+            response
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createCandidateRaw")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createCandidateRaw"
+        )
+    }
 }
 
-const createBulkCandidate = async (param: Array<any>, userId: number) => {
-    const transaction = await ormCustomer.transaction()
-    const arrRejected: Array<any> = []
-    const arrIgnored: Array<any> = []
+const candidateBatchSystemCheck = async (
+    userLoginId: number,
+    batchId: number
+) => {
     try {
-        param = param.map((item, i) => {
-            const row_num = i + 2
-            return { ...item, row_num }
+        const rawCandidates = await prisma.candidateRaw.findMany({
+            where: {
+                batchId,
+            },
         })
-        const _params: any = param.map((item, i) => {
-            const rejected: any = {}
-            const ignored: any = {}
 
+        const arrRejSum: Prisma.CandidateRejectionSummaryCreateManyInput[] = []
+        const filteredCandidates = rawCandidates.map((item) => {
             // industry
-            let industry: any = helper.candidate.handleNotNullString(
-                item.industry,
-                80
-            )
+            let industry: any = handleNotNullString(item.industry, 80)
             if (industry && typeof industry === "object") {
                 industry = "Other"
             }
 
             // category
-            let category: any = helper.candidate.handleNotNullString(
-                item.category,
-                80
-            )
+            let category: any = handleNotNullString(item.category, 80)
             if (category && typeof category === "object") {
-                rejected["category"] = category.error
+                arrRejSum.push({
+                    columnName: "category",
+                    rejectionType: "REJECT",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: category.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 category = null
             }
 
             // fullName
-            let fullName: any = helper.candidate.handleNotNullString(
-                item.full_name,
-                200
-            )
+            let fullName: any = handleNotNullString(item.fullName, 200)
             if (fullName && typeof fullName === "object") {
-                rejected["full_name"] = fullName.error
+                arrRejSum.push({
+                    columnName: "full_name",
+                    rejectionType: "REJECT",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: fullName.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 fullName = null
             }
 
             // contactNo1
-            let contactNo1: any = helper.candidate.handleNotNullNumber(
-                item.primary_mobile,
-                45
-            )
+            let contactNo1: any = handleNotNullNumber(item.contactNo1, 45)
             if (contactNo1 && typeof contactNo1 === "object") {
-                rejected["primary_mobile"] = contactNo1.error
+                arrRejSum.push({
+                    columnName: "primary_mobile",
+                    rejectionType: "REJECT",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: contactNo1.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 contactNo1 = null
             }
 
-            // curr_address
-            let curr_address: any = helper.candidate.handleString(
-                item.curr_address,
-                500
-            )
-            if (curr_address && typeof curr_address === "object") {
-                ignored["curr_address"] = curr_address.error
-                curr_address = null
+            // currAddress
+            let currAddress: any = handleString(item.currAddress, 500)
+            if (currAddress && typeof currAddress === "object") {
+                arrRejSum.push({
+                    columnName: "curr_address",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: currAddress.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                currAddress = null
             }
 
-            // curr_city
-            let curr_city: any = helper.candidate.handleNotNullString(
-                item.curr_city,
-                45
-            )
-            if (curr_city && typeof curr_city === "object") {
-                rejected["curr_city"] = curr_city.error
-                curr_city = null
+            // currCity
+            let currCity: any = handleNotNullString(item.currCity, 45)
+            if (currCity && typeof currCity === "object") {
+                arrRejSum.push({
+                    columnName: "curr_city",
+                    rejectionType: "REJECT",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: currCity.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                currCity = null
             }
 
-            // curr_state
-            let curr_state: any = helper.candidate.handleString(
-                item.curr_state,
-                45
-            )
-            if (curr_state && typeof curr_state === "object") {
-                ignored["curr_state"] = curr_state.error
-                curr_state = null
+            // currState
+            let currState: any = handleString(item.currState, 45)
+            if (currState && typeof currState === "object") {
+                arrRejSum.push({
+                    columnName: "curr_state",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: currState.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                currState = null
             }
 
-            // curr_country
-            const curr_country = "India"
+            // currCountry
+            const currCountry = item.currCountry
 
-            // curr_zip
-            let curr_zip: any = helper.candidate.handleNumber(
-                item.curr_pincode,
-                10
-            )
-            if (curr_zip && typeof curr_zip === "object") {
-                ignored["curr_pincode"] = curr_zip.error
-                curr_zip = null
+            // currZip
+            let currZip: any = handleNumber(item.currZip, 10)
+            if (currZip && typeof currZip === "object") {
+                arrRejSum.push({
+                    columnName: "curr_pincode",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: currZip.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                currZip = null
             }
 
-            // birthdate
-            let birthDate: any = helper.candidate.handleDate(item.birth_date)
-            if (birthDate && typeof birthDate == "object") {
-                ignored["birth_date"] = birthDate.error
-                birthDate = null
+            // dob
+            let dob: any = handleDate(item.dob)
+            if (dob && typeof dob == "object") {
+                arrRejSum.push({
+                    columnName: "birth_date",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: dob.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                dob = null
             }
 
             // gender
-            let gender: any = helper.candidate.handleGender(item.gender)
+            let gender: any = handleGender(item.gender)
             if (gender && typeof gender === "object") {
-                ignored["gender"] = gender.error
+                arrRejSum.push({
+                    columnName: "gender",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: gender.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 gender = null
             }
 
-            // perm_address
-            let perm_address: any = helper.candidate.handleString(
-                item.perm_address,
-                500
-            )
-            if (perm_address && typeof perm_address === "object") {
-                ignored["perm_address"] = perm_address.error
-                perm_address = null
+            // permAddress
+            let permAddress: any = handleString(item.permAddress, 500)
+            if (permAddress && typeof permAddress === "object") {
+                arrRejSum.push({
+                    columnName: "perm_address",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: permAddress.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                permAddress = null
             }
 
-            // perm_city
-            let perm_city: any = helper.candidate.handleString(
-                item.perm_city,
-                45
-            )
-            if (perm_city && typeof perm_city === "object") {
-                ignored["perm_city"] = perm_city.error
-                perm_city = null
+            // permCity
+            let permCity: any = handleString(item.permCity, 45)
+            if (permCity && typeof permCity === "object") {
+                arrRejSum.push({
+                    columnName: "perm_city",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: permCity.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                permCity = null
             }
 
-            // perm_state
-            let perm_state: any = helper.candidate.handleString(
-                item.perm_state,
-                45
-            )
-            if (perm_state && typeof perm_state === "object") {
-                ignored["perm_state"] = perm_state.error
-                perm_state = null
+            // permState
+            let permState: any = handleString(item.permState, 45)
+            if (permState && typeof permState === "object") {
+                arrRejSum.push({
+                    columnName: "perm_state",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: permState.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                permState = null
             }
 
-            // perm_country
-            const perm_country = "India"
+            // permCountry
+            const permCountry = item.permCountry
 
-            // perm_zip
-            let perm_zip: any = helper.candidate.handleNumber(
-                item.perm_pincode,
-                10
-            )
-            if (perm_zip && typeof perm_zip === "object") {
-                ignored["perm_pincode"] = perm_zip.error
-                perm_zip = null
+            // permZip
+            let permZip: any = handleNumber(item.permZip, 10)
+            if (permZip && typeof permZip === "object") {
+                arrRejSum.push({
+                    columnName: "perm_pincode",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: permZip.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                permZip = null
             }
 
             // email1
-            let email1: any = helper.candidate.handleEmail(
-                item.primary_email,
-                80
-            )
+            let email1: any = handleEmail(item.email1, 80)
             if (email1 && typeof email1 === "object") {
-                ignored["primary_email"] = email1.error
+                arrRejSum.push({
+                    columnName: "primary_email",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: email1.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 email1 = null
             }
 
             // email2
-            let email2: any = helper.candidate.handleEmail(
-                item.secondary_email,
-                80
-            )
+            let email2: any = handleEmail(item.email2, 80)
             if (email2 && typeof email2 === "object") {
-                ignored["secondary_email"] = email2.error
+                arrRejSum.push({
+                    columnName: "secondary_email",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: email2.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 email2 = null
             }
 
             // contactNo2
-            let contactNo2: any = helper.candidate.handleNumber(
-                item.secondary_mobile,
-                45
-            )
+            let contactNo2: any = handleNumber(item.contactNo2, 45)
             if (contactNo2 && typeof contactNo2 === "object") {
-                ignored["secondary_mobile"] = contactNo2.error
+                arrRejSum.push({
+                    columnName: "secondary_mobile",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: contactNo2.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 contactNo2 = null
             }
 
             // aadharNo
-            let aadharNo: any = helper.candidate.handleAadhar(item.aadhar_no)
+            let aadharNo: any = handleAadhar(item.aadharNo)
             if (aadharNo && typeof aadharNo === "object") {
-                ignored["aadhar_no"] = aadharNo.error
+                arrRejSum.push({
+                    columnName: "aadhar_no",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: aadharNo.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
                 aadharNo = null
             }
 
-            // isActive
-            const isActive = true
-
-            // registrationStatus
-            let registrationStatus: any = helper.candidate.handleString(
-                item.registration_status,
-                15
-            )
-            if (registrationStatus && typeof registrationStatus == "object") {
-                ignored["registration_status"] = registrationStatus.error
-                registrationStatus = null
+            // panNo
+            let panNo: any = handleString(item.panNo, 12)
+            if (panNo && typeof panNo === "object") {
+                arrRejSum.push({
+                    columnName: "pan_no",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: panNo.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                panNo = null
             }
 
-            // totalExpMonths
-            let totalExpMonths: any = helper.candidate.handleNumber(
-                item.exp_months
-            )
-            if (totalExpMonths && typeof totalExpMonths == "object") {
-                ignored["exp_months"] = totalExpMonths.error
-                totalExpMonths = null
+            // dlNo
+            let dlNo: any = handleString(item.dlNo, 20)
+            if (dlNo && typeof dlNo === "object") {
+                arrRejSum.push({
+                    columnName: "driving_licence_no",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: dlNo.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                dlNo = null
             }
 
-            // totalExpYears
-            let totalExpYears: any = helper.candidate.handleNumber(
-                item.exp_years
-            )
-            if (totalExpYears && typeof totalExpYears == "object") {
-                ignored["exp_years"] = totalExpYears.error
-                totalExpYears = null
+            // expYears
+            let expYears: any = handleNumber(item.expYears)
+            if (expYears && typeof expYears == "object") {
+                arrRejSum.push({
+                    columnName: "exp_years",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: expYears.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                expYears = null
             }
 
-            // pref_location_1
-            let pref_location_1: any = helper.candidate.handleString(
-                item.pref_location_1,
-                45
-            )
-            if (pref_location_1 && typeof pref_location_1 == "object") {
-                ignored["pref_location_1"] = pref_location_1.error
-                pref_location_1 = null
+            // expMonths
+            let expMonths: any = handleNumber(item.expMonths)
+            if (expMonths && typeof expMonths == "object") {
+                arrRejSum.push({
+                    columnName: "exp_months",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: expMonths.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                expMonths = null
             }
 
-            // pref_location_2
-            let pref_location_2: any = helper.candidate.handleString(
-                item.pref_location_2,
-                45
-            )
-            if (pref_location_2 && typeof pref_location_2 == "object") {
-                ignored["pref_location_2"] = pref_location_2.error
-                pref_location_2 = null
+            // prefLocation1
+            let prefLocation1: any = handleString(item.prefLocation1, 80)
+            if (prefLocation1 && typeof prefLocation1 == "object") {
+                arrRejSum.push({
+                    columnName: "pref_location_1",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: prefLocation1.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                prefLocation1 = null
             }
 
-            // pref_location_3
-            let pref_location_3: any = helper.candidate.handleString(
-                item.pref_location_3,
-                45
-            )
-            if (pref_location_3 && typeof pref_location_3 == "object") {
-                ignored["pref_location_3"] = pref_location_3.error
-                pref_location_3 = null
+            // prefLocation2
+            let prefLocation2: any = handleString(item.prefLocation2, 80)
+            if (prefLocation2 && typeof prefLocation2 == "object") {
+                arrRejSum.push({
+                    columnName: "pref_location_2",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: prefLocation2.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                prefLocation2 = null
             }
 
-            if (Object.keys(rejected).length) {
-                rejected["rowNum"] = item.row_num
-                arrRejected.push(rejected)
+            // prefLocation3
+            let prefLocation3: any = handleString(item.prefLocation3, 80)
+            if (prefLocation3 && typeof prefLocation3 == "object") {
+                arrRejSum.push({
+                    columnName: "pref_location_3",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: prefLocation3.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                prefLocation3 = null
             }
-            if (Object.keys(ignored).length) {
-                ignored["rowNum"] = item.row_num
-                arrIgnored.push(ignored)
+
+            // skill1
+            let skill1: any = handleString(item.skill1, 45)
+            if (skill1 && typeof skill1 == "object") {
+                arrRejSum.push({
+                    columnName: "skill_1",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: skill1.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                skill1 = null
             }
+
+            // skill2
+            let skill2: any = handleString(item.skill2, 45)
+            if (skill2 && typeof skill2 == "object") {
+                arrRejSum.push({
+                    columnName: "skill_2",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: skill2.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                skill2 = null
+            }
+
+            // primaryLang
+            let primaryLang: any = handleString(item.primaryLang, 30)
+            if (primaryLang && typeof primaryLang == "object") {
+                arrRejSum.push({
+                    columnName: "primary_lang",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: primaryLang.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                primaryLang = null
+            }
+
+            // secondaryLang
+            let secondaryLang: any = handleString(item.secondaryLang, 30)
+            if (secondaryLang && typeof secondaryLang == "object") {
+                arrRejSum.push({
+                    columnName: "secondary_lang",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: secondaryLang.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                secondaryLang = null
+            }
+
+            // thirdLang
+            let thirdLang: any = handleString(item.thirdLang, 30)
+            if (thirdLang && typeof thirdLang == "object") {
+                arrRejSum.push({
+                    columnName: "third_lang",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: thirdLang.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                thirdLang = null
+            }
+
+            // lastCompany
+            let lastCompany: any = handleString(item.lastCompany, 100)
+            if (lastCompany && typeof lastCompany == "object") {
+                arrRejSum.push({
+                    columnName: "last_company",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: lastCompany.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                lastCompany = null
+            }
+
+            // designation
+            let designation: any = handleString(item.designation, 80)
+            if (designation && typeof designation == "object") {
+                arrRejSum.push({
+                    columnName: "designation",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: designation.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                designation = null
+            }
+
+            // startDate
+            let startDate: any = handleDate(item.startDate)
+            if (startDate && typeof startDate == "object") {
+                arrRejSum.push({
+                    columnName: "start_date",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: startDate.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                startDate = null
+            }
+
+            // endDate
+            let endDate: any = handleDate(item.endDate)
+            if (endDate && typeof endDate == "object") {
+                arrRejSum.push({
+                    columnName: "end_date",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: endDate.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                endDate = null
+            }
+
+            // jobDescription
+            let jobDescription: any = handleString(item.jobDescription, 200)
+            if (jobDescription && typeof jobDescription == "object") {
+                arrRejSum.push({
+                    columnName: "job_description",
+                    rejectionType: "IGNORE",
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: jobDescription.error,
+                    candidateRawId: item.id,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+                jobDescription = null
+            }
+
             return {
-                fullName,
-                birthDate,
-                gender,
-                perm_address,
-                perm_city,
-                perm_state,
-                perm_country,
-                perm_zip,
-                curr_address,
-                curr_city,
-                curr_state,
-                curr_country,
-                curr_zip,
-                email1,
-                email2,
-                contactNo1,
-                contactNo2,
-                aadharNo,
-                isActive,
-                registrationStatus,
-                totalExpMonths,
-                totalExpYears,
+                id: item.id,
                 industry,
                 category,
-                pref_location_1,
-                pref_location_2,
-                pref_location_3,
-                rowNum: item.row_num,
-                created_by: userId,
-                modified_by: userId,
+                fullName,
+                contactNo1,
+                currAddress,
+                currCity,
+                currState,
+                currCountry,
+                currZip,
+                dob,
+                gender,
+                permAddress,
+                permCity,
+                permState,
+                permCountry,
+                permZip,
+                email1,
+                email2,
+                contactNo2,
+                aadharNo,
+                panNo,
+                dlNo,
+                expYears,
+                expMonths,
+                prefLocation1,
+                prefLocation2,
+                prefLocation3,
+                skill1,
+                skill2,
+                primaryLang,
+                secondaryLang,
+                thirdLang,
+                lastCompany,
+                designation,
+                startDate,
+                endDate,
+                jobDescription,
+                rowNum: item.rowNum,
             }
         })
 
-        // * remove null fullName, contactNo1, categoty and curr_city
-        let filteredData = _params.filter(
-            (item: any) =>
+        // * remove null fullName, contactNo1, category and curr_city
+        let finalData = filteredCandidates.filter(
+            (item) =>
                 item.fullName &&
                 item.contactNo1 &&
                 item.category &&
-                item.curr_city
+                item.currCity
         )
 
         // * remove duplicate email1(primary_email) from excel
-        const _deEmails = helper.candidate.findDuplicateFromExcel(
-            filteredData,
+        const _duplicateExcelEmails = helper.candidate.findDuplicateFromExcel(
+            finalData,
             "email1",
             "primary_email",
             false
         )
-        filteredData = _deEmails.arr
-        _deEmails.arrIgnored.forEach((item) => arrIgnored.push(item))
+        finalData = _duplicateExcelEmails.arr
+        _duplicateExcelEmails.arrIgnored.forEach((item) => {
+            arrRejSum.push({
+                columnName: item.column,
+                candidateRawId: item.rawId,
+                rejectedBy: "SYSTEM",
+                rejectionReason: "DUPLICATE",
+                rejectionType: "IGNORE",
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })
+        })
 
         // * remove duplicate aadharNo(aadhar_no) from excel
-        const _deAadharNos = helper.candidate.findDuplicateFromExcel(
-            filteredData,
+        const _duplicateExcelAadharNos = helper.candidate.findDuplicateFromExcel(
+            finalData,
             "aadharNo",
             "aadhar_no",
             false
         )
-        filteredData = _deAadharNos.arr
-        _deAadharNos.arrIgnored.forEach((item) => arrIgnored.push(item))
+        finalData = _duplicateExcelAadharNos.arr
+        _duplicateExcelAadharNos.arrIgnored.forEach((item) => {
+            arrRejSum.push({
+                columnName: item.column,
+                candidateRawId: item.rawId,
+                rejectedBy: "SYSTEM",
+                rejectionReason: "DUPLICATE",
+                rejectionType: "IGNORE",
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })
+        })
+
+        // * remove duplicate panNo(pan_no) from excel
+        const _duplicateExcelPanNos = helper.candidate.findDuplicateFromExcel(
+            finalData,
+            "panNo",
+            "pan_no",
+            false
+        )
+        finalData = _duplicateExcelPanNos.arr
+        _duplicateExcelPanNos.arrIgnored.forEach((item) => {
+            arrRejSum.push({
+                columnName: item.column,
+                candidateRawId: item.rawId,
+                rejectedBy: "SYSTEM",
+                rejectionReason: "DUPLICATE",
+                rejectionType: "IGNORE",
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })
+        })
+
+        // * remove duplicate dlNo(driving_licence_no) from excel
+        const _duplicateExcelDlNos = helper.candidate.findDuplicateFromExcel(
+            finalData,
+            "dlNo",
+            "driving_licence_no",
+            false
+        )
+        finalData = _duplicateExcelDlNos.arr
+        _duplicateExcelDlNos.arrIgnored.forEach((item) => {
+            arrRejSum.push({
+                columnName: item.column,
+                candidateRawId: item.rawId,
+                rejectedBy: "SYSTEM",
+                rejectionReason: "DUPLICATE",
+                rejectionType: "IGNORE",
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })
+        })
 
         // * remove duplicate contactNo1(primary_mobile) from excel
-        const _deContactNos = helper.candidate.findDuplicateFromExcel(
-            filteredData,
+        const _duplicateExcelContactNos = helper.candidate.findDuplicateFromExcel(
+            finalData,
             "contactNo1",
             "primary_mobile",
             true
         )
-        filteredData = _deContactNos.arr
-        _deContactNos.arrIgnored.forEach((item) => arrRejected.push(item))
+        finalData = _duplicateExcelContactNos.arr
+        _duplicateExcelContactNos.arrIgnored.forEach((item) => {
+            arrRejSum.push({
+                columnName: item.column,
+                candidateRawId: item.rawId,
+                rejectedBy: "SYSTEM",
+                rejectionReason: "DUPLICATE",
+                rejectionType: "REJECT",
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })
+        })
 
         // * remove null fullName, contactNo1, categoty and curr_city
-        filteredData = filteredData.filter(
-            (item: any) =>
+        finalData = finalData.filter(
+            (item) =>
                 item.fullName &&
                 item.contactNo1 &&
                 item.category &&
-                item.curr_city
+                item.currCity
         )
 
-        const duplicateFromDB = await customerDB.Candidate.findAndCountAll({
-            attributes: ["email1", "contactNo1", "aadharNo"],
+        const duplicateFromDB = await prisma.candidateVersioning.findMany({
             where: {
-                [Op.or]: [
+                OR: [
                     {
                         email1: {
-                            [Op.in]: filteredData.map(
-                                (item: any) => item.fullName
-                            ),
+                            in: finalData
+                                .map((item) => item.email1)
+                                .filter((item) => item),
                         },
                     },
                     {
                         contactNo1: {
-                            [Op.in]: filteredData.map(
-                                (item: any) => item.contactNo1
-                            ),
+                            in: finalData
+                                .map((item) => item.contactNo1)
+                                .filter((item) => item)
+                                .map((item) => `${item}`),
                         },
                     },
                     {
                         aadharNo: {
-                            [Op.in]: filteredData.map(
-                                (item: any) => item.aadharNo
-                            ),
+                            in: finalData
+                                .map((item) => item.aadharNo)
+                                .filter((item) => item),
+                        },
+                    },
+                    {
+                        panNo: {
+                            in: finalData
+                                .map((item) => item.panNo)
+                                .filter((item) => item),
+                        },
+                    },
+                    {
+                        dlNo: {
+                            in: finalData
+                                .map((item) => item.dlNo)
+                                .filter((item) => item),
                         },
                     },
                 ],
             },
-            transaction,
+            select: {
+                email1: true,
+                contactNo1: true,
+                aadharNo: true,
+                panNo: true,
+                dlNo: true,
+            },
         })
-        const arrDuplicateFromDB = duplicateFromDB.rows.map((item) =>
-            item.toJSON()
-        )
-        if (duplicateFromDB.count) {
+
+        if (duplicateFromDB.length) {
             // * remove duplicate email1(primary_email) from db
-            const _ddEmails = helper.candidate.findDuplicateFromDB(
-                filteredData,
-                arrDuplicateFromDB,
+            const _duplicateDbEmails = helper.candidate.findDuplicateFromDB(
+                finalData,
+                duplicateFromDB,
                 "email1",
                 "primary_email",
                 false
             )
-            filteredData = _ddEmails.arr
-            _ddEmails.arrIgnored.forEach((item) => arrIgnored.push(item))
+            finalData = _duplicateDbEmails.arr
+            _duplicateDbEmails.arrIgnored.forEach((item) => {
+                arrRejSum.push({
+                    columnName: item.column,
+                    candidateRawId: item.rawId,
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: "DUPLICATE",
+                    rejectionType: "IGNORE",
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+            })
 
             // * remove duplicate aadharNo(aadhar_no) from db
-            const _ddAadharNos = helper.candidate.findDuplicateFromDB(
-                filteredData,
-                arrDuplicateFromDB,
+            const _duplicateDbAadharNos = helper.candidate.findDuplicateFromDB(
+                finalData,
+                duplicateFromDB,
                 "aadharNo",
                 "aadhar_no",
                 false
             )
-            filteredData = _ddAadharNos.arr
-            _ddAadharNos.arrIgnored.forEach((item) => arrIgnored.push(item))
+            finalData = _duplicateDbAadharNos.arr
+            _duplicateDbAadharNos.arrIgnored.forEach((item) => {
+                arrRejSum.push({
+                    columnName: item.column,
+                    candidateRawId: item.rawId,
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: "DUPLICATE",
+                    rejectionType: "IGNORE",
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+            })
+
+            // * remove duplicate panNo(pan_no) from db
+            const _duplicateDbPanNos = helper.candidate.findDuplicateFromDB(
+                finalData,
+                duplicateFromDB,
+                "panNo",
+                "pan_no",
+                false
+            )
+            finalData = _duplicateDbPanNos.arr
+            _duplicateDbPanNos.arrIgnored.forEach((item) => {
+                arrRejSum.push({
+                    columnName: item.column,
+                    candidateRawId: item.rawId,
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: "DUPLICATE",
+                    rejectionType: "IGNORE",
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+            })
+
+            // * remove duplicate dlNo(driving_licence_no) from db
+            const _duplicateDbDlNos = helper.candidate.findDuplicateFromDB(
+                finalData,
+                duplicateFromDB,
+                "dlNo",
+                "driving_licence_no",
+                false
+            )
+            finalData = _duplicateDbDlNos.arr
+            _duplicateDbDlNos.arrIgnored.forEach((item) => {
+                arrRejSum.push({
+                    columnName: item.column,
+                    candidateRawId: item.rawId,
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: "DUPLICATE",
+                    rejectionType: "IGNORE",
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+            })
 
             // * remove duplicate contactNo1(primary_mobile) from db
-            const _ddContactNos = helper.candidate.findDuplicateFromDB(
-                filteredData,
-                arrDuplicateFromDB,
+            const _duplicateDbContactNos = helper.candidate.findDuplicateFromDB(
+                finalData,
+                duplicateFromDB,
                 "contactNo1",
                 "primary_mobile",
                 true
             )
-            console.log(_ddContactNos.arrIgnored.length)
-            filteredData = _ddContactNos.arr
-            _ddContactNos.arrIgnored.forEach((item) => arrRejected.push(item))
-
-            // * remove null fullName, contactNo1, categoty and curr_city
-            filteredData = filteredData.filter(
-                (item: any) =>
-                    item.fullName &&
-                    item.contactNo1 &&
-                    item.category &&
-                    item.curr_city
-            )
+            finalData = _duplicateDbContactNos.arr
+            _duplicateDbContactNos.arrIgnored.forEach((item) => {
+                arrRejSum.push({
+                    columnName: item.column,
+                    candidateRawId: item.rawId,
+                    rejectedBy: "SYSTEM",
+                    rejectionReason: "DUPLICATE",
+                    rejectionType: "REJECT",
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                })
+            })
         }
 
-        const rowNums = [
-            ...new Set([
-                ...arrRejected.map((item) => item.rowNum),
-                ...arrIgnored.map((item) => item.rowNum),
-            ]),
-        ]
+        const arrCandidateVersioning = finalData.map(
+            (item): Prisma.CandidateVersioningCreateManyInput => {
+                const {
+                    id,
+                    rowNum,
+                    primaryLang,
+                    secondaryLang,
+                    thirdLang,
+                    prefLocation1,
+                    prefLocation2,
+                    prefLocation3,
+                    contactNo1,
+                    contactNo2,
+                    ...other
+                } = item
 
-        const arrSummary = param.filter((item: any, i: number) =>
-            rowNums.includes(i + 2)
-        )
-
-        const candidate = await customerDB.Candidate.bulkCreate(filteredData, {
-            fields: [
-                "fullName",
-                "birthDate",
-                "gender",
-                "perm_address",
-                "perm_city",
-                "perm_state",
-                "perm_country",
-                "perm_zip",
-                "curr_address",
-                "curr_city",
-                "curr_state",
-                "curr_country",
-                "curr_zip",
-                "email1",
-                "email2",
-                "contactNo1",
-                "contactNo2",
-                "aadharNo",
-                "isActive",
-                "created_by",
-                "modified_by",
-            ],
-            transaction,
-        })
-        const arrOtherDetails = candidate.map((item, ind) => {
-            const {
-                totalExpMonths,
-                totalExpYears,
-                registrationStatus,
-            } = _params[ind]
-            return {
-                totalExpMonths,
-                totalExpYears,
-                registrationStatus,
-                candidateId: item.id as number,
-                created_by: userId,
-                modified_by: userId,
-            }
-        })
-        const candidateother = await customerDB.CandidateOtherDetails.bulkCreate(
-            arrOtherDetails,
-            {
-                fields: [
-                    "totalExpMonths",
-                    "totalExpYears",
-                    "registrationStatus",
-                    "candidateId",
-                    "created_by",
-                    "modified_by",
-                ],
-                transaction,
+                return {
+                    candidateRawId: id,
+                    primaryLanguage: primaryLang,
+                    secondaryLanguage: secondaryLang,
+                    thirdLanguage: thirdLang,
+                    preferLocation1: prefLocation1,
+                    preferLocation2: prefLocation2,
+                    preferLocation3: prefLocation3,
+                    contactNo1: `${contactNo1}`,
+                    contactNo2: contactNo2 ? `${contactNo2}` : null,
+                    version: 1,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                    ...other,
+                }
             }
         )
 
-        //
+        const arrRejectedRawId: number[] = arrRejSum
+            .filter((item) => item.rejectionType === "REJECT")
+            .map((item) => item.candidateRawId)
 
-        await transaction.commit()
-        // return Object.assign({ candidate, candidateother })
-        return helper.getHandlerResponseObject(
-            true,
-            helper.httpStatus.Created,
-            `${candidate.length} Candidates uploaded successfully`,
-            { arrRejected, arrIgnored, arrSummary }
-        )
-    } catch (err: any) {
-        await transaction.rollback()
-        // console.log(err)
-        // log.error(err, "Error while createBulkCandidate")
-        throw err
+        await prisma.$transaction([
+            // Create Candidate versioning
+            prisma.candidateVersioning.createMany({
+                data: arrCandidateVersioning,
+            }),
+            // Update CandidateRaw for system approved fields
+            prisma.candidateRaw.updateMany({
+                where: {
+                    id: {
+                        notIn: arrRejectedRawId,
+                    },
+                },
+                data: {
+                    isSystemApproved: true,
+                },
+            }),
+            // Create candidate rejection summary
+            prisma.candidateRejectionSummary.createMany({
+                data: arrRejSum,
+            }),
+        ])
+
+        console.log(`System check done for batchNo: ${batchId}`)
+    } catch (error) {
+        log.error(error.message, "Error while candidateBatchSystemCheck")
     }
 }
 
@@ -913,7 +1305,7 @@ const createBulkCandidate = async (param: Array<any>, userId: number) => {
  * create Candidate Traning certificate
  */
 interface createCandidateTrainingCertParam {
-    type: "training" | "certificate" | "other"
+    type: "TRAINING" | "CERTIFICATE" | "OTHER"
     title: string
     issueDate: Date
     issuedBy: string
@@ -923,142 +1315,248 @@ interface createCandidateTrainingCertParam {
 }
 
 const addCandidateTrainingCert = async (
+    userLoginId: number,
     param: createCandidateTrainingCertParam
-) => {
-    let getskillId: any
-    if (param.skillId == undefined || param.skillId == null) {
-        getskillId = null
-    } else {
-        if (typeof param.skillId !== "number") {
-            const newSkillset = await customerDB.SkillSet.create({
-                title: param.skillId,
-            })
-            getskillId = newSkillset.id
-        } else {
-            getskillId = param.skillId
-        }
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTraining = await prisma.candidateTraining.create({
+            data: {
+                title: param.title,
+                type: param.type,
+                issueDate: param.issueDate,
+                issuedBy: param.issuedBy,
+                description: param.description,
+                CandidateId: {
+                    connect: {
+                        id: param.candidate,
+                    },
+                },
+                SkillId: {
+                    connectOrCreate: {
+                        where: {
+                            id: param.skillId,
+                        },
+                        create: {
+                            title: param.skillId,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        },
+                    },
+                },
+                CreatedBy: { connect: { id: userLoginId } },
+                ModifiedBy: { connect: { id: userLoginId } },
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Candidate training/certificare created successfully",
+            candidateTraining
+        )
+    } catch (error) {
+        log.error(error.message, "Error while addCandidateTrainingCert")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while addCandidateTrainingCert"
+        )
     }
-    const candidateCertificate = await customerDB.CandidateCertificate.create({
-        type: param.type,
-        title: param.title,
-        issueDate: param.issueDate,
-        issuedBy: param.issuedBy,
-        description: param.description,
-        candidateId: param.candidate,
-        skillId: getskillId,
-    }).catch((err: any) => {
-        log.error(err, "Error while addCandidateTrainingCert")
-        throw err
-    })
-    return candidateCertificate
 }
 /*
  * get Candidate Traning certificate By Id
  */
-const getCandidateTrainingCertById = async (id: number, certId: number) => {
-    const candidateCertificate = await customerDB.CandidateCertificate.findOne({
-        include: [{ model: customerDB.SkillSet }],
-        where: {
-            id: certId,
-            candidateId: id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getCandidateTrainingCertById")
-        throw err
-    })
-    return candidateCertificate
+const getCandidateTrainingCertById = async (
+    id: number,
+    certId: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTraining = await prisma.candidateTraining.findFirst({
+            where: {
+                id: certId,
+                candidateId: id,
+            },
+            include: {
+                SkillId: true,
+            },
+        })
+
+        if (!candidateTraining)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate training/certificate not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidateTraining
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getCandidateTrainingCertById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidateTrainingCertById"
+        )
+    }
 }
+
 /*
  * update Candidate Traning certificate By Id
  */
 interface updateCandidateTrainingCertParam {
     id: number
-    type: "training" | "certificate" | "other"
+    type: "TRAINING" | "CERTIFICATE" | "OTHER"
     title: string
     issueDate: Date
     issuedBy: string
     description: string
     candidate: number
-    skillId: number
+    skillId: any
+}
+const updateCandidateTrainingCertById = async (
+    userLoginId: number,
+    param: updateCandidateTrainingCertParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTrainingFound = await prisma.candidateTraining.findFirst(
+            {
+                where: {
+                    id: param.id,
+                },
+            }
+        )
+        if (!candidateTrainingFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate training/certificate not found"
+            )
+
+        const candidateTraining = await prisma.candidateTraining.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                title: param.title,
+                type: param.type,
+                issueDate: param.issueDate,
+                issuedBy: param.issuedBy,
+                description: param.description,
+                SkillId: {
+                    connectOrCreate: {
+                        where: {
+                            id: param.skillId,
+                        },
+                        create: {
+                            title: param.skillId,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        },
+                    },
+                },
+                ModifiedBy: {
+                    connect: {
+                        id: userLoginId,
+                    },
+                },
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate training/certificate updated successfully",
+            candidateTraining
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updateCandidateTrainingCertById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCandidateTrainingCertById"
+        )
+    }
 }
 
-const updateCandidateTrainingCertById = async (
-    param: updateCandidateTrainingCertParam
-) => {
-    const candidateCertificate = await customerDB.CandidateCertificate.findOne({
-        where: { id: param.id },
-    })
-    let getskillId: any
-    if (param.skillId == undefined || param.skillId == null) {
-        getskillId = null
-    } else {
-        if (typeof param.skillId !== "number") {
-            const newSkillset = await customerDB.SkillSet.create({
-                title: param.skillId,
-            })
-            getskillId = newSkillset.id
-        } else {
-            getskillId = param.skillId
-        }
-    }
-    let updateCandidateCertificate = null
-    if (candidateCertificate) {
-        candidateCertificate.type = param.type
-        candidateCertificate.title = param.title
-        candidateCertificate.issueDate = param.issueDate
-        candidateCertificate.issuedBy = param.issuedBy
-        candidateCertificate.description = param.description
-        candidateCertificate.candidateId = param.candidate
-        candidateCertificate.skillId = getskillId
-        updateCandidateCertificate = await candidateCertificate
-            .save()
-            .catch((err: any) => {
-                log.error(err, "Error while updateCandidateTrainingCertById")
-                throw err
-            })
-        return updateCandidateCertificate
-    }
-}
 /*
  * remove Candidate Traning certificate By Id
  */
-
 interface removeCandidateTrainingCertParam {
     id: number
 }
 const removeCandidateTrainingCert = async (
     param: removeCandidateTrainingCertParam
-) => {
-    const deletedRows = await customerDB.CandidateCertificate.destroy({
-        where: {
-            id: param.id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while removeCandidateTrainingCert")
-        throw err
-    })
-    return deletedRows
+): Promise<helper.IResponseObject> => {
+    try {
+        const deletedRow = await prisma.candidateTraining.delete({
+            where: {
+                id: param.id,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate training/certificate deleted successfully",
+            deletedRow
+        )
+    } catch (error) {
+        log.error(error.message, "Error while removeCandidateTrainingCert")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while removeCandidateTrainingCert"
+        )
+    }
 }
+
 /*
  * get Candidate workHistory By Id
  */
+const getCandidateWorkHistoryById = async (
+    id: number,
+    workId: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateWorkHistory = await prisma.candidateWorkHistory.findFirst(
+            {
+                where: {
+                    id: workId,
+                    candidateId: id,
+                },
+                include: {
+                    CompanyId: true,
+                    Skill: true,
+                },
+            }
+        )
+        if (!candidateWorkHistory)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate work history not found"
+            )
 
-const getCandidateWorkHistoryById = async (id: number, workId: number) => {
-    const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne({
-        where: {
-            id: workId,
-            candidateId: id,
-        },
-        include: [
-            { model: customerDB.CandidateWorkHistorySkill },
-            { model: customerDB.Company },
-        ],
-    }).catch((err: any) => {
-        log.error(err, "Error while getCandidateWorkHistoryById")
-        throw err
-    })
-    return candidateWorkHistory
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidateWorkHistory
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getCandidateWorkHistoryById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidateWorkHistoryById"
+        )
+    }
 }
+
 /*
  * create Candidate workHistory By Id
  */
@@ -1073,82 +1571,76 @@ interface createCandidateWorkHistoryParam {
 }
 
 const addCandidateWorkHistory = async (
+    userLoginId: number,
     param: createCandidateWorkHistoryParam
-) => {
-    const transaction = await ormCustomer.transaction()
+): Promise<helper.IResponseObject> => {
     try {
         let skillsSetArray = []
-        const skills: any = []
-        const newSkills: any = []
+        const skills: number[] = []
+        const newSkills: string[] = []
 
         skillsSetArray = param.skillId
-        skillsSetArray.map((items: any) => {
+        skillsSetArray.forEach((items: any) => {
             if (typeof items == "number") {
                 skills.push(items)
             } else {
                 newSkills.push(items)
             }
         })
-        const NewskillsArrayObject = newSkills.map((item: any) => {
-            return { title: item }
+
+        await prisma.skill.createMany({
+            data: newSkills.map((x) => ({
+                title: x,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })),
+            skipDuplicates: true,
         })
-        const skillSet = await customerDB.SkillSet.bulkCreate(
-            NewskillsArrayObject,
-            {
-                fields: ["id", "title"],
-                transaction,
-            }
-        )
-        const candidateWorkHistory = await customerDB.CandidateWorkHistory.create(
-            {
+
+        const skillsCreated = await prisma.skill.findMany({
+            where: {
+                title: {
+                    in: newSkills,
+                },
+            },
+        })
+
+        const allSkillsIds = [...skills, ...skillsCreated.map((x) => x.id)]
+
+        const candidateWorkHistory = await prisma.candidateWorkHistory.create({
+            data: {
                 startDate: param.startDate,
                 endDate: param.endDate,
                 description: param.description,
+                Skill: {
+                    createMany: {
+                        data: allSkillsIds.map((x) => ({
+                            skillId: x,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        })),
+                    },
+                },
                 candidateId: param.candidate,
                 companyId: param.companyId,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
             },
-            {
-                fields: [
-                    "startDate",
-                    "endDate",
-                    "description",
-                    "candidateId",
-                    "companyId",
-                ],
-                transaction,
-            }
-        )
-        const getSkillId = skillSet.map((item) => {
-            return {
-                skillId: item.id,
-                workHistoryId: candidateWorkHistory.id,
-            }
         })
-        const skillsArrayObject = skills.map((item: any) => {
-            return {
-                skillId: item,
-                workHistoryId: candidateWorkHistory.id,
-            }
-        })
-        const workHistorySkill = [...skillsArrayObject, ...getSkillId]
 
-        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
-            workHistorySkill,
-            {
-                fields: ["skillId", "workHistoryId"],
-                transaction,
-            }
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Candidate work history created successfully",
+            candidateWorkHistory
         )
-        await transaction.commit()
-        return Object.assign({
-            skillSet,
-            candidateWorkHistory,
-            candidateWorkHistorySkill,
-        })
-    } catch (err: any) {
-        await transaction.rollback()
-        log.error(err, "Error while addCandidateWorkHistory")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while addCandidateWorkHistory")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while addCandidateWorkHistory"
+        )
     }
 }
 /*
@@ -1165,92 +1657,105 @@ interface updateCandidateWorkHistoryParam {
 }
 
 const updateCandidateWorkHistoryById = async (
+    userLoginId: number,
     param: updateCandidateWorkHistoryParam
-) => {
-    const transaction = await ormCustomer.transaction()
+): Promise<helper.IResponseObject> => {
     try {
-        const candidateWorkHistory = await customerDB.CandidateWorkHistory.findOne(
+        const candidateWorkHistoryFound = await prisma.candidateWorkHistory.findFirst(
             {
                 where: { id: param.id },
             }
         )
+        if (!candidateWorkHistoryFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate work history not found"
+            )
 
-        const deleteCandidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.destroy(
+        const deleteSkillsFromCWH = prisma.skillOnCandidateWorkHistory.deleteMany(
             {
                 where: {
-                    workHistoryId: param.id,
+                    candidateWorkHistoryId: param.id,
                 },
-                transaction,
             }
         )
 
         let skillsSetArray = []
-        const skills: any = []
-        const newSkills: any = []
+        const skills: number[] = []
+        const newSkills: string[] = []
 
         skillsSetArray = param.skillId
-        skillsSetArray.map((items: any) => {
+        skillsSetArray.forEach((items: any) => {
             if (typeof items == "number") {
                 skills.push(items)
             } else {
                 newSkills.push(items)
             }
         })
-        const NewskillsArrayObject = newSkills.map((item: any) => {
-            return { title: item }
-        })
-        const skillSet = await customerDB.SkillSet.bulkCreate(
-            NewskillsArrayObject,
-            {
-                fields: ["id", "title"],
-                transaction,
-            }
-        )
 
-        let updateCandidateWcandidateWorkHistory = null
-        if (candidateWorkHistory) {
-            candidateWorkHistory.startDate = param.startDate
-            candidateWorkHistory.endDate = param.endDate
-            candidateWorkHistory.description = param.description
-            candidateWorkHistory.candidateId = param.candidate
-            candidateWorkHistory.companyId = param.companyId
-            updateCandidateWcandidateWorkHistory = await candidateWorkHistory.save()
-        }
-        {
-            transaction
-        }
-        const getSkillId = skillSet.map((item) => {
-            return {
-                skillId: item.id,
-                workHistoryId: candidateWorkHistory?.id,
-            }
+        await prisma.skill.createMany({
+            data: newSkills.map((x) => ({
+                title: x,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            })),
+            skipDuplicates: true,
         })
-        const skillsArrayObject = skills.map((item: any) => {
-            return {
-                skillId: item,
-                workHistoryId: candidateWorkHistory?.id,
-            }
+
+        const skillsCreated = await prisma.skill.findMany({
+            where: {
+                title: {
+                    in: newSkills,
+                },
+            },
         })
-        const workHistorySkill = [...skillsArrayObject, ...getSkillId]
-        const candidateWorkHistorySkill = await customerDB.CandidateWorkHistorySkill.bulkCreate(
-            workHistorySkill,
-            {
-                fields: ["skillId", "workHistoryId"],
-                transaction,
-            }
+
+        const allSkillsIds = [...skills, ...skillsCreated.map((x) => x.id)]
+
+        const updateCWH = prisma.candidateWorkHistory.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                startDate: param.startDate,
+                endDate: param.endDate,
+                description: param.description,
+                Skill: {
+                    createMany: {
+                        data: allSkillsIds.map((x) => ({
+                            skillId: x,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        })),
+                    },
+                },
+                companyId: param.companyId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        const [
+            deletedSkills,
+            candidateWorkHistory,
+        ] = await prisma.$transaction([deleteSkillsFromCWH, updateCWH])
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate work history updated successfully",
+            candidateWorkHistory
         )
-        await transaction.commit()
-        return Object.assign({
-            skillSet,
-            updateCandidateWcandidateWorkHistory,
-            candidateWorkHistorySkill,
-        })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while updateCandidateWorkHistoryById")
-        throw err
+    } catch (error) {
+        log.error(error.message, "Error while updateCandidateWorkHistoryById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCandidateWorkHistoryById"
+        )
     }
 }
+
 /*
  * remove Candidate workHistory By Id
  */
@@ -1259,75 +1764,119 @@ interface removeCandidateWorkHistoryParam {
 }
 const removeCandidateWorkHistory = async (
     param: removeCandidateWorkHistoryParam
-) => {
-    const deletedRows = await customerDB.CandidateWorkHistory.destroy({
-        where: {
-            id: param.id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while removeCandidateWorkHistory")
-        throw err
-    })
-    return deletedRows
+): Promise<helper.IResponseObject> => {
+    try {
+        const deleteSkills = prisma.skillOnCandidateWorkHistory.deleteMany({
+            where: {
+                candidateWorkHistoryId: param.id,
+            },
+        })
+        const deleteCWH = prisma.candidateWorkHistory.delete({
+            where: {
+                id: param.id,
+            },
+        })
+
+        await prisma.$transaction([deleteSkills, deleteCWH])
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate work history deleted successfully"
+        )
+    } catch (error) {
+        log.error(error.message, "Error while removeCandidateWorkHistory")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while removeCandidateWorkHistory"
+        )
+    }
 }
 /*
- * get Candidate workHistory By Id
+ * get Candidate workHistories
  */
-const getCandidatesWorkHistory = async (id: number) => {
-    const candidatesWorkHistory = await customerDB.CandidateWorkHistory.findAll(
-        {
-            include: [
-                { model: customerDB.CandidateWorkHistorySkill },
-                { model: customerDB.Company },
-            ],
-            where: {
-                candidateId: id,
-            },
-        }
-    ).catch((err: any) => {
-        log.error(err, "Error while removeCandidateWorkHistory")
-        throw err
-    })
-    return candidatesWorkHistory
+const getCandidatesWorkHistory = async (
+    id: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidatesWorkHistories = await prisma.candidateWorkHistory.findMany(
+            {
+                where: {
+                    candidateId: id,
+                },
+                include: {
+                    CompanyId: true,
+                    Skill: true,
+                },
+            }
+        )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidatesWorkHistories
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getCandidatesWorkHistory")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidatesWorkHistory"
+        )
+    }
 }
 
 /*
  * get Candidate Traning Certificate
  */
 
-const getCandidateTrainingCert = async (id: number) => {
-    const candidatesCertificate = await customerDB.CandidateCertificate.findAll(
-        {
-            include: [{ model: customerDB.SkillSet }],
+const getCandidateTrainingCerts = async (
+    id: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTrainings = await prisma.candidateTraining.findMany({
             where: {
                 candidateId: id,
             },
-        }
-    ).catch((err: any) => {
-        log.error(err, "Error while getCandidateTrainingCert")
-        //(err)
-        throw err
-    })
-    return candidatesCertificate
+            include: {
+                SkillId: true,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidateTrainings
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getCandidateTrainingCerts")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidateTrainingCerts"
+        )
+    }
 }
+
 const Candidate = {
     getCandidates,
     getCandidateById,
     createCandidate,
     updateCandidateById,
-    deleteAllCandiate,
-    deleteCandiateById,
     addCandidateTrainingCert,
     updateCandidateTrainingCertById,
     removeCandidateTrainingCert,
     addCandidateWorkHistory,
     updateCandidateWorkHistoryById,
     removeCandidateWorkHistory,
-    createBulkCandidate,
     getCandidatesWorkHistory,
-    getCandidateTrainingCert,
+    getCandidateTrainingCerts,
     getCandidateTrainingCertById,
     getCandidateWorkHistoryById,
+    createCandidateRaw,
 }
 
 export { Candidate }

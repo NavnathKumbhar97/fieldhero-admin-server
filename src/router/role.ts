@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as helper from "../helper"
 import * as middleware from "./middleware"
-const { httpStatus } = helper
 const RoleRouter = Router()
 
 //* Fetch all Roles
@@ -12,12 +11,9 @@ RoleRouter.get(
     middleware.permission(helper.permissions.role_read_all),
     async (req: Request, res: Response) => {
         try {
-            const roles = await handler.Role.getRoles(req.query.all)
-            if (!roles.length) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(roles)
-            }
+            const result = await handler.Role.getRoles(req.query.all as string)
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -28,45 +24,52 @@ RoleRouter.get(
 RoleRouter.get(
     "/roles/:id",
     middleware.permission(helper.permissions.role_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const role = await handler.Role.getRoleById(req.params.id)
-            if (role == null) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(role)
-            }
+            const result = await handler.Role.getRoleById(
+                parseInt(req.params.id)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
     }
 )
 
-//* Create Role and Permission
+//* Create Role
 RoleRouter.post(
     "/roles",
     middleware.permission(helper.permissions.role_create),
     async (req: Request, res: Response) => {
         try {
-            const role = await handler.Role.createRole(req.body)
-            res.status(httpStatus.Created).json(role)
+            const result = await handler.Role.createRole(
+                helper.getUserLoginId(req.user),
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
     }
 )
 
-//* Update Role and Permission
+//* Update Role
 RoleRouter.put(
     "/roles/:id",
     middleware.permission(helper.permissions.role_update),
     async (req: Request, res: Response) => {
         try {
-            const role = await handler.Role.UpdateRoleById({
-                id: req.params.id,
-                ...req.body,
-            })
-            res.status(httpStatus.OK).json(role)
+            const result = await handler.Role.updateRoleById(
+                helper.getUserLoginId(req.user),
+                {
+                    id: parseInt(req.params.id),
+                    ...req.body,
+                }
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }

@@ -1,21 +1,19 @@
 import { Router, Request, Response } from "express"
 // local imports
-import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
+import * as handler from "../handlers"
 
-const IndustryRouter = Router()
-// Industry
+const AgentRouter = Router()
+// Agent
 
-//* Fetch all Industry
-IndustryRouter.get(
-    "/industries",
-    middleware.permission(helper.permissions.industry_read_all),
-    async (req: Request, res: Response) => {
+//* Fetch all agents
+AgentRouter.get(
+    "/agents",
+    middleware.permission(helper.permissions.agent_read_all),
+    async (req: Request, res: Response): Promise<void> => {
         try {
-            const result = await handler.Industry.getIndustries(
-                req.query.all as string
-            )
+            const result = await handler.Agent.getAllAgents()
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
         } catch (error) {
@@ -24,13 +22,13 @@ IndustryRouter.get(
     }
 )
 
-//* Fetch Industry By Id
-IndustryRouter.get(
-    "/industries/:id",
-    middleware.permission(helper.permissions.industry_read),
-    async (req: Request, res: Response) => {
+//* Fetch agent by id
+AgentRouter.get(
+    "/agents/:id",
+    middleware.permission(helper.permissions.agent_read),
+    async (req: Request, res: Response): Promise<void> => {
         try {
-            const result = await handler.Industry.getIndustryById(
+            const result = await handler.Agent.getAgentById(
                 parseInt(req.params.id)
             )
             const { code, data, message } = result
@@ -41,13 +39,13 @@ IndustryRouter.get(
     }
 )
 
-//* Create Industry
-IndustryRouter.post(
-    "/industries",
-    middleware.permission(helper.permissions.industry_create),
+//* Create agent
+AgentRouter.post(
+    "/agents",
+    middleware.permission(helper.permissions.agent_create),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.Industry.createIndustry(
+            const result = await handler.Agent.createAgent(
                 helper.getUserLoginId(req.user),
                 req.body
             )
@@ -59,18 +57,16 @@ IndustryRouter.post(
     }
 )
 
-//* Update Industry
-IndustryRouter.put(
-    "/industries/:id",
-    middleware.permission(helper.permissions.industry_update),
+//* Update agent
+AgentRouter.put(
+    "/agents/:id",
+    middleware.permission(helper.permissions.agent_update),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.Industry.updateIndustryById(
+            const result = await handler.Agent.updateAgent(
                 helper.getUserLoginId(req.user),
-                {
-                    id: parseInt(req.params.id),
-                    ...req.body,
-                }
+                parseInt(req.params.id),
+                req.body
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
@@ -80,4 +76,4 @@ IndustryRouter.put(
     }
 )
 
-export { IndustryRouter }
+export { AgentRouter }

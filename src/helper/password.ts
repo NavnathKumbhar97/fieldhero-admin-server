@@ -1,15 +1,16 @@
 import bcrypt from "bcrypt"
-const BCRYPT_SALT_ROUNDS: string = process.env.BCRYPT_ROUNDS!
+// local imports
+import * as config from "../config"
 
-const encryptPassword = async (password: any) => {
-    const encPassword = await bcrypt.hash(
-        password,
-        parseInt(BCRYPT_SALT_ROUNDS)
-    )
+const encryptPassword = async (password: string): Promise<string> => {
+    const encPassword = await bcrypt.hash(password, config.BCRYPT_ROUNDS)
     return encPassword
 }
 
-const verifyPassword = async (password: any, encPassword: any) => {
+const verifyPassword = async (
+    password: string,
+    encPassword: string
+): Promise<boolean> => {
     const isVerified = await bcrypt.compare(password, encPassword)
     return isVerified
 }

@@ -3,6 +3,7 @@ import passport from "passport"
 import jwt from "jsonwebtoken"
 // local imports
 import "../auth/passport"
+import * as config from "../config"
 import { httpStatus } from "../helper"
 import * as handler from "../handlers"
 
@@ -38,7 +39,7 @@ LoginRouter.post(
                             sub: user.uuid,
                             role: user.roleId,
                         }
-                        const secret = process.env.JWT_SECRET_KEY!
+                        const secret = config.JWT_SECRET
                         const token = jwt.sign(dataStoredInToken, secret, {
                             expiresIn: "8h",
                         })

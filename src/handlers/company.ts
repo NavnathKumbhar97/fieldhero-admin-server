@@ -1,49 +1,83 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
-/*
- * get All Companies Details
- */
-const getCompanies = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
-    }
-    const companies = await customerDB.Company.findAll({
-        include: [
-            {
-                model: customerDB.Industry,
+// local imports
+import * as helper from "../helper"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
+
+//* get All Companies Details
+const getCompanies = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const companies = await prisma.company.findMany({
+            where: {
+                isActive: whereCondition,
             },
-        ],
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["companyName", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getCompanies")
-        throw err
-    })
-    return companies
+            include: {
+                IndustryId: {
+                    select: {
+                        title: true,
+                    },
+                },
+            },
+            orderBy: {
+                companyName: "asc",
+            },
+        })
+
+        const result = companies.map((comp) => ({
+            id: comp.id,
+            companyName: comp.companyName,
+            isActive: comp.isActive,
+            industry: comp.IndustryId?.title,
+        }))
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            result
+        )
+    } catch (error) {
+        log.error(error.message, "Error while getCompanies")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCompanies"
+        )
+    }
 }
+
 /*
  * get Compnay Details By details
  */
-const getCompanyById = async (id: number) => {
-    const company = await customerDB.Company.findOne({
-        where: {
-            id,
-        },
-        include: [
-            {
-                model: customerDB.Industry,
+const getCompanyById = async (id: number): Promise<helper.IResponseObject> => {
+    try {
+        const company = await prisma.company.findFirst({
+            where: {
+                id,
             },
-        ],
-    }).catch((err: any) => {
-        log.error(err, "Error while getCompanyById")
-        throw err
-    })
-    return company
+            include: {
+                IndustryId: true,
+            },
+        })
+        if (!company)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Company not found"
+            )
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", company)
+    } catch (error) {
+        log.error(error.message, "Error while getCompanyById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCompanyById"
+        )
+    }
 }
 /*
  * Create Compnay Details
@@ -52,28 +86,72 @@ interface createCompnayParam {
     companyName: string
     description: string
     isActive: boolean
-    industryId: number
+    industryId: string | number
 }
 
-const createCompany = async (param: createCompnayParam) => {
-    const findCompnay = await customerDB.Company.findOne({
-        where: {
-            companyName: param.companyName,
-        },
-    })
-    if (findCompnay) {
-        return null
-    } else {
-        const company = await customerDB.Company.create({
-            companyName: param.companyName,
-            description: param.description,
-            isActive: param.isActive,
-            industryId: param.industryId,
-        }).catch((err) => {
-            log.error(err, "Error while createCompany")
-            throw err
+const createCompany = async (
+    userLoginId: number,
+    param: createCompnayParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const companyFound = await prisma.company.findFirst({
+            where: {
+                companyName: param.companyName,
+            },
         })
-        return company
+        if (companyFound) {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Company already exist"
+            )
+        }
+
+        const company = await prisma.company.create({
+            data: {
+                companyName: param.companyName,
+                description: param.description,
+                isActive: param.isActive,
+                IndustryId: {
+                    connectOrCreate: {
+                        where: {
+                            id:
+                                typeof param.industryId === "number"
+                                    ? param.industryId
+                                    : undefined,
+                            title:
+                                typeof param.industryId === "string"
+                                    ? param.industryId
+                                    : undefined,
+                        },
+                        create: {
+                            title:
+                                typeof param.industryId === "number"
+                                    ? param.industryId + ""
+                                    : param.industryId,
+                            createdBy: userLoginId,
+                            modifiedBy: userLoginId,
+                        },
+                    },
+                },
+                CreatedBy: { connect: { id: userLoginId } },
+                ModifiedBy: { connect: { id: userLoginId } },
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Company created successfully",
+            company
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createCompany")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createCompany"
+        )
     }
 }
 /*
@@ -84,53 +162,73 @@ interface updateCompnayParam {
     companyName: string
     description: string
     isActive: boolean
-    industryId: number
+    industryId: string | number
 }
 
-const updatedCompanyById = async (param: updateCompnayParam) => {
-    const company = await customerDB.Company.findOne({
-        where: { id: param.id },
-    })
-    let updatedCompany = null
-    if (company) {
-        company.companyName = param.companyName
-        company.description = param.description
-        company.isActive = param.isActive
-        company.industryId = param.industryId
-        updatedCompany = await company.save().catch((err: any) => {
-            log.error(err, "Error while updatedCompany")
-            throw err
+const updatedCompanyById = async (
+    userLoginId: number,
+    param: updateCompnayParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const companyFound = await prisma.company.findFirst({
+            where: {
+                id: param.id,
+            },
         })
-        return updatedCompany
+        if (!companyFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Company not found"
+            )
+
+        let industryId: number | undefined =
+            typeof param.industryId !== "string" ? param.industryId : undefined
+        if (typeof param.industryId === "string") {
+            const _industry = await prisma.industry.create({
+                data: {
+                    title: param.industryId,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                },
+            })
+            industryId = _industry.id
+        }
+
+        const company = await prisma.company.update({
+            where: {
+                id: companyFound.id,
+            },
+            data: {
+                companyName: param.companyName,
+                description: param.description,
+                isActive: param.isActive,
+                industryId: industryId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Company updated successfully",
+            company
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updatedCompanyById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updatedCompanyById"
+        )
     }
 }
 
-/*
- * Delete Compnay Details
- */
-
-const deleteCompanyById = async (id: number) => {
-    const Company = await customerDB.Company.findOne({
-        where: {
-            id: id,
-        },
-    })
-    let deleteCompany = null
-    if (Company) {
-        Company.isActive = false
-        deleteCompany = await Company.save().catch((err: any) => {
-            log.error(err, "Error while deleteCompanyById")
-            throw err
-        })
-        return deleteCompany
-    }
-}
 const Company = {
     getCompanies,
     getCompanyById,
     createCompany,
     updatedCompanyById,
-    deleteCompanyById,
 }
 
 export { Company }

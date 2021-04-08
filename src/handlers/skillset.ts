@@ -1,43 +1,64 @@
-import { customerDB } from "../sequelize"
-import { log } from "../helper"
+// local imports
+import { Prisma } from ".prisma/client"
+import * as helper from "../helper"
+
+import prisma from "../prisma"
+const { log, httpStatus } = helper
 /*
- * Get All SkillSets Details
+ * Get All Skills
  */
-const getSkillSets = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
+const getSkills = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const skills = await prisma.skill.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: {
+                title: "asc",
+            },
+        })
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", skills)
+    } catch (error) {
+        log.error(error.message, "Error while getSkills")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSkills"
+        )
     }
-    const skillSets = await customerDB.SkillSet.findAll({
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["title", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getSkillSets")
-        throw err
-    })
-    return skillSets
 }
 
 /*
- * Get SkillSets Details By Id
+ * Get Skill Details By Id
  */
-const getSkillSetById = async (id: number) => {
-    const skillSet = await customerDB.SkillSet.findOne({
-        where: {
-            id,
-        },
-    }).catch((err) => {
-        log.error(err, "Error while getSkillSetById")
-        throw err
-    })
-    return skillSet
+const getSkillById = async (id: number): Promise<helper.IResponseObject> => {
+    try {
+        const skill = await prisma.skill.findFirst({
+            where: { id },
+        })
+        if (!skill)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Skill not found"
+            )
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", skill)
+    } catch (error) {
+        log.error(error.message, "Error while getSkillById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSkillById"
+        )
+    }
 }
 /*
- * Create SkillSets Details
+ * Create Skill
  */
 interface createSkillSetParam {
     title: string
@@ -45,24 +66,46 @@ interface createSkillSetParam {
     isActive: boolean
 }
 
-const createSkillSet = async (param: createSkillSetParam) => {
-    const findSkillSet = await customerDB.SkillSet.findOne({
-        where: {
-            title: param.title,
-        },
-    })
-    if (findSkillSet) {
-        return null
-    } else {
-        const createdSkillSet = await customerDB.SkillSet.create({
-            title: param.title,
-            description: param.description,
-            isActive: param.isActive,
-        }).catch((err: any) => {
-            log.error(err, "Error while createSkillSet")
-            throw err
+const createSkill = async (
+    userLoginId: number,
+    param: createSkillSetParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const skillFound = await prisma.skill.findFirst({
+            where: {
+                title: param.title,
+            },
         })
-        return createdSkillSet
+        if (skillFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Skill already exist"
+            )
+
+        const skill = await prisma.skill.create({
+            data: {
+                title: param.title,
+                description: param.description,
+                isActive: "isActive" in param ? param.isActive : undefined,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Skill created successfully",
+            skill
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createSkill")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createSkill"
+        )
     }
 }
 /*
@@ -75,49 +118,55 @@ interface updateSkillSetParam {
     isActive: boolean
 }
 
-const updateSkillSetById = async (param: updateSkillSetParam) => {
-    const skill = await customerDB.SkillSet.findOne({
-        where: { id: param.id },
-    })
-    let updatedSkill = null
-    if (skill) {
-        skill.title = param.title
-        skill.description = param.description
-        skill.isActive = param.isActive
-        updatedSkill = await skill.save().catch((err: any) => {
-            log.error(err, "Error while updateSkillSetById")
-            throw err
+const updateSkillById = async (
+    userLoginId: number,
+    param: updateSkillSetParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const skillFound = await prisma.skill.findFirst({
+            where: { id: param.id },
         })
-        return updatedSkill
-    }
-}
+        if (!skillFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Skill not found"
+            )
 
-/*
- * Deleted SkillSets Details
- */
-const deleteSkillSetById = async (id: number) => {
-    const skillSet = await customerDB.SkillSet.findOne({
-        where: {
-            id,
-        },
-    })
-    let deleteSkillSet = null
-    if (skillSet) {
-        skillSet.isActive = false
-        deleteSkillSet = await skillSet.save().catch((err: any) => {
-            log.error(err, "Error while deleteSkillSetById")
-            throw err
+        const skill = await prisma.skill.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                title: param.title,
+                description: param.description,
+                isActive: "isActive" in param ? param.isActive : undefined,
+                modifiedBy: userLoginId,
+            },
         })
-        return deleteSkillSet
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Skill updated successfully",
+            skill
+        )
+    } catch (error) {
+        log.error(error.message, "Error while updateSkillById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateSkillById"
+        )
     }
 }
 
 const SkillSet = {
-    getSkillSets,
-    getSkillSetById,
-    createSkillSet,
-    updateSkillSetById,
-    deleteSkillSetById,
+    getSkills,
+    getSkillById,
+    createSkill,
+    updateSkillById,
+    // deleteSkillSetById,
 }
 
 export { SkillSet }

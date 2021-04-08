@@ -3,7 +3,7 @@ const generatePassword = (
     fullName: string,
     email: string,
     password: string
-) => {
+): string => {
     return `<mjml>
     <mj-body>
       <mj-section>
@@ -32,7 +32,9 @@ interface IForgotPasswordEmailParam {
     email: string
     token: string
 }
-const generateForgotPasswordEmail = (param: IForgotPasswordEmailParam) => {
+const generateForgotPasswordEmail = (
+    param: IForgotPasswordEmailParam
+): string => {
     const url = `${config.CLIENT_URL}/reset-password?token=${param.token}&email=${param.email}`
     return `<mjml>
   <mj-body>    
@@ -64,7 +66,7 @@ interface IResetPasswordSuccessEmailparam {
 }
 const generateResetPasswordSuccessEmail = (
     param: IResetPasswordSuccessEmailparam
-) => {
+): string => {
     return `<mjml>
   <mj-body>    
     <mj-section>
@@ -94,7 +96,7 @@ interface IResetPasswordByAdminSuccessEmailparam {
 }
 const generateResetPasswordByAdminSuccessEmail = (
     param: IResetPasswordByAdminSuccessEmailparam
-) => {
+): string => {
     return `<mjml>
     <mj-body>    
       <mj-section>
@@ -117,11 +119,41 @@ const generateResetPasswordByAdminSuccessEmail = (
   </mjml>`
 }
 
+const createAgent = (
+    fullName: string,
+    email: string,
+    password: string
+): string => {
+    return `<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column border="black">
+        <mj-divider border-color="#2A64B5"></mj-divider>
+        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero - Agent</mj-text>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="20px">Account Created</mj-text>
+        <mj-text font-size="14px" font-weight="bold">Hello ${fullName},</mj-text>
+        <mj-text font-size="14px" font-weight="bold">Welcome to Fieldhero.</mj-text>
+        <mj-text>Your account has been created successfully.</mj-text>
+        <mj-text>Please find your credentials below.</mj-text>
+        <mj-text>UserName: <b>${email}</b></mj-text>
+        <mj-text>Password: <b>${password}</b></mj-text>
+        <mj-divider border-color="#2A64B5"></mj-divider>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+  </mjml>`
+}
+
 const emailTemplate = {
     generatePassword,
     generateForgotPasswordEmail,
     generateResetPasswordSuccessEmail,
-    generateResetPasswordByAdminSuccessEmail
+    generateResetPasswordByAdminSuccessEmail,
+    createAgent,
 }
 
 export { emailTemplate }

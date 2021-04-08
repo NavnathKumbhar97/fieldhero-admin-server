@@ -6,7 +6,7 @@ import passport from "passport"
 import { httpStatus } from "../helper"
 import { LoginRouter } from "./passport"
 import { IndustryRouter } from "./industry"
-import { SkillSetRouter } from "./skillset"
+import { SkillRouter } from "./skillset"
 import { CompanyRouter } from "./company"
 import { CandidateRouter } from "./candidate"
 import { SubscriptionRouter } from "./subscriptions"
@@ -15,6 +15,7 @@ import { RoleRouter } from "./role"
 import { PermissionRouter } from "./permission"
 import { UploadRouter } from "./upload"
 import { UserRouter } from "./user"
+import { AgentRouter } from "./agent"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -25,7 +26,7 @@ router.use(LoginRouter)
 router.use(passport.authenticate("jwt", { session: false }))
 // router below will use passport jwt authorization
 router.use(IndustryRouter)
-router.use(SkillSetRouter)
+router.use(SkillRouter)
 router.use(CompanyRouter)
 router.use(CandidateRouter)
 router.use(UploadRouter)
@@ -34,6 +35,7 @@ router.use(CustomerRouter)
 router.use(PermissionRouter)
 router.use(RoleRouter)
 router.use(UserRouter)
+router.use(AgentRouter)
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {

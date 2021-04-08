@@ -1,114 +1,130 @@
-import { Op } from "sequelize"
 import generator from "generate-password"
 import bcrypt from "bcrypt"
 import mjml from "mjml"
 // local imports
-import { customerDB, ormCustomer } from "../sequelize"
-import { log, httpStatus } from "../helper"
+import * as helper from "../helper"
 import { emailTemplate } from "../handlers"
 import * as config from "../config"
 import mailer from "../../nodemailer"
-import { custom } from "joi"
+import prisma from "../prisma"
+
+const { log, httpStatus } = helper
 
 // * Get all customers
-const getCustomers = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
-    }
+const getCustomers = async (all: string): Promise<helper.IResponseObject> => {
     try {
-        const customers = await customerDB.Customer.findAll({
-            attributes: [
-                "id",
-                "fullName",
-                "companyName",
-                "birthDate",
-                "gender",
-                "state",
-                "country",
-                "profileImage",
-                "isActive",
-            ],
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const customers = await prisma.customer.findMany({
             where: {
                 isActive: whereCondition,
             },
-            include: {
-                model: customerDB.CustomerLogin,
-                attributes: ["email"],
+            select: {
+                id: true,
+                fullName: true,
+                companyName: true,
+                dob: true,
+                gender: true,
+                state: true,
+                country: true,
+                profileImage: true,
+                isActive: true,
+                CustomerLogin: {
+                    select: {
+                        email: true,
+                    },
+                },
+            },
+            orderBy: {
+                fullName: "asc",
             },
         })
-
-        return customers.map((cust) => {
-            const { customer_login, ...other } = cust.toJSON() as any
-            return { ...other, email: customer_login.email }
+        const result = customers.map((cust) => {
+            const { CustomerLogin, ...rest } = cust
+            return { ...rest, email: CustomerLogin?.email }
         })
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error) {
-        log.error(error, "Error while getCustomers")
-        throw error
+        log.error(error.message, "Error while getCustomers")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCustomers"
+        )
     }
 }
 
 // * Get customer by id
-const getCustomerById = async (id: number) => {
+const getCustomerById = async (id: number): Promise<helper.IResponseObject> => {
     try {
-        const customer = await customerDB.Customer.findOne({
-            attributes: [
-                "id",
-                "fullName",
-                "companyName",
-                "birthDate",
-                "gender",
-                "state",
-                "country",
-                "profileImage",
-                "isActive",
-            ],
-            where: {
-                id,
-            },
-            include: {
-                model: customerDB.CustomerLogin,
-                attributes: ["email"],
+        const customer = await prisma.customer.findFirst({
+            where: { id },
+            select: {
+                id: true,
+                fullName: true,
+                companyName: true,
+                dob: true,
+                gender: true,
+                state: true,
+                country: true,
+                profileImage: true,
+                isActive: true,
+                CustomerLogin: {
+                    select: {
+                        email: true,
+                    },
+                },
             },
         })
-        if (customer) {
-            const { customer_login, ...other } = customer.toJSON() as any
-            return { ...other, email: customer_login.email }
-        }
-        return null
+
+        if (!customer)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer not found"
+            )
+
+        const { CustomerLogin, ...other } = customer
+        const result = { ...other, email: CustomerLogin?.email }
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error) {
-        log.error(error, "Error while getCustomerById")
-        throw error
+        log.error(error.message, "Error while getCustomerById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCustomerById"
+        )
     }
 }
 
-const getCustomerSubscriptions = async (id: number) => {
+const getCustomerSubscriptions = async (
+    customerId: number
+): Promise<helper.IResponseObject> => {
     try {
-        const customer = await customerDB.Customer.findOne({
-            attributes: ["id"],
-            where: { id },
-        })
-        if (customer) {
-            const custSubscriptions = await customerDB.CustomerSubscription.findAll(
-                {
-                    where: {
-                        customerId: customer.id,
-                    },
-                }
-            )
-            if (custSubscriptions.length) {
-                const _custSubscriptions = custSubscriptions.map((x) =>
-                    x.toJSON()
-                )
-                return _custSubscriptions
+        const customerSubscriptions = await prisma.customerSubscription.findMany(
+            {
+                where: {
+                    customerId,
+                },
             }
-        }
-        return null
+        )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            customerSubscriptions
+        )
     } catch (error) {
-        log.error(error, "Error while getCustomerSubscriptions")
-        throw error
+        log.error(error.message, "Error while getCustomerSubscriptions")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCustomerSubscriptions"
+        )
     }
 }
 
@@ -118,29 +134,39 @@ const getCustomerSubscriptions = async (id: number) => {
  * @param subId
  */
 
-const getCustomerSubscriptionsById = async (id: number, subId: number) => {
+const getCustomerSubscriptionsById = async (
+    customerId: number,
+    subscriptionId: number
+): Promise<helper.IResponseObject> => {
     try {
-        const customer = await customerDB.Customer.findOne({
-            attributes: ["id"],
-            where: { id },
-        })
-        if (customer) {
-            const custSubscription = await customerDB.CustomerSubscription.findAll(
-                {
-                    where: {
-                        customerId: customer.id,
-                        id: subId,
-                    },
-                }
-            )
-            if (custSubscription) {
-                return custSubscription
+        const customerSubscription = await prisma.customerSubscription.findFirst(
+            {
+                where: {
+                    customerId,
+                    id: subscriptionId,
+                },
             }
-        }
-        return null
+        )
+        if (!customerSubscription)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer subscription not found"
+            )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            customerSubscription
+        )
     } catch (error) {
-        log.error(error, "Error while getCustomerSubscriptionById")
-        throw error
+        log.error(error.message, "Error while getCustomerSubscriptionsById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCustomerSubscriptionsById"
+        )
     }
 }
 
@@ -154,25 +180,50 @@ interface ICustomerSubscriptionParam {
     comment?: string
 }
 const createCustomerSubscription = async (
+    userLoginId: number,
     param: ICustomerSubscriptionParam
-) => {
+): Promise<helper.IResponseObject> => {
     try {
-        const customerSubscription = await customerDB.CustomerSubscription.create(
-            {
+        const customerFound = await prisma.customer.findFirst({
+            where: {
+                id: param.customerId,
+            },
+        })
+        if (!customerFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer not found"
+            )
+
+        const customerSubscription = await prisma.customerSubscription.create({
+            data: {
                 planName: param.planName,
                 startDate: param.startDate,
                 expiryDate: param.expiryDate,
                 allocatedData: param.allocatedData,
                 usedData: 0,
                 status: param.status,
-                comment: param.comment ? param.comment : null,
+                comment: param.comment,
                 customerId: param.customerId,
-            }
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Customer subscription created successfully",
+            customerSubscription
         )
-        return customerSubscription
     } catch (error) {
-        log.error(error, "Error while createCustomerSubscription")
-        throw error
+        log.error(error.message, "Error while createCustomerSubscription")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createCustomerSubscription"
+        )
     }
 }
 
@@ -188,115 +239,142 @@ interface updateSubScriptionParam {
 }
 
 const updateCustomerSubscriptionsById = async (
+    userLoginId: number,
     param: updateSubScriptionParam
-) => {
+): Promise<helper.IResponseObject> => {
     try {
-        const customer = await customerDB.Customer.findOne({
-            attributes: ["id"],
-            where: { id: param.customerId },
+        const customerFound = await prisma.customer.findFirst({
+            where: {
+                id: param.customerId,
+            },
         })
-        if (customer) {
-            const custSubscription = await customerDB.CustomerSubscription.findAll(
-                {
-                    where: {
-                        customerId: customer.id,
-                        id: param.id,
-                    },
-                }
+        if (!customerFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer not found"
             )
-            const updateSubScription = null
-            if (custSubscription) {
-                (custSubscription[0].planName = param.planName),
-                    (custSubscription[0].startDate = param.startDate),
-                    (custSubscription[0].expiryDate = param.expiryDate),
-                    (custSubscription[0].allocatedData = param.allocatedData),
-                    (custSubscription[0].status = param.status),
-                    (custSubscription[0].comment = param.comment)
 
-                const updateSubScription = await custSubscription[0].save()
-
-                return updateSubScription
+        const customerSubscription = await prisma.customerSubscription.updateMany(
+            {
+                where: {
+                    id: param.id,
+                    customerId: param.customerId,
+                },
+                data: {
+                    planName: param.planName,
+                    startDate: param.startDate,
+                    expiryDate: param.expiryDate,
+                    allocatedData: param.allocatedData,
+                    status: param.status,
+                    comment: param.comment,
+                    modifiedBy: userLoginId,
+                },
             }
-        }
-        return null
+        )
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Customer subscription updated successfully",
+            customerSubscription
+        )
     } catch (error) {
-        log.error(error, "Error while updateCustomerSubscriptionsById")
-        throw error
+        log.error(error.message, "Error while updateCustomerSubscriptionsById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCustomerSubscriptionsById"
+        )
     }
 }
 
-const resetLoginPasswordForCustomer = async (param: any) => {
-    const t = await ormCustomer.transaction()
+interface IResetLoginPasswordForCustomerParam {
+    id: number
+}
+
+const resetLoginPasswordForCustomer = async (
+    userLoginId: number,
+    param: IResetLoginPasswordForCustomerParam
+): Promise<helper.IResponseObject> => {
     try {
-        const customerLogin = await customerDB.CustomerLogin.findOne({
-            include: [
-                {
-                    model: customerDB.Customer,
-                    attributes: ["fullName"],
-                },
-            ],
+        const customerFound = await prisma.customer.findFirst({
             where: {
-                customerId: {
-                    [Op.eq]: param.id,
+                id: param.id,
+            },
+            include: {
+                CustomerLogin: true,
+            },
+        })
+        if (!customerFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer not found"
+            )
+
+        const newPassword = generator.generate({
+            excludeSimilarCharacters: true,
+            length: 12,
+            lowercase: true,
+            uppercase: true,
+            numbers: true,
+            symbols: false,
+            strict: true,
+        })
+        const newPasswordHash = await bcrypt.hash(
+            newPassword,
+            config.BCRYPT_ROUNDS
+        )
+
+        const customerLogin = await prisma.customerLogin.update({
+            where: {
+                id: customerFound.CustomerLogin?.id,
+            },
+            data: {
+                passwordHash: newPasswordHash,
+                modifiedBy: userLoginId,
+            },
+            include: {
+                CustomerId: {
+                    select: {
+                        fullName: true,
+                    },
                 },
             },
-            transaction: t,
         })
-        if (customerLogin) {
-            const _customerLogin: any = customerLogin.toJSON()
-            const newPassword = generator.generate({
-                excludeSimilarCharacters: true,
-                length: 12,
-                lowercase: true,
-                uppercase: true,
-                numbers: true,
-                symbols: false,
-                strict: true,
+
+        const html = mjml(
+            emailTemplate.generateResetPasswordByAdminSuccessEmail({
+                fullName: customerLogin.CustomerId.fullName,
+                password: newPassword,
             })
-            const newPasswordHash = await bcrypt.hash(
-                newPassword,
-                config.BCRYPT_ROUNDS
-            )
-            customerLogin.passwordHash = newPasswordHash
-            await customerLogin.save({ transaction: t })
-            await t.commit()
-            const html = mjml(
-                emailTemplate.generateResetPasswordByAdminSuccessEmail({
-                    fullName: _customerLogin.customer_master.fullName,
-                    password: newPassword,
-                })
-            ).html
-            mailer
-                .sendMail({
-                    to: [_customerLogin.email],
-                    from: config.EMAIL_FROM,
-                    subject: "Fieldhero - Password Reset Successfully",
-                    html,
-                })
-                .catch((err) => {
-                    log.error(
-                        err.message,
-                        "Error in nodemailer while resetLoginPasswordForCustomer"
-                    )
-                })
-            return {
-                status: true,
-                code: httpStatus.OK,
-                message:
-                    "Password reset successfully. New password has been sent on your email.",
-                data: null,
-            }
-        } else {
-            return {
-                status: false,
-                code: httpStatus.Bad_Request,
-                message: "Customer not found",
-            }
-        }
+        ).html
+        mailer
+            .sendMail({
+                to: [customerLogin.email],
+                from: config.EMAIL_FROM,
+                subject: "Fieldhero Customer - Password Reset Successfully",
+                html,
+            })
+            .catch((err) => {
+                log.error(
+                    err.message,
+                    "Error in nodemailer while resetLoginPasswordForCustomer"
+                )
+            })
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "Password reset successfully. New password has been sent on your email"
+        )
     } catch (error) {
-        await t.rollback()
-        log.error(error, "error while resetLoginPasswordForCustomer")
-        throw error
+        log.error(error.message, "Error while resetLoginPasswordForCustomer")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while resetLoginPasswordForCustomer"
+        )
     }
 }
 
@@ -305,45 +383,55 @@ interface IUpdateCustomerparam {
     fullName: string
     companyName: string
     birthDate: Date
-    gender: "male" | "female" | "other" | null
+    gender: "MALE" | "FEMALE" | "OTHER" | null
     state: string
     country: string
 }
-const updateCustomer = async (param: IUpdateCustomerparam) => {
-    const t = await ormCustomer.transaction()
+const updateCustomer = async (
+    userLoginId: number,
+    param: IUpdateCustomerparam
+): Promise<helper.IResponseObject> => {
     try {
-        const customer = await customerDB.Customer.findOne({
+        const customerFound = await prisma.customer.findFirst({
             where: {
                 id: param.id,
             },
-            transaction: t,
         })
-        if (customer) {
-            if (param.fullName) customer.fullName = param.fullName
-            customer.companyName = param.companyName
-            customer.birthDate = param.birthDate
-            customer.gender = param.gender
-            customer.state = param.state
-            customer.country = param.country
-            await customer.save({ transaction: t })
-            await t.commit()
-            return {
-                status: true,
-                code: httpStatus.No_Content,
-                message: `Customer updated successfully`,
-                data: null,
-            }
-        } else {
-            return {
-                status: false,
-                code: httpStatus.Bad_Request,
-                message: "Customer not found",
-            }
-        }
+        if (!customerFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Customer not found"
+            )
+
+        const customer = await prisma.customer.update({
+            where: {
+                id: customerFound.id,
+            },
+            data: {
+                fullName: param.fullName,
+                companyName: param.companyName,
+                dob: param.birthDate,
+                gender: param.gender,
+                state: param.state,
+                country: param.country,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Customer updated successfully",
+            customer
+        )
     } catch (error) {
-        await t.rollback()
-        log.error(error, "error while updateCustomer")
-        throw error
+        log.error(error.message, "Error while updateCustomer")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCustomer"
+        )
     }
 }
 

@@ -3,7 +3,6 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
-const { httpStatus } = helper
 
 const CustomerRouter = Router()
 
@@ -13,12 +12,9 @@ CustomerRouter.get(
     middleware.permission(helper.permissions.customer_read_all),
     async (req: Request, res: Response) => {
         try {
-            const customers = await handler.Customer.getCustomers(req.query.all)
-            if (!customers.length) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(customers)
-            }
+            const result = await handler.Customer.getCustomers(req.query.all as string)
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -29,16 +25,13 @@ CustomerRouter.get(
 CustomerRouter.get(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const customer = await handler.Customer.getCustomerById(
-                req.params.id
+            const result = await handler.Customer.getCustomerById(
+                parseInt(req.params.id)
             )
-            if (!customer) {
-                res.sendStatus(httpStatus.No_Content)
-            } else {
-                res.status(httpStatus.OK).json(customer)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -49,29 +42,17 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_update),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const response = await handler.Customer.updateCustomer({
-                id: req.params.id,
-                ...req.body,
-            })
-            if (response) {
-                const { code, message, status, data } = response
-                if (status) {
-                    res.status(code).json({
-                        message,
-                        data,
-                    })
-                } else {
-                    res.status(code).json({
-                        message,
-                    })
+            const result = await handler.Customer.updateCustomer(
+                helper.getUserLoginId(req.user),
+                {
+                    id: parseInt(req.params.id),
+                    ...req.body,
                 }
-            } else {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                })
-            }
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -82,16 +63,13 @@ CustomerRouter.put(
 CustomerRouter.get(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_read_all),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const subscriptions = await handler.Customer.getCustomerSubscriptions(
-                req.params.id
+            const result = await handler.Customer.getCustomerSubscriptions(
+                parseInt(req.params.id)
             )
-            if (subscriptions && subscriptions.length) {
-                res.status(httpStatus.OK).json(subscriptions)
-            } else {
-                res.sendStatus(httpStatus.No_Content)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -102,15 +80,17 @@ CustomerRouter.get(
 CustomerRouter.post(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_create),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const cust_subscription = await handler.Customer.createCustomerSubscription(
+            const result = await handler.Customer.createCustomerSubscription(
+                helper.getUserLoginId(req.user),
                 {
-                    customerId: req.params.id,
+                    customerId: parseInt(req.params.id),
                     ...req.body,
                 }
             )
-            res.status(httpStatus.Created).json(cust_subscription)
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -121,17 +101,14 @@ CustomerRouter.post(
 CustomerRouter.get(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_read),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const custSubscription = await handler.Customer.getCustomerSubscriptionsById(
-                req.params.id,
-                req.params.subId
+            const result = await handler.Customer.getCustomerSubscriptionsById(
+                parseInt(req.params.id),
+                parseInt(req.params.subId)
             )
-            if (custSubscription) {
-                res.status(httpStatus.OK).json(custSubscription)
-            } else {
-                res.sendStatus(httpStatus.No_Content)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -142,20 +119,18 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_update),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const custSubscription = await handler.Customer.updateCustomerSubscriptionsById(
+            const result = await handler.Customer.updateCustomerSubscriptionsById(
+                helper.getUserLoginId(req.user),
                 {
                     customerId: req.params.id,
                     id: req.params.subId,
                     ...req.body,
                 }
             )
-            if (custSubscription) {
-                res.status(httpStatus.OK).json(custSubscription)
-            } else {
-                res.sendStatus(httpStatus.No_Content)
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }
@@ -166,30 +141,16 @@ CustomerRouter.put(
 CustomerRouter.post(
     "/customers/:id/reset-password",
     middleware.permission(helper.permissions.customer_reset_password),
-    async (req: Request<any>, res: Response) => {
+    async (req: Request, res: Response) => {
         try {
-            const response = await handler.Customer.resetLoginPasswordForCustomer(
+            const result = await handler.Customer.resetLoginPasswordForCustomer(
+                helper.getUserLoginId(req.user),
                 {
-                    id: req.params.id,
+                    id: parseInt(req.params.id),
                 }
             )
-            if (response) {
-                const { code, message, status, data } = response
-                if (status) {
-                    res.status(code).json({
-                        message,
-                        data,
-                    })
-                } else {
-                    res.status(code).json({
-                        message,
-                    })
-                }
-            } else {
-                res.status(httpStatus.Bad_Request).json({
-                    code: httpStatus.Bad_Request,
-                })
-            }
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
         } catch (error) {
             handler.express.handleRouterError(res, error)
         }

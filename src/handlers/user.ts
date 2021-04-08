@@ -1,16 +1,16 @@
 import mjml from "mjml"
-import { Op } from "sequelize"
 import crypto from "crypto"
 import moment from "moment"
 import generator from "generate-password"
 import bcrypt from "bcrypt"
 // local imports
-import { customerDB, ormCustomer } from "../sequelize"
-import { log, passwordfunction, httpStatus } from "../helper"
 import * as helper from "../helper"
 import { emailTemplate } from "../handlers/mjml"
 import mailer from "../../nodemailer"
 import * as config from "../config"
+import prisma from "../prisma"
+
+const { log, passwordfunction, httpStatus } = helper
 
 /**
  * Create User Details
@@ -18,48 +18,64 @@ import * as config from "../config"
 interface createUserParam {
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "other" | null
+    gender: "MALE" | "FEMALE" | "OTHER" | null
     address: string
     state: string
     country: string
     profileImage: string
     isActive: boolean
-    roleId: number
+    roleId: number | undefined
     email: string
 }
-const createUser = async (param: createUserParam) => {
-    const transaction = await ormCustomer.transaction()
+const createUser = async (
+    userLoginId: number,
+    param: createUserParam
+): Promise<helper.IResponseObject> => {
     try {
-        const autoPassword = Math.random().toString(36).slice(-8)
-        const userDetails = await customerDB.User.create(
-            {
-                fullName: param.fullName,
-                birthDate: param.birthDate || null,
-                gender: param.gender,
-                address: param.address,
-                state: param.state,
-                country: param.country,
-                isActive: param.isActive,
-            },
-            { transaction }
-        )
-
-        const userLogin = await customerDB.UserLogin.create(
-            {
-                userId: userDetails.id as number,
-                roleId: param.roleId,
+        const userFound = await prisma.userLogin.findFirst({
+            where: {
                 email: param.email,
-                passwordHash: await passwordfunction.encryptPassword(
-                    autoPassword
-                ),
             },
-            { transaction }
-        )
+        })
+        if (userFound) {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Email already exist"
+            )
+        }
+
+        const autoPassword = Math.random().toString(36).slice(-8)
+        const encPassword = await passwordfunction.encryptPassword(autoPassword)
+        const user = await prisma.user.create({
+            data: {
+                fullName: param.fullName,
+                dob: moment(param.birthDate).toDate(),
+                gender: param.gender,
+                currAddress: param.address,
+                currState: param.state,
+                currCountry: "India",
+                isActive: "isActive" in param ? param.isActive : true,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+                UserLogin: {
+                    create: {
+                        email: param.email,
+                        passwordHash: encPassword,
+                        Role: {
+                            connect: {
+                                id: param.roleId,
+                            },
+                        },
+                    },
+                },
+            },
+        })
 
         const html = mjml(
             emailTemplate.generatePassword(
-                userDetails.fullName,
-                userLogin.email,
+                param.fullName,
+                param.email,
                 autoPassword
             ),
             { beautify: true }
@@ -68,17 +84,25 @@ const createUser = async (param: createUserParam) => {
             .sendMail({
                 to: [param.email],
                 from: config.EMAIL_FROM,
-                subject: "Fieldhero - Your Password",
+                subject: "Fieldhero Admin - Your Password",
                 html: html.html,
             })
             .then((success) => log.info(success))
             .catch((err) => log.error(err))
-        await transaction.commit()
-        return Object.assign({ userDetails, userLogin })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while createUser")
-        throw err
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "User created successfully",
+            user
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createUser")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createUser"
+        )
     }
 }
 
@@ -86,79 +110,115 @@ const createUser = async (param: createUserParam) => {
  * Get All User Details
  * @param all
  */
-const getUser = async (all: any) => {
-    let whereCondition = {}
-    if (all == "*") {
-        whereCondition = [0, 1]
-    } else {
-        whereCondition = 1
+const getUsers = async (all: string): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+
+        const users = await prisma.user.findMany({
+            select: {
+                id: true,
+                fullName: true,
+                isActive: true,
+                UserLogin: {
+                    select: {
+                        email: true,
+                        Role: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                isActive: whereCondition,
+                UserLogin: {
+                    roleId: {
+                        not: 3,
+                    },
+                },
+            },
+            orderBy: {
+                fullName: "asc",
+            },
+        })
+
+        const result = users.map((user) => ({
+            id: user.id,
+            fullName: user.fullName,
+            isActive: user.isActive,
+            email: user.UserLogin?.email,
+            role: user.UserLogin?.Role.name,
+        }))
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error) {
+        log.error(error.message, "Error while getUsers")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getUsers"
+        )
     }
-    const users = await customerDB.User.findAll({
-        attributes: [
-            "id",
-            "fullName",
-            "birthDate",
-            "gender",
-            "address",
-            "state",
-            "country",
-            "profileImage",
-            "isActive",
-        ],
-        where: {
-            isActive: whereCondition,
-        },
-        order: [["fullName", "ASC"]],
-    }).catch((err: any) => {
-        log.error(err, "Error while getUser")
-        throw err
-    })
-    return users
 }
 
-const getUserById = async (id: number) => {
-    const user = await customerDB.User.findOne({
-        attributes: [
-            "id",
-            "fullName",
-            "birthDate",
-            "gender",
-            "address",
-            "state",
-            "country",
-            "profileImage",
-            "isActive",
-        ],
-        include: [
-            {
-                model: customerDB.UserLogin,
-                attributes: ["email", "roleId"],
+const getUserById = async (id: number): Promise<helper.IResponseObject> => {
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                id,
             },
-        ],
-        where: {
-            id,
-        },
-    }).catch((err: any) => {
-        log.error(err, "Error while getuserById")
-        throw err
-    })
-    const _user: any = user?.toJSON()
-    const { user_login, ...rest } = _user
-    return {
-        ...rest,
-        email: user_login.email,
-        roleId: user_login.roleId,
+            select: {
+                id: true,
+                fullName: true,
+                dob: true,
+                gender: true,
+                currAddress: true,
+                currState: true,
+                currCountry: true,
+                profileImage: true,
+                isActive: true,
+                UserLogin: {
+                    select: {
+                        email: true,
+                        roleId: true,
+                    },
+                },
+            },
+        })
+        if (!user)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "User not found"
+            )
+        const { UserLogin, ...rest } = user
+        const result = {
+            ...rest,
+            email: UserLogin?.email,
+            roleId: UserLogin?.roleId,
+        }
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error) {
+        log.error(error.message, "Error while getUserById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getUserById"
+        )
     }
 }
 
 /*
- * Update Industry Details
+ * Update User Details
  */
 interface UpdateUserParam {
     id: number
     fullName: string
     birthDate: Date
-    gender: "male" | "female" | "other" | null
+    gender: "MALE" | "FEMALE" | "OTHER" | null
     address: string
     state: string
     country: string
@@ -167,277 +227,297 @@ interface UpdateUserParam {
     roleId: number
     email: string
 }
-const updateUserById = async (param: UpdateUserParam) => {
-    const transaction = await ormCustomer.transaction()
+const updateUserById = async (
+    userLoginId: number,
+    param: UpdateUserParam
+): Promise<helper.IResponseObject> => {
     try {
-        const user = await customerDB.User.findOne({
-            where: { id: param.id },
-        })
-        let updateUserDetails = null
-        if (user) {
-            user.fullName = param.fullName
-            user.birthDate = param.birthDate || null
-            user.gender = param.gender
-            user.address = param.address
-            user.state = param.state
-            user.country = param.country
-            user.isActive = param.isActive
-            updateUserDetails = await user.save()
-        }
-        {
-            transaction
-        }
-        const userLoginDetails = await customerDB.UserLogin.findOne({
-            where: { userId: param.id },
-        })
-        let updateUserLoginDetails = null
-        if (userLoginDetails) {
-            if (param.roleId) userLoginDetails.roleId = param.roleId
-            if (param.email) userLoginDetails.email = param.email
-            updateUserLoginDetails = await userLoginDetails.save()
-        }
-        {
-            transaction
-        }
-        await transaction.commit()
-        return Object.assign({ updateUserDetails, updateUserLoginDetails })
-    } catch (err) {
-        await transaction.rollback()
-        log.error(err, "Error while updateUserById")
-        throw err
-    }
-}
-
-const createResetPasswordToken = async (email: string) => {
-    const t = await ormCustomer.transaction()
-    try {
-        const user = await customerDB.UserLogin.findOne({
-            include: [
-                {
-                    model: customerDB.User,
-                    attributes: ["fullName"],
-                },
-            ],
+        const userFound = await prisma.user.findFirst({
             where: {
-                email: {
-                    [Op.eq]: email,
+                id: param.id,
+            },
+        })
+        if (!userFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "User not found"
+            )
+
+        const user = await prisma.user.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                fullName: param.fullName,
+                dob: param.birthDate,
+                gender: param.gender,
+                currAddress: param.address,
+                currState: param.state,
+                currCountry: "India",
+                isActive: "isActive" in param ? param.isActive : undefined,
+                modifiedBy: userLoginId,
+                UserLogin: {
+                    update: {
+                        roleId: param.roleId,
+                        email: param.email,
+                        modifiedBy: userLoginId,
+                    },
                 },
             },
-            transaction: t,
+            include: {
+                UserLogin: true,
+            },
         })
-        if (user) {
-            const _user: any = user.toJSON()
-            const token = crypto.randomBytes(32).toString("hex")
-            user.resetToken = token
-            user.resetExpires = moment(Date.now() + 3600000).toDate()
-            await user.save({ transaction: t })
-            await t.commit()
+        const { UserLogin, ...rest } = user
+        const result = { ...rest, ...UserLogin }
 
-            const html = mjml(
-                emailTemplate.generateForgotPasswordEmail({
-                    fullName: _user.user_master.fullName,
-                    email: _user.email,
-                    token,
-                })
-            ).html
-            mailer
-                .sendMail({
-                    to: [_user.email],
-                    from: config.EMAIL_FROM,
-                    subject: "Fieldhero - Reset Password Request",
-                    html,
-                })
-                .catch((err) => {
-                    log.error(
-                        err.message,
-                        "Error in nodemailer while createResetPasswordToken"
-                    )
-                })
-            return {
-                status: true,
-                code: httpStatus.OK,
-                data: null,
-                message: "Password reset request has been sent on your email.",
-            }
-        } else {
-            return {
-                status: false,
-                code: httpStatus.Not_Found,
-                message: "Email not found",
-            }
-        }
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "User updated successfully",
+            result
+        )
     } catch (error) {
-        t.rollback()
-        log.error("Error while createResetPasswordToken", error.message)
-        return {
-            status: false,
-            code: httpStatus.Bad_Request,
-            message: "Error while createResetPasswordToken",
-        }
+        log.error(error.message, "Error while updateUserById")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateUserById"
+        )
     }
 }
 
-const resetPasswordForUser = async (token: string, email: string) => {
-    const t = await ormCustomer.transaction()
+const createResetPasswordToken = async (
+    email: string
+): Promise<helper.IResponseObject> => {
     try {
-        const userLogin = await customerDB.UserLogin.findOne({
-            include: [
-                {
-                    model: customerDB.User,
-                    attributes: ["fullName"],
-                },
-            ],
+        const userLoginFound = await prisma.userLogin.findFirst({
+            where: { email },
+        })
+        if (!userLoginFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Email not found"
+            )
+
+        const token = crypto.randomBytes(32).toString("hex")
+        const userLogin = await prisma.userLogin.update({
             where: {
-                email: {
-                    [Op.eq]: email,
+                id: userLoginFound.id,
+            },
+            data: {
+                resetToken: token,
+                resetExpires: moment(Date.now() + 3600000).toDate(),
+                modifiedBy: userLoginFound.id,
+            },
+            include: {
+                User: {
+                    select: {
+                        fullName: true,
+                    },
                 },
             },
-            transaction: t,
         })
-        if (userLogin) {
-            const _userLogin: any = userLogin.toJSON()
-            if (_userLogin.resetToken === token) {
-                const isTokenValid = moment(_userLogin.resetExpires).isAfter(
-                    moment()
+
+        const html = mjml(
+            emailTemplate.generateForgotPasswordEmail({
+                fullName: userLogin.User.fullName,
+                email: userLogin.email,
+                token,
+            })
+        ).html
+        mailer
+            .sendMail({
+                to: [userLogin.email],
+                from: config.EMAIL_FROM,
+                subject: "Fieldhero Admin - Reset Password Request",
+                html,
+            })
+            .catch((err) => {
+                log.error(
+                    err.message,
+                    "Error in nodemailer while createResetPasswordToken"
                 )
-                if (isTokenValid) {
-                    const newPassword = generator.generate({
-                        excludeSimilarCharacters: true,
-                        length: 12,
-                        lowercase: true,
-                        uppercase: true,
-                        numbers: true,
-                        symbols: false,
-                        strict: true,
-                    })
-                    const newPasswordHash = await bcrypt.hash(
-                        newPassword,
-                        config.BCRYPT_ROUNDS
-                    )
-                    userLogin.resetToken = null
-                    userLogin.resetExpires = null
-                    userLogin.passwordHash = newPasswordHash
-                    await userLogin.save({ transaction: t })
-                    await t.commit()
-                    const html = mjml(
-                        emailTemplate.generateResetPasswordSuccessEmail({
-                            fullName: _userLogin.user_master.fullName,
-                            password: newPassword,
-                        })
-                    ).html
-                    mailer
-                        .sendMail({
-                            to: [_userLogin.email],
-                            from: config.EMAIL_FROM,
-                            subject: "Fieldhero - Password Reset Successfully",
-                            html,
-                        })
-                        .catch((err) => {
-                            log.error(
-                                err.message,
-                                "Error in nodemailer while resetPasswordForUser"
-                            )
-                        })
-                    return {
-                        status: true,
-                        code: httpStatus.OK,
-                        message:
-                            "Password reset successfully. New password has been sent on your email.",
-                        data: null,
-                    }
-                } else {
-                    return {
-                        status: false,
-                        code: httpStatus.Bad_Request,
-                        message:
-                            "Token expired. Please request reset password again.",
-                    }
-                }
-            } else {
-                return {
-                    status: false,
-                    code: httpStatus.Bad_Request,
-                    message: "Token mismatch.",
-                }
-            }
-        } else {
+            })
+
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.OK,
+            "Password reset request has been sent on your email"
+        )
+    } catch (error) {
+        log.error(error.message, "Error while createResetPasswordToken")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createResetPasswordToken"
+        )
+    }
+}
+
+const resetPasswordForUser = async (
+    token: string,
+    email: string
+): Promise<helper.IResponseObject> => {
+    try {
+        const userLoginFound = await prisma.userLogin.findFirst({
+            where: {
+                email,
+            },
+            include: {
+                User: {
+                    select: {
+                        fullName: true,
+                    },
+                },
+            },
+        })
+        if (!userLoginFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Email not found"
+            )
+
+        if (userLoginFound.resetToken !== token)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Bad_Request,
+                "Token mismatch"
+            )
+
+        const isTokenValid = moment(userLoginFound.resetExpires).isAfter(
+            moment()
+        )
+        if (!isTokenValid)
             return {
                 status: false,
                 code: httpStatus.Bad_Request,
-                message: "Email not found.",
+                message: "Token expired. Please request reset password again.",
             }
-        }
+
+        const newPassword = generator.generate({
+            excludeSimilarCharacters: true,
+            length: 12,
+            lowercase: true,
+            uppercase: true,
+            numbers: true,
+            symbols: false,
+            strict: true,
+        })
+        const newPasswordHash = await bcrypt.hash(
+            newPassword,
+            config.BCRYPT_ROUNDS
+        )
+
+        const userLogin = await prisma.userLogin.update({
+            where: {
+                id: userLoginFound.id,
+            },
+            data: {
+                resetToken: null,
+                resetExpires: null,
+                passwordHash: newPasswordHash,
+                modifiedBy: userLoginFound.id,
+            },
+        })
+
+        const html = mjml(
+            emailTemplate.generateResetPasswordSuccessEmail({
+                fullName: userLoginFound.User.fullName,
+                password: newPassword,
+            })
+        ).html
+        mailer
+            .sendMail({
+                to: [userLogin.email],
+                from: config.EMAIL_FROM,
+                subject: "Fieldhero Admin - Password Reset Successfully",
+                html,
+            })
+            .catch((err) => {
+                log.error(
+                    err.message,
+                    "Error in nodemailer while resetPasswordForUser"
+                )
+            })
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "Password reset successfully. New password has been sent on your email"
+        )
     } catch (error) {
-        await t.rollback()
-        log.error("Error while resetPasswordForUser", error.message)
-        return {
-            status: false,
-            code: httpStatus.Bad_Request,
-            message: "Error while resetPasswordForUser",
-        }
+        log.error(error.message, "Error while resetPasswordForUser")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while resetPasswordForUser"
+        )
     }
 }
 
 const changePassword = async (
-    userId: any,
+    userLoginId: number,
     oldPassword: string,
     newPassword: string
 ): Promise<helper.IResponseObject> => {
-    const t = await ormCustomer.transaction()
     try {
-        console.log(userId, oldPassword, newPassword)
-        const userLogin = await customerDB.UserLogin.findOne({
+        const userLoginFound = await prisma.userLogin.findFirst({
             where: {
-                userId,
+                id: userLoginId,
             },
-            transaction: t,
         })
-        if (userLogin) {
-            console.log(userLogin.toJSON())
-            const isPasswordSame = await passwordfunction.verifyPassword(
-                oldPassword,
-                userLogin.passwordHash
+        if (!userLoginFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "User not found"
             )
-            if (isPasswordSame) {
-                const newEncPassword = await passwordfunction.encryptPassword(
-                    newPassword
-                )
-                userLogin.passwordHash = newEncPassword
-                await userLogin.save({ transaction: t })
-                await t.commit()
-                return helper.getHandlerResponseObject(
-                    true,
-                    httpStatus.OK,
-                    "Password changed successfully"
-                )
-            } else {
-                return helper.getHandlerResponseObject(
-                    false,
-                    httpStatus.Bad_Request,
-                    "Old password is wrong"
-                )
-            }
-        } else {
+
+        const isPasswordSame = await passwordfunction.verifyPassword(
+            oldPassword,
+            userLoginFound.passwordHash
+        )
+        if (!isPasswordSame)
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Bad_Request,
-                "Error while changePassword"
+                "Old password is wrong"
             )
-        }
+
+        const newEncPassword = await passwordfunction.encryptPassword(
+            newPassword
+        )
+        await prisma.userLogin.update({
+            where: {
+                id: userLoginFound.id,
+            },
+            data: {
+                passwordHash: newEncPassword,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "Password changed successfully"
+        )
     } catch (error) {
-        await t.rollback()
-        log.error("Error while changePassword", error.message)
+        log.error(error.message, "Error while changePassword")
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "User not found"
+            "Error while changePassword"
         )
     }
 }
 
 const User = {
     createUser,
-    getUser,
+    getUsers,
     getUserById,
     updateUserById,
     createResetPasswordToken,
