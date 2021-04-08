@@ -7,6 +7,6 @@ RUN npm install && npm cache clean --force
 ENV NODE_ENV production
 ENV PORT 80
 EXPOSE 80
-RUN prisma migrate deploy
+RUN npm run prisma:deploy
 RUN NODE_ENV=production npm run build
 CMD [ \npm\, \start\ ]
