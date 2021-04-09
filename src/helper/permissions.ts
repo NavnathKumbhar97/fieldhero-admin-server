@@ -56,4 +56,9 @@ export default {
     agent_read: 55,
     agent_create: 56,
     agent_update: 57,
+    agent_self_read: 58,
+    agent_self_update: 59,
+    agent_self_change_password: 60,
+    candidate_upload_batch_self_read_all: 61,
+    candidate_upload_batch_read_all: 62,
 }
