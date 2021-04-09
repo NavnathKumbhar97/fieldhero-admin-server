@@ -321,7 +321,7 @@ const createCandidateRaw = async (
                 permCountry: "India",
                 permZip: `${p["perm_pincode"]}`,
                 email1: `${handleString(p["primary_email"])}`,
-                email2: `${handleString(p["secondary_email"])}`,
+                // email2: `${handleString(p["secondary_email"])}`,
                 contactNo2: `${p["secondary_mobile"]}`,
                 aadharNo: `${p["aadhar_no"]}`,
                 panNo: `${handleString(p["pan_no"])}`,
@@ -330,12 +330,12 @@ const createCandidateRaw = async (
                 expMonths: `${p["exp_months"]}`,
                 prefLocation1: `${handleString(p["pref_location_1"])}`,
                 prefLocation2: `${handleString(p["pref_location_2"])}`,
-                prefLocation3: `${handleString(p["pref_location_3"])}`,
+                // prefLocation3: `${handleString(p["pref_location_3"])}`,
                 skill1: `${handleString(p["skill_1"])}`,
                 skill2: `${handleString(p["skill_2"])}`,
                 primaryLang: `${handleString(p["primary_lang"])}`,
                 secondaryLang: `${handleString(p["secondary_lang"])}`,
-                thirdLang: `${handleString(p["third_lang"])}`,
+                // thirdLang: `${handleString(p["third_lang"])}`,
                 lastCompany: `${handleString(p["last_company"])}`,
                 designation: `${handleString(p["designation"])}`,
                 startDate: `${handleString(p["start_date"])}`,
@@ -618,19 +618,19 @@ const candidateBatchSystemCheck = async (
             }
 
             // email2
-            let email2: any = handleEmail(item.email2, 80)
-            if (email2 && typeof email2 === "object") {
-                arrRejSum.push({
-                    columnName: "secondary_email",
-                    rejectionType: "IGNORE",
-                    rejectedBy: "SYSTEM",
-                    rejectionReason: email2.error,
-                    candidateRawId: item.id,
-                    createdBy: userLoginId,
-                    modifiedBy: userLoginId,
-                })
-                email2 = null
-            }
+            // let email2: any = handleEmail(item.email2, 80)
+            // if (email2 && typeof email2 === "object") {
+            //     arrRejSum.push({
+            //         columnName: "secondary_email",
+            //         rejectionType: "IGNORE",
+            //         rejectedBy: "SYSTEM",
+            //         rejectionReason: email2.error,
+            //         candidateRawId: item.id,
+            //         createdBy: userLoginId,
+            //         modifiedBy: userLoginId,
+            //     })
+            //     email2 = null
+            // }
 
             // contactNo2
             let contactNo2: any = handleNumber(item.contactNo2, 45)
@@ -753,19 +753,19 @@ const candidateBatchSystemCheck = async (
             }
 
             // prefLocation3
-            let prefLocation3: any = handleString(item.prefLocation3, 80)
-            if (prefLocation3 && typeof prefLocation3 == "object") {
-                arrRejSum.push({
-                    columnName: "pref_location_3",
-                    rejectionType: "IGNORE",
-                    rejectedBy: "SYSTEM",
-                    rejectionReason: prefLocation3.error,
-                    candidateRawId: item.id,
-                    createdBy: userLoginId,
-                    modifiedBy: userLoginId,
-                })
-                prefLocation3 = null
-            }
+            // let prefLocation3: any = handleString(item.prefLocation3, 80)
+            // if (prefLocation3 && typeof prefLocation3 == "object") {
+            //     arrRejSum.push({
+            //         columnName: "pref_location_3",
+            //         rejectionType: "IGNORE",
+            //         rejectedBy: "SYSTEM",
+            //         rejectionReason: prefLocation3.error,
+            //         candidateRawId: item.id,
+            //         createdBy: userLoginId,
+            //         modifiedBy: userLoginId,
+            //     })
+            //     prefLocation3 = null
+            // }
 
             // skill1
             let skill1: any = handleString(item.skill1, 45)
@@ -828,19 +828,19 @@ const candidateBatchSystemCheck = async (
             }
 
             // thirdLang
-            let thirdLang: any = handleString(item.thirdLang, 30)
-            if (thirdLang && typeof thirdLang == "object") {
-                arrRejSum.push({
-                    columnName: "third_lang",
-                    rejectionType: "IGNORE",
-                    rejectedBy: "SYSTEM",
-                    rejectionReason: thirdLang.error,
-                    candidateRawId: item.id,
-                    createdBy: userLoginId,
-                    modifiedBy: userLoginId,
-                })
-                thirdLang = null
-            }
+            // let thirdLang: any = handleString(item.thirdLang, 30)
+            // if (thirdLang && typeof thirdLang == "object") {
+            //     arrRejSum.push({
+            //         columnName: "third_lang",
+            //         rejectionType: "IGNORE",
+            //         rejectedBy: "SYSTEM",
+            //         rejectionReason: thirdLang.error,
+            //         candidateRawId: item.id,
+            //         createdBy: userLoginId,
+            //         modifiedBy: userLoginId,
+            //     })
+            //     thirdLang = null
+            // }
 
             // lastCompany
             let lastCompany: any = handleString(item.lastCompany, 100)
@@ -936,7 +936,7 @@ const candidateBatchSystemCheck = async (
                 permCountry,
                 permZip,
                 email1,
-                email2,
+                // email2,
                 contactNo2,
                 aadharNo,
                 panNo,
@@ -945,12 +945,12 @@ const candidateBatchSystemCheck = async (
                 expMonths,
                 prefLocation1,
                 prefLocation2,
-                prefLocation3,
+                // prefLocation3,
                 skill1,
                 skill2,
                 primaryLang,
                 secondaryLang,
-                thirdLang,
+                // thirdLang,
                 lastCompany,
                 designation,
                 startDate,
@@ -1242,10 +1242,10 @@ const candidateBatchSystemCheck = async (
                     rowNum,
                     primaryLang,
                     secondaryLang,
-                    thirdLang,
+                    // thirdLang,
                     prefLocation1,
                     prefLocation2,
-                    prefLocation3,
+                    // prefLocation3,
                     contactNo1,
                     contactNo2,
                     ...other
@@ -1255,10 +1255,10 @@ const candidateBatchSystemCheck = async (
                     candidateRawId: id,
                     primaryLanguage: primaryLang,
                     secondaryLanguage: secondaryLang,
-                    thirdLanguage: thirdLang,
+                    // thirdLanguage: thirdLang,
                     preferLocation1: prefLocation1,
                     preferLocation2: prefLocation2,
-                    preferLocation3: prefLocation3,
+                    // preferLocation3: prefLocation3,
                     contactNo1: `${contactNo1}`,
                     contactNo2: contactNo2 ? `${contactNo2}` : null,
                     version: 1,
