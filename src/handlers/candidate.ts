@@ -356,6 +356,8 @@ const createCandidateRaw = async (
             data: {
                 count: data.length,
                 timestamp: moment().utc().format(),
+                approvedCount: 0,
+                rejectedCount: 0,
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
                 CandidateRaw: {
@@ -1272,6 +1274,7 @@ const candidateBatchSystemCheck = async (
         const arrRejectedRawId: number[] = arrRejSum
             .filter((item) => item.rejectionType === "REJECT")
             .map((item) => item.candidateRawId)
+        const isAllRejected = rawCandidates.length === arrRejectedRawId.length
 
         await prisma.$transaction([
             // Create Candidate versioning
@@ -1287,11 +1290,26 @@ const candidateBatchSystemCheck = async (
                 },
                 data: {
                     isSystemApproved: true,
+                    modifiedBy: userLoginId
                 },
             }),
             // Create candidate rejection summary
             prisma.candidateRejectionSummary.createMany({
                 data: arrRejSum,
+            }),
+            //
+            prisma.candidateUploadBatch.update({
+                where: {
+                    id: batchId,
+                },
+                data: {
+                    status: isAllRejected ? "PROCESSED" : "IN_PROGRESS",
+                    rejectedCount: {
+                        increment: arrRejectedRawId.length,
+                    },
+                    paymentAmount: isAllRejected ? 0 : undefined,
+                    modifiedBy: userLoginId
+                },
             }),
         ])
 

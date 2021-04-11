@@ -28,7 +28,7 @@ const parseDate = (date: string): moment.Moment | null => {
     else return null
 }
 
-interface IResponseObject {
+type IResponseObject = {
     status: boolean
     code: number
     message: string
