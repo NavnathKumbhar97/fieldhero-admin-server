@@ -9,7 +9,6 @@
         "dev": "nodemon -L",
         "lint": "eslint . --ext .ts",
         "prebuild": "npm run clean && npm run lint",
-        "prestart": "npm run build",
         "prisma:deploy": "prisma migrate deploy",
         "start": "node -r dotenv/config .",
         "test": "jest --setupFiles dotenv/config",
