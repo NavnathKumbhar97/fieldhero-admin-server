@@ -19,9 +19,20 @@ interface createUserParam {
     fullName: string
     birthDate: Date
     gender: "MALE" | "FEMALE" | "OTHER" | null
-    address: string
-    state: string
-    country: string
+    currAddress: string
+    currCity: string
+    currState: string
+    currZip: string
+    permAddress: string
+    permCity: string
+    permState: string
+    permZip: string
+    primaryLang: string
+    secodnaryLang: string
+    thirdLang: string
+    aadharCard: string
+    panCard: string
+    note: string
     profileImage: string
     isActive: boolean
     roleId: number | undefined
@@ -52,9 +63,22 @@ const createUser = async (
                 fullName: param.fullName,
                 dob: moment(param.birthDate).toDate(),
                 gender: param.gender,
-                currAddress: param.address,
-                currState: param.state,
+                currAddress: param.currAddress,
+                currCity: param.currCity,
+                currState: param.currState,
                 currCountry: "India",
+                currZip: param.currZip,
+                permAddress: param.permAddress,
+                permCity: param.permCity,
+                permState: param.permState,
+                permCountry: "India",
+                permZip: param.permZip,
+                primaryLang: param.primaryLang,
+                secondaryLang: param.secodnaryLang,
+                thirdLang: param.thirdLang,
+                aadharCard: param.aadharCard,
+                panCard: param.panCard,
+                note: param.note,
                 isActive: "isActive" in param ? param.isActive : true,
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
@@ -175,8 +199,21 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
                 dob: true,
                 gender: true,
                 currAddress: true,
+                currCity: true,
                 currState: true,
                 currCountry: true,
+                currZip: true,
+                permAddress: true,
+                permCity: true,
+                permState: true,
+                permCountry: true,
+                permZip: true,
+                primaryLang: true,
+                secondaryLang: true,
+                thirdLang: true,
+                aadharCard: true,
+                panCard: true,
+                note: true,
                 profileImage: true,
                 isActive: true,
                 UserLogin: {
@@ -219,9 +256,20 @@ interface UpdateUserParam {
     fullName: string
     birthDate: Date
     gender: "MALE" | "FEMALE" | "OTHER" | null
-    address: string
-    state: string
-    country: string
+    currAddress: string
+    currCity: string
+    currState: string
+    currZip: string
+    permAddress: string
+    permCity: string
+    permState: string
+    permZip: string
+    primaryLang: string
+    secodnaryLang: string
+    thirdLang: string
+    aadharCard: string
+    panCard: string
+    note: string
     profileImage: string
     isActive: boolean
     roleId: number
@@ -252,9 +300,22 @@ const updateUserById = async (
                 fullName: param.fullName,
                 dob: param.birthDate,
                 gender: param.gender,
-                currAddress: param.address,
-                currState: param.state,
+                currAddress: param.currAddress,
+                currCity: param.currCity,
+                currState: param.currState,
                 currCountry: "India",
+                currZip: param.currZip,
+                permAddress: param.permAddress,
+                permCity: param.permCity,
+                permState: param.permState,
+                permCountry: "India",
+                permZip: param.permZip,
+                primaryLang: param.primaryLang,
+                secondaryLang: param.secodnaryLang,
+                thirdLang: param.thirdLang,
+                aadharCard: param.aadharCard,
+                panCard: param.panCard,
+                note: param.note,
                 isActive: "isActive" in param ? param.isActive : undefined,
                 modifiedBy: userLoginId,
                 UserLogin: {
