@@ -201,6 +201,13 @@ const createAgent = async (
                     "Email is already used.",
                     null
                 )
+            if (agentFound.UserId.UserLogin?.contactNo === param.contactNo)
+                return helper.getHandlerResponseObject(
+                    false,
+                    httpStatus.Bad_Request,
+                    "Contact no is already used.",
+                    null
+                )
         }
 
         const password = generator.generate({
