@@ -28,7 +28,7 @@ interface createUserParam {
     permState: string
     permZip: string
     primaryLang: string
-    secodnaryLang: string
+    secondaryLang: string
     thirdLang: string
     aadharCard: string
     panCard: string
@@ -37,6 +37,7 @@ interface createUserParam {
     isActive: boolean
     roleId: number | undefined
     email: string
+    contactNo: string
 }
 const createUser = async (
     userLoginId: number,
@@ -74,7 +75,7 @@ const createUser = async (
                 permCountry: "India",
                 permZip: param.permZip,
                 primaryLang: param.primaryLang,
-                secondaryLang: param.secodnaryLang,
+                secondaryLang: param.secondaryLang,
                 thirdLang: param.thirdLang,
                 aadharCard: param.aadharCard,
                 panCard: param.panCard,
@@ -85,6 +86,7 @@ const createUser = async (
                 UserLogin: {
                     create: {
                         email: param.email,
+                        contactNo: param.contactNo,
                         passwordHash: encPassword,
                         Role: {
                             connect: {
@@ -219,6 +221,7 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
                 UserLogin: {
                     select: {
                         email: true,
+                        contactNo: true,
                         roleId: true,
                     },
                 },
@@ -235,6 +238,7 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
             ...rest,
             email: UserLogin?.email,
             roleId: UserLogin?.roleId,
+            contactNo: UserLogin?.contactNo,
         }
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
@@ -265,7 +269,7 @@ interface UpdateUserParam {
     permState: string
     permZip: string
     primaryLang: string
-    secodnaryLang: string
+    secondaryLang: string
     thirdLang: string
     aadharCard: string
     panCard: string
@@ -274,6 +278,7 @@ interface UpdateUserParam {
     isActive: boolean
     roleId: number
     email: string
+    contactNo: string
 }
 const updateUserById = async (
     userLoginId: number,
@@ -311,7 +316,7 @@ const updateUserById = async (
                 permCountry: "India",
                 permZip: param.permZip,
                 primaryLang: param.primaryLang,
-                secondaryLang: param.secodnaryLang,
+                secondaryLang: param.secondaryLang,
                 thirdLang: param.thirdLang,
                 aadharCard: param.aadharCard,
                 panCard: param.panCard,
@@ -322,6 +327,7 @@ const updateUserById = async (
                     update: {
                         roleId: param.roleId,
                         email: param.email,
+                        contactNo: param.contactNo,
                         modifiedBy: userLoginId,
                     },
                 },
