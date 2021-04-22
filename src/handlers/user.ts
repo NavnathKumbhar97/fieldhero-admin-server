@@ -46,15 +46,29 @@ const createUser = async (
     try {
         const userFound = await prisma.userLogin.findFirst({
             where: {
-                email: param.email,
+                OR: [
+                    {
+                        email: param.email,
+                    },
+                    {
+                        contactNo: param.contactNo,
+                    },
+                ],
             },
         })
         if (userFound) {
-            return helper.getHandlerResponseObject(
-                false,
-                httpStatus.Conflict,
-                "Email already exist"
-            )
+            if (userFound.email === param.email)
+                return helper.getHandlerResponseObject(
+                    false,
+                    httpStatus.Conflict,
+                    "Email already exist"
+                )
+            if (userFound.contactNo === param.contactNo)
+                return helper.getHandlerResponseObject(
+                    false,
+                    httpStatus.Conflict,
+                    "Contact no is already used"
+                )
         }
 
         const autoPassword = Math.random().toString(36).slice(-8)
