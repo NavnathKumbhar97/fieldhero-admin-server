@@ -10,6 +10,7 @@ COPY ./nodemailer.ts ./
 COPY ./prisma ./
 COPY ./src ./src
 RUN npm ci
+RUN npx prisma migrate deploy
 RUN npm run build
 # production builder stage
 FROM node:14.16.1-alpine AS prod-builder

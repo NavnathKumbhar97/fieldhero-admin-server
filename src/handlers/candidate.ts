@@ -1120,6 +1120,7 @@ const candidateBatchSystemCheck = async (
                         },
                     },
                 ],
+                version: 1,
             },
             select: {
                 email1: true,
@@ -1290,7 +1291,7 @@ const candidateBatchSystemCheck = async (
                 },
                 data: {
                     isSystemApproved: true,
-                    modifiedBy: userLoginId
+                    modifiedBy: userLoginId,
                 },
             }),
             // Create candidate rejection summary
@@ -1308,7 +1309,7 @@ const candidateBatchSystemCheck = async (
                         increment: arrRejectedRawId.length,
                     },
                     paymentAmount: isAllRejected ? 0 : undefined,
-                    modifiedBy: userLoginId
+                    modifiedBy: userLoginId,
                 },
             }),
         ])

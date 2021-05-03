@@ -13,6 +13,12 @@ const getGender = (): Array<string> => {
 }
 
 const parseDate = (date: string): moment.Moment | null => {
+    if (moment(date, "DD.MM.YY", true).isValid())
+        return moment(date, "DD.MM.YY", true)
+    if (moment(date, "DD-MM-YY", true).isValid())
+        return moment(date, "DD-MM-YY", true)
+    if (moment(date, "DD/MM/YY", true).isValid())
+        return moment(date, "DD/MM/YY", true)
     if (moment(date, "DD.MM.YYYY", true).isValid())
         return moment(date, "DD.MM.YYYY", true)
     else if (moment(date, "DD-MM-YYYY", true).isValid())
@@ -24,7 +30,7 @@ const parseDate = (date: string): moment.Moment | null => {
     else if (moment(date, "YYYY-MM-DD", true).isValid())
         return moment(date, "YYYY-MM-DD", true)
     else if (moment(date, "YYYY/MM/DD", true).isValid())
-        return moment(date, "YYYY/M/MDD", true)
+        return moment(date, "YYYY/MM/DD", true)
     else return null
 }
 

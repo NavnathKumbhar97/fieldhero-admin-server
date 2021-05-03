@@ -61,4 +61,10 @@ export default {
     agent_self_change_password: 60,
     candidate_upload_batch_self_read_all: 61,
     candidate_upload_batch_read_all: 62,
+    admin_candidate_verification_read_all: 63,
+    admin_candidate_verification_read: 64,
+    candidate_verification_read_all: 65,
+    candidate_verification_read: 66,
+    candidate_verification_create: 67,
+    candidate_verification_update: 68
 }

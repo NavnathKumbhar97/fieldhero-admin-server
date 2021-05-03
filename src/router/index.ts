@@ -17,6 +17,7 @@ import { UploadRouter } from "./upload"
 import { UserRouter } from "./user"
 import { AgentRouter } from "./agent"
 import { CandidateUploadBatchRouter } from "./candidateUploadBatch"
+import { CandidateVerificationRouter } from "./candidateVerification"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -38,6 +39,7 @@ router.use(RoleRouter)
 router.use(UserRouter)
 router.use(AgentRouter)
 router.use(CandidateUploadBatchRouter)
+router.use(CandidateVerificationRouter)
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {

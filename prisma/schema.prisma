@@ -68,6 +68,19 @@ enum CustomerStatus {
   VERIFIED
 }
 
+enum CallStatus {
+  BUSY
+  CALL_BACK
+  COMPLETED
+  DISCONNECTED
+  HALF_DETAILS
+  NOT_INTERESTED
+  NOT_REACHABLE
+  RINGING
+  SWITCH_OFF
+  WRONG_NO
+}
+
 // Models
 
 model Permission {
@@ -375,14 +388,14 @@ model CandidateVersioning {
   currState                  String?                      @db.VarChar(45)
   currCountry                String?                      @db.VarChar(45)
   currZip                    String?                      @db.VarChar(10)
-  email1                     String?                      @unique @db.VarChar(80)
+  email1                     String?                      @db.VarChar(80)
   email2                     String?                      @db.VarChar(80)
-  contactNo1                 String                       @unique @db.VarChar(45)
+  contactNo1                 String                       @db.VarChar(45)
   contactNo2                 String?                      @db.VarChar(45)
-  aadharNo                   String?                      @unique @db.VarChar(15)
-  panNo                      String?                      @unique @db.VarChar(12)
-  dlNo                       String?                      @unique @db.VarChar(20)
-  registrationStatus         String?                      @unique @db.VarChar(15)
+  aadharNo                   String?                      @db.VarChar(15)
+  panNo                      String?                      @db.VarChar(12)
+  dlNo                       String?                      @db.VarChar(20)
+  registrationStatus         String?                      @db.VarChar(15)
   expYears                   Int?
   expMonths                  Int?
   preferLocation1            String?                      @db.VarChar(80)
@@ -414,11 +427,48 @@ model CandidateCallCentreHistory {
   id                    Int                 @id @default(autoincrement())
   candidateVersioningId Int
   CandidateVersioningId CandidateVersioning @relation(fields: [candidateVersioningId], references: [id])
-  callStatus            String              @db.VarChar(40)
+  callStatus            CallStatus?
   comment               String?             @db.VarChar(500)
   candidateConsent      CandidateConsent    @default(PENDING)
-  consentReason         String?             @db.VarChar(100)
   isSubmitted           Boolean             @default(false)
+  industry              Boolean?
+  category              Boolean?
+  fullName              Boolean?
+  dob                   Boolean?
+  gender                Boolean?
+  permAddress           Boolean?
+  permCity              Boolean?
+  permState             Boolean?
+  permCountry           Boolean?
+  permZip               Boolean?
+  currAddress           Boolean?
+  currCity              Boolean?
+  currState             Boolean?
+  currCountry           Boolean?
+  currZip               Boolean?
+  email1                Boolean?
+  email2                Boolean?
+  contactNo1            Boolean?
+  contactNo2            Boolean?
+  aadharNo              Boolean?
+  panNo                 Boolean?
+  dlNo                  Boolean?
+  registrationStatus    Boolean?
+  expYears              Boolean?
+  expMonths             Boolean?
+  preferLocation1       Boolean?
+  preferLocation2       Boolean?
+  preferLocation3       Boolean?
+  skill1                Boolean?
+  skill2                Boolean?
+  primaryLanguage       Boolean?
+  secondaryLanguage     Boolean?
+  thirdLanguage         Boolean?
+  lastCompany           Boolean?
+  designation           Boolean?
+  startDate             Boolean?
+  endDate               Boolean?
+  jobDescription        Boolean?
   createdOn             DateTime            @default(now())
   modifiedOn            DateTime            @updatedAt
   createdBy             Int?
