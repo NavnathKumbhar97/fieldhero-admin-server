@@ -12,6 +12,7 @@ import { emailTemplate } from "./mjml"
 import { express } from "./express"
 import { Agent } from "./agent"
 import { CandidateUploadBatch } from "./candidateUploadBatch"
+import { CandidateVerification } from "./candidateVerificatio"
 
 export {
     Candidate,
@@ -27,5 +28,6 @@ export {
     UploadImage,
     User,
     Agent,
-    CandidateUploadBatch
+    CandidateUploadBatch,
+    CandidateVerification
 }

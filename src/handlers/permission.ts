@@ -18,7 +18,7 @@ const getPermissions = async (all: string): Promise<helper.IResponseObject> => {
             where: {
                 isActive: whereCondition,
             },
-            orderBy: { id: "asc" },
+            orderBy: [{ group: "asc" }, { id: "asc" }],
         })
 
         return helper.getHandlerResponseObject(
