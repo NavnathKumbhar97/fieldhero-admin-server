@@ -250,6 +250,11 @@ const getCandidateVerificationById = async (
                     version: 2,
                     createdBy: userLoginId,
                     id: itemId,
+                    CandidateCallCentreHistory: {
+                        every: {
+                            isSubmitted: false,
+                        },
+                    },
                 },
                 select: {
                     industry: true,
@@ -587,7 +592,6 @@ const updateCandidateVerificationById = async (
 const getDashboardForUser = async (
     userLoginId: number
 ): Promise<IResponseObject> => {
-    console.log("I m here")
     try {
         const batchCountRequest = prisma.candidateUploadBatch.count({
             where: {

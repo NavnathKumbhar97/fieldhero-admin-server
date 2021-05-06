@@ -21,7 +21,7 @@ app.use((req, res, next) =>
 app.use(express.urlencoded({ extended: false }))
 app.use(helmet())
 // configure pino logging with express
-app.use(pino({ logger: log }))
+// app.use(pino({ logger: log }))
 
 app.use("/api/v1", routerV1)
 
