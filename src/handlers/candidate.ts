@@ -5,6 +5,7 @@ import paginate from "jw-paginate"
 import prisma from "../prisma"
 import * as helper from "../helper"
 import { log, httpStatus } from "../helper"
+import { IRejected } from "../helper/candidate"
 
 const {
     handleString,
@@ -303,49 +304,55 @@ const createCandidateRaw = async (
 ): Promise<helper.IResponseObject> => {
     try {
         const data = param
-            .map((p, i: number) => ({
-                industry: `${handleString(p["industry"])}`,
-                category: `${handleString(p["category"])}`,
-                fullName: `${handleString(p["full_name"])}`,
-                contactNo1: `${p["primary_mobile"]}`,
-                currAddress: `${handleString(p["curr_address"])}`,
-                currCity: `${handleString(p["curr_city"])}`,
-                currState: `${handleString(p["curr_state"])}`,
-                currCountry: "India",
-                currZip: `${p["curr_pincode"]}`,
-                dob: `${handleString(p["birth_date"])}`,
-                gender: `${handleString(p["gender"])}`,
-                permAddress: `${handleString(p["perm_address"])}`,
-                permCity: `${handleString(p["perm_city"])}`,
-                permState: `${handleString(p["perm_state"])}`,
-                permCountry: "India",
-                permZip: `${p["perm_pincode"]}`,
-                email1: `${handleString(p["primary_email"])}`,
-                // email2: `${handleString(p["secondary_email"])}`,
-                contactNo2: `${p["secondary_mobile"]}`,
-                aadharNo: `${p["aadhar_no"]}`,
-                panNo: `${handleString(p["pan_no"])}`,
-                dlNo: `${handleString(p["driving_licence_no"])}`,
-                expYears: `${p["exp_years"]}`,
-                expMonths: `${p["exp_months"]}`,
-                prefLocation1: `${handleString(p["pref_location_1"])}`,
-                prefLocation2: `${handleString(p["pref_location_2"])}`,
-                // prefLocation3: `${handleString(p["pref_location_3"])}`,
-                skill1: `${handleString(p["skill_1"])}`,
-                skill2: `${handleString(p["skill_2"])}`,
-                primaryLang: `${handleString(p["primary_lang"])}`,
-                secondaryLang: `${handleString(p["secondary_lang"])}`,
-                // thirdLang: `${handleString(p["third_lang"])}`,
-                lastCompany: `${handleString(p["last_company"])}`,
-                designation: `${handleString(p["designation"])}`,
-                startDate: `${handleString(p["start_date"])}`,
-                endDate: `${handleString(p["end_date"])}`,
-                jobDescription: `${handleString(p["job_description"])}`,
-                createdBy: userLoginId,
-                modifiedBy: userLoginId,
-                isSystemApproved: false,
-                rowNum: i + 2,
-            }))
+            .map((p, i: number) => {
+                try {
+                    return {
+                        industry: `${handleString(p["industry"])}`,
+                        category: `${handleString(p["category"])}`,
+                        fullName: `${handleString(p["full_name"])}`,
+                        contactNo1: `${p["primary_mobile"]}`,
+                        currAddress: `${handleString(p["curr_address"])}`,
+                        currCity: `${handleString(p["curr_city"])}`,
+                        currState: `${handleString(p["curr_state"])}`,
+                        currCountry: "India",
+                        currZip: `${p["curr_pincode"]}`,
+                        dob: `${handleString(p["birth_date"])}`,
+                        gender: `${handleString(p["gender"])}`,
+                        permAddress: `${handleString(p["perm_address"])}`,
+                        permCity: `${handleString(p["perm_city"])}`,
+                        permState: `${handleString(p["perm_state"])}`,
+                        permCountry: "India",
+                        permZip: `${p["perm_pincode"]}`,
+                        email1: `${handleString(p["primary_email"])}`,
+                        // email2: `${handleString(p["secondary_email"])}`,
+                        contactNo2: `${p["secondary_mobile"]}`,
+                        aadharNo: `${p["aadhar_no"]}`,
+                        panNo: `${handleString(p["pan_no"])}`,
+                        dlNo: `${handleString(p["driving_licence_no"])}`,
+                        expYears: `${p["exp_years"]}`,
+                        expMonths: `${p["exp_months"]}`,
+                        prefLocation1: `${handleString(p["pref_location_1"])}`,
+                        prefLocation2: `${handleString(p["pref_location_2"])}`,
+                        // prefLocation3: `${handleString(p["pref_location_3"])}`,
+                        skill1: `${handleString(p["skill_1"])}`,
+                        skill2: `${handleString(p["skill_2"])}`,
+                        primaryLang: `${handleString(p["primary_lang"])}`,
+                        secondaryLang: `${handleString(p["secondary_lang"])}`,
+                        // thirdLang: `${handleString(p["third_lang"])}`,
+                        lastCompany: `${handleString(p["last_company"])}`,
+                        designation: `${handleString(p["designation"])}`,
+                        startDate: `${handleString(p["start_date"])}`,
+                        endDate: `${handleString(p["end_date"])}`,
+                        jobDescription: `${handleString(p["job_description"])}`,
+                        createdBy: userLoginId,
+                        modifiedBy: userLoginId,
+                        isSystemApproved: false,
+                        rowNum: i + 2,
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
+            })
             .map((p: any) => {
                 Object.keys(p).forEach((key: string) => {
                     if (p[key] === "null") p[key] = null
@@ -398,13 +405,19 @@ const candidateBatchSystemCheck = async (
         const arrRejSum: Prisma.CandidateRejectionSummaryCreateManyInput[] = []
         const filteredCandidates = rawCandidates.map((item) => {
             // industry
-            let industry: any = handleNotNullString(item.industry, 80)
+            let industry: string | IRejected = handleNotNullString(
+                item.industry,
+                80
+            )
             if (industry && typeof industry === "object") {
                 industry = "Other"
             }
 
             // category
-            let category: any = handleNotNullString(item.category, 80)
+            let category: string | IRejected | null = handleNotNullString(
+                item.category,
+                80
+            )
             if (category && typeof category === "object") {
                 arrRejSum.push({
                     columnName: "category",
@@ -419,7 +432,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // fullName
-            let fullName: any = handleNotNullString(item.fullName, 200)
+            let fullName: string | IRejected | null = handleNotNullString(
+                item.fullName,
+                200
+            )
             if (fullName && typeof fullName === "object") {
                 arrRejSum.push({
                     columnName: "full_name",
@@ -434,7 +450,11 @@ const candidateBatchSystemCheck = async (
             }
 
             // contactNo1
-            let contactNo1: any = handleNotNullNumber(item.contactNo1, 45)
+            let contactNo1: number | IRejected | null = handleNotNullNumber(
+                item.contactNo1,
+                10,
+                true
+            )
             if (contactNo1 && typeof contactNo1 === "object") {
                 arrRejSum.push({
                     columnName: "primary_mobile",
@@ -449,7 +469,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // currAddress
-            let currAddress: any = handleString(item.currAddress, 500)
+            let currAddress: string | IRejected | null = handleString(
+                item.currAddress,
+                500
+            )
             if (currAddress && typeof currAddress === "object") {
                 arrRejSum.push({
                     columnName: "curr_address",
@@ -464,7 +487,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // currCity
-            let currCity: any = handleNotNullString(item.currCity, 45)
+            let currCity: string | IRejected | null = handleNotNullString(
+                item.currCity,
+                45
+            )
             if (currCity && typeof currCity === "object") {
                 arrRejSum.push({
                     columnName: "curr_city",
@@ -479,7 +505,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // currState
-            let currState: any = handleString(item.currState, 45)
+            let currState: string | IRejected | null = handleString(
+                item.currState,
+                45
+            )
             if (currState && typeof currState === "object") {
                 arrRejSum.push({
                     columnName: "curr_state",
@@ -497,7 +526,11 @@ const candidateBatchSystemCheck = async (
             const currCountry = item.currCountry
 
             // currZip
-            let currZip: any = handleNumber(item.currZip, 10)
+            let currZip: number | IRejected | null = handleNumber(
+                item.currZip,
+                6,
+                true
+            )
             if (currZip && typeof currZip === "object") {
                 arrRejSum.push({
                     columnName: "curr_pincode",
@@ -512,7 +545,7 @@ const candidateBatchSystemCheck = async (
             }
 
             // dob
-            let dob: any = handleDate(item.dob)
+            let dob: string | IRejected | null = handleDate(item.dob)
             if (dob && typeof dob == "object") {
                 arrRejSum.push({
                     columnName: "birth_date",
@@ -527,7 +560,12 @@ const candidateBatchSystemCheck = async (
             }
 
             // gender
-            let gender: any = handleGender(item.gender)
+            let gender:
+                | "MALE"
+                | "FEMALE"
+                | "OTHER"
+                | IRejected
+                | null = handleGender(item.gender)
             if (gender && typeof gender === "object") {
                 arrRejSum.push({
                     columnName: "gender",
@@ -542,7 +580,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // permAddress
-            let permAddress: any = handleString(item.permAddress, 500)
+            let permAddress: string | IRejected | null = handleString(
+                item.permAddress,
+                500
+            )
             if (permAddress && typeof permAddress === "object") {
                 arrRejSum.push({
                     columnName: "perm_address",
@@ -557,7 +598,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // permCity
-            let permCity: any = handleString(item.permCity, 45)
+            let permCity: string | IRejected | null = handleString(
+                item.permCity,
+                45
+            )
             if (permCity && typeof permCity === "object") {
                 arrRejSum.push({
                     columnName: "perm_city",
@@ -572,7 +616,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // permState
-            let permState: any = handleString(item.permState, 45)
+            let permState: string | IRejected | null = handleString(
+                item.permState,
+                45
+            )
             if (permState && typeof permState === "object") {
                 arrRejSum.push({
                     columnName: "perm_state",
@@ -590,7 +637,11 @@ const candidateBatchSystemCheck = async (
             const permCountry = item.permCountry
 
             // permZip
-            let permZip: any = handleNumber(item.permZip, 10)
+            let permZip: number | IRejected | null = handleNumber(
+                item.permZip,
+                6,
+                true
+            )
             if (permZip && typeof permZip === "object") {
                 arrRejSum.push({
                     columnName: "perm_pincode",
@@ -605,7 +656,7 @@ const candidateBatchSystemCheck = async (
             }
 
             // email1
-            let email1: any = handleEmail(item.email1, 80)
+            let email1: string | IRejected | null = handleEmail(item.email1, 80)
             if (email1 && typeof email1 === "object") {
                 arrRejSum.push({
                     columnName: "primary_email",
@@ -635,7 +686,11 @@ const candidateBatchSystemCheck = async (
             // }
 
             // contactNo2
-            let contactNo2: any = handleNumber(item.contactNo2, 45)
+            let contactNo2: number | IRejected | null = handleNumber(
+                item.contactNo2,
+                10,
+                true
+            )
             if (contactNo2 && typeof contactNo2 === "object") {
                 arrRejSum.push({
                     columnName: "secondary_mobile",
@@ -650,7 +705,9 @@ const candidateBatchSystemCheck = async (
             }
 
             // aadharNo
-            let aadharNo: any = handleAadhar(item.aadharNo)
+            let aadharNo: string | IRejected | null = handleAadhar(
+                item.aadharNo
+            )
             if (aadharNo && typeof aadharNo === "object") {
                 arrRejSum.push({
                     columnName: "aadhar_no",
@@ -665,7 +722,7 @@ const candidateBatchSystemCheck = async (
             }
 
             // panNo
-            let panNo: any = handleString(item.panNo, 12)
+            let panNo: string | IRejected | null = handleString(item.panNo, 12)
             if (panNo && typeof panNo === "object") {
                 arrRejSum.push({
                     columnName: "pan_no",
@@ -680,7 +737,7 @@ const candidateBatchSystemCheck = async (
             }
 
             // dlNo
-            let dlNo: any = handleString(item.dlNo, 20)
+            let dlNo: string | IRejected | null = handleString(item.dlNo, 20)
             if (dlNo && typeof dlNo === "object") {
                 arrRejSum.push({
                     columnName: "driving_licence_no",
@@ -695,7 +752,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // expYears
-            let expYears: any = handleNumber(item.expYears)
+            let expYears: number | IRejected | null = handleNumber(
+                item.expYears,
+                2
+            )
             if (expYears && typeof expYears == "object") {
                 arrRejSum.push({
                     columnName: "exp_years",
@@ -710,7 +770,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // expMonths
-            let expMonths: any = handleNumber(item.expMonths)
+            let expMonths: number | IRejected | null = handleNumber(
+                item.expMonths,
+                2
+            )
             if (expMonths && typeof expMonths == "object") {
                 arrRejSum.push({
                     columnName: "exp_months",
@@ -725,7 +788,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // prefLocation1
-            let prefLocation1: any = handleString(item.prefLocation1, 80)
+            let prefLocation1: string | IRejected | null = handleString(
+                item.prefLocation1,
+                80
+            )
             if (prefLocation1 && typeof prefLocation1 == "object") {
                 arrRejSum.push({
                     columnName: "pref_location_1",
@@ -740,7 +806,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // prefLocation2
-            let prefLocation2: any = handleString(item.prefLocation2, 80)
+            let prefLocation2: string | IRejected | null = handleString(
+                item.prefLocation2,
+                80
+            )
             if (prefLocation2 && typeof prefLocation2 == "object") {
                 arrRejSum.push({
                     columnName: "pref_location_2",
@@ -770,7 +839,10 @@ const candidateBatchSystemCheck = async (
             // }
 
             // skill1
-            let skill1: any = handleString(item.skill1, 45)
+            let skill1: string | IRejected | null = handleString(
+                item.skill1,
+                45
+            )
             if (skill1 && typeof skill1 == "object") {
                 arrRejSum.push({
                     columnName: "skill_1",
@@ -785,7 +857,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // skill2
-            let skill2: any = handleString(item.skill2, 45)
+            let skill2: string | IRejected | null = handleString(
+                item.skill2,
+                45
+            )
             if (skill2 && typeof skill2 == "object") {
                 arrRejSum.push({
                     columnName: "skill_2",
@@ -800,7 +875,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // primaryLang
-            let primaryLang: any = handleString(item.primaryLang, 30)
+            let primaryLang: string | IRejected | null = handleString(
+                item.primaryLang,
+                30
+            )
             if (primaryLang && typeof primaryLang == "object") {
                 arrRejSum.push({
                     columnName: "primary_lang",
@@ -815,7 +893,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // secondaryLang
-            let secondaryLang: any = handleString(item.secondaryLang, 30)
+            let secondaryLang: string | IRejected | null = handleString(
+                item.secondaryLang,
+                30
+            )
             if (secondaryLang && typeof secondaryLang == "object") {
                 arrRejSum.push({
                     columnName: "secondary_lang",
@@ -845,7 +926,10 @@ const candidateBatchSystemCheck = async (
             // }
 
             // lastCompany
-            let lastCompany: any = handleString(item.lastCompany, 100)
+            let lastCompany: string | IRejected | null = handleString(
+                item.lastCompany,
+                100
+            )
             if (lastCompany && typeof lastCompany == "object") {
                 arrRejSum.push({
                     columnName: "last_company",
@@ -860,7 +944,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // designation
-            let designation: any = handleString(item.designation, 80)
+            let designation: string | IRejected | null = handleString(
+                item.designation,
+                80
+            )
             if (designation && typeof designation == "object") {
                 arrRejSum.push({
                     columnName: "designation",
@@ -875,7 +962,9 @@ const candidateBatchSystemCheck = async (
             }
 
             // startDate
-            let startDate: any = handleDate(item.startDate)
+            let startDate: string | IRejected | null = handleDate(
+                item.startDate
+            )
             if (startDate && typeof startDate == "object") {
                 arrRejSum.push({
                     columnName: "start_date",
@@ -890,7 +979,7 @@ const candidateBatchSystemCheck = async (
             }
 
             // endDate
-            let endDate: any = handleDate(item.endDate)
+            let endDate: string | IRejected | null = handleDate(item.endDate)
             if (endDate && typeof endDate == "object") {
                 arrRejSum.push({
                     columnName: "end_date",
@@ -905,7 +994,10 @@ const candidateBatchSystemCheck = async (
             }
 
             // jobDescription
-            let jobDescription: any = handleString(item.jobDescription, 200)
+            let jobDescription: string | IRejected | null = handleString(
+                item.jobDescription,
+                200
+            )
             if (jobDescription && typeof jobDescription == "object") {
                 arrRejSum.push({
                     columnName: "job_description",
@@ -919,7 +1011,7 @@ const candidateBatchSystemCheck = async (
                 jobDescription = null
             }
 
-            return {
+            const result = {
                 id: item.id,
                 industry,
                 category,
@@ -960,16 +1052,29 @@ const candidateBatchSystemCheck = async (
                 jobDescription,
                 rowNum: item.rowNum,
             }
+            return result
         })
+        interface x
+            extends Omit<
+                typeof filteredCandidates[number],
+                "fullName" | "contactNo1" | "category" | "currCity"
+            > {
+            fullName: string
+            contactNo1: number
+            category: string
+            currCity: string
+        }
 
         // * remove null fullName, contactNo1, category and curr_city
-        let finalData = filteredCandidates.filter(
-            (item) =>
-                item.fullName &&
-                item.contactNo1 &&
-                item.category &&
-                item.currCity
-        )
+        let finalData = filteredCandidates.filter<x>((item): item is x => {
+            return (
+                item.fullName !== null &&
+                item.contactNo1 !== null &&
+                item.category !== null &&
+                item.currCity !== null
+            )
+        })
+        type p = typeof finalData[number]
 
         // * remove duplicate email1(primary_email) from excel
         const _duplicateExcelEmails = helper.candidate.findDuplicateFromExcel(
@@ -1087,7 +1192,9 @@ const candidateBatchSystemCheck = async (
                         email1: {
                             in: finalData
                                 .map((item) => item.email1)
-                                .filter((item) => item),
+                                .filter(
+                                    (item): item is string => item !== null
+                                ),
                         },
                     },
                     {
@@ -1102,21 +1209,27 @@ const candidateBatchSystemCheck = async (
                         aadharNo: {
                             in: finalData
                                 .map((item) => item.aadharNo)
-                                .filter((item) => item),
+                                .filter(
+                                    (item): item is string => item !== null
+                                ),
                         },
                     },
                     {
                         panNo: {
                             in: finalData
                                 .map((item) => item.panNo)
-                                .filter((item) => item),
+                                .filter(
+                                    (item): item is string => item !== null
+                                ),
                         },
                     },
                     {
                         dlNo: {
                             in: finalData
                                 .map((item) => item.dlNo)
-                                .filter((item) => item),
+                                .filter(
+                                    (item): item is string => item !== null
+                                ),
                         },
                     },
                 ],
@@ -1251,6 +1364,8 @@ const candidateBatchSystemCheck = async (
                     // prefLocation3,
                     contactNo1,
                     contactNo2,
+                    permZip,
+                    currZip,
                     ...other
                 } = item
 
@@ -1264,6 +1379,8 @@ const candidateBatchSystemCheck = async (
                     // preferLocation3: prefLocation3,
                     contactNo1: `${contactNo1}`,
                     contactNo2: contactNo2 ? `${contactNo2}` : null,
+                    permZip: permZip ? permZip.toString() : null,
+                    currZip: currZip ? currZip.toString() : null,
                     version: 1,
                     createdBy: userLoginId,
                     modifiedBy: userLoginId,

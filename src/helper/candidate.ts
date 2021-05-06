@@ -1,3 +1,4 @@
+import moment from "moment"
 import * as helper from "../helper"
 
 export interface IRejected {
@@ -91,46 +92,42 @@ const handleString = (
         typeof input === "object" &&
         Object.keys(input).length
     ) {
-        if (input.richText) {
-            const result = input.richText
-                .map((x: any) => x.text)
-                .join("")
-                .trim()
-            if (result.length === 0) {
-                return null
-            } else {
-                if (maxLength) {
-                    return result.length > maxLength
-                        ? { value: input, error: "LENGTH_EXCEEDED" }
-                        : result
-                }
-                return result
-            }
+        let result = ""
+        if ("richText" in input) {
+            result = inputAsRichtextObj(input)
         } else {
-            const result = input.text.trim()
-            if (result.length === 0) {
-                return null
-            } else {
-                if (maxLength) {
-                    return result.length > maxLength
-                        ? { value: input, error: "LENGTH_EXCEEDED" }
-                        : result
-                }
-                return result
+            if (typeof input.text === "object" && "richText" in input.text)
+                result = inputAsRichtextObj(input.text)
+            else result = input.text.trim()
+        }
+        if (result.length === 0) {
+            return null
+        } else {
+            if (maxLength) {
+                return result.length > maxLength
+                    ? { value: input, error: "LENGTH_EXCEEDED" }
+                    : result
             }
+            return result
         }
     }
     return input
 }
 
-const handleGender = (input: any): string | null | IRejected => {
+const handleGender = (
+    input: any
+): "MALE" | "FEMALE" | "OTHER" | null | IRejected => {
     if (input && typeof input === "string") {
         const result = input.trim().toLowerCase()
         if (result.length === 0) {
             return null
         } else {
-            if (input === "male" || input === "female" || input === "other") {
-                return input.toUpperCase()
+            if (
+                result === "male" ||
+                result === "female" ||
+                result === "other"
+            ) {
+                return input.toUpperCase() as "MALE" | "FEMALE" | "OTHER"
             }
             return { value: input, error: "WRONG_INPUT" }
         }
@@ -142,9 +139,12 @@ const handleDate = (input: any): string | null | IRejected => {
     if (input && typeof input === "string") {
         const result = input.trim()
         if (result.length) {
-            const _parsedDate = helper.parseDate(result)
+            let _parsedDate = helper.parseDate(result)
             if (_parsedDate) {
-                return _parsedDate.format("YYYY-MM-DD")
+                if (_parsedDate.year() > moment().year()) {
+                    _parsedDate = _parsedDate.add(-100, "year")
+                }
+                return _parsedDate.utc().format()
             }
             return { value: input, error: "WRONG_INPUT" }
         }
@@ -155,23 +155,34 @@ const handleDate = (input: any): string | null | IRejected => {
 
 const handleNotNullNumber = (
     input: any,
-    maxLength?: number
+    maxLength?: number,
+    exactLength?: boolean
 ): number | IRejected => {
     if (input) {
         if (typeof input === "number") {
-            if (maxLength) {
+            if (maxLength && !exactLength) {
                 return input.toString().length <= maxLength
+                    ? input
+                    : { value: input, error: "LENGTH_EXCEEDED" }
+            } else if (maxLength && exactLength) {
+                return input.toString().length === maxLength
                     ? input
                     : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return input
         } else if (typeof input === "string") {
-            if (maxLength) {
-                return input.length <= maxLength
-                    ? parseInt(input)
-                    : { value: input, error: "LENGTH_EXCEEDED" }
+            if (!isNaN(parseInt(input))) {
+                if (maxLength && !exactLength) {
+                    return input.length <= maxLength
+                        ? parseInt(input)
+                        : { value: input, error: "LENGTH_EXCEEDED" }
+                } else if (maxLength && exactLength) {
+                    return input.length === maxLength
+                        ? parseInt(input)
+                        : { value: input, error: "LENGTH_EXCEEDED" }
+                }
+                return parseInt(input)
             }
-            return parseInt(input)
         }
         return { value: input, error: "WRONG_INPUT" }
     }
@@ -180,23 +191,34 @@ const handleNotNullNumber = (
 
 const handleNumber = (
     input: any,
-    maxLength?: number
+    maxLength?: number,
+    exactLength?: boolean
 ): number | null | IRejected => {
     if (input) {
         if (typeof input === "number") {
-            if (maxLength) {
+            if (maxLength && !exactLength) {
                 return input.toString().length <= maxLength
+                    ? input
+                    : { value: input, error: "LENGTH_EXCEEDED" }
+            } else if (maxLength && exactLength) {
+                return input.toString().length === maxLength
                     ? input
                     : { value: input, error: "LENGTH_EXCEEDED" }
             }
             return input
         } else if (typeof input === "string") {
-            if (maxLength) {
-                return input.length <= maxLength
-                    ? parseInt(input)
-                    : { value: input, error: "LENGTH_EXCEEDED" }
+            if (!isNaN(parseInt(input))) {
+                if (maxLength && !exactLength) {
+                    return input.length <= maxLength
+                        ? parseInt(input)
+                        : { value: input, error: "LENGTH_EXCEEDED" }
+                } else if (maxLength && exactLength) {
+                    return input.length === maxLength
+                        ? parseInt(input)
+                        : { value: input, error: "LENGTH_EXCEEDED" }
+                }
+                return parseInt(input)
             }
-            return parseInt(input)
         }
         return { value: input, error: "WRONG_INPUT" }
     }
@@ -346,6 +368,14 @@ const findDuplicateFromDB = (
         arr = arr.filter((item: any) => item[field])
     }
     return { arr, arrIgnored }
+}
+
+// local methods
+const inputAsRichtextObj = (input: { richText: Array<{ text: string }> }) => {
+    return input.richText
+        .map((x) => x.text)
+        .join("")
+        .trim()
 }
 
 export default {
