@@ -32,12 +32,6 @@ Contents of `.env.sample`
 NODE_ENV='development'
 # express listening port
 PORT=8080
-# Database
-DB_HOST=localhost
-DB_PORT=3306
-DB_USER='user'
-DB_PASS='pass'
-DB_NAME='dbname'
 # JWT
 BCRYPT_ROUNDS=random_number
 JWT_SECRET_KEY='random_string'
@@ -50,9 +44,15 @@ EMAIL_FROM='User <user@email.com>'
 # 
 SERVER_URL='http://localhost'
 CLIENT_URL='http://localhost'
+AGENT_PORTAL_URL=http://localhost
+# Prisma - Database
+DATABASE_URL=postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public
+# Telegram
+TELEGRAM_BOT_TOKEN=token
+TELEGRAM_CHAT_ID=chatId
 ```
 
-## Deploy
+## Manual Deploy
 
 -   To build tar file which can be deploy using caprover
 
@@ -77,11 +77,8 @@ caprover deploy -t deploy.tar -d
 Pincode API<br>
 [http://www.postalpincode.in/](http://www.postalpincode.in/)
 
-The Comprehensive Sequelize Cheatsheet<br>
-[https://dev.to/projectescape/the-comprehensive-sequelize-cheatsheet-3m1m](https://dev.to/projectescape/the-comprehensive-sequelize-cheatsheet-3m1m)
-
-Use Sequelize and Typescript like a pro! With/out the LEGACY decorators
-[https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472](https://medium.com/@enetoOlveda/use-sequelize-and-typescript-like-a-pro-with-out-the-legacy-decorators-fbaabed09472)
+Prisma Documentation<br>
+[https://www.prisma.io/docs/](https://www.prisma.io/docs/)
 
 How to delete a commit in git, local and remote<br>
 [https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/](https://ncona.com/2011/07/how-to-delete-a-commit-in-git-local-and-remote/)

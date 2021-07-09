@@ -3,6 +3,7 @@ import { Strategy as LocalStrategy } from "passport-local"
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt"
 // local imports
 import * as helper from "../helper"
+import config from "../config"
 
 import prisma from "../prisma"
 const { log, passwordfunction } = helper
@@ -81,7 +82,7 @@ passport.use(
     new JwtStrategy(
         {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: process.env.JWT_SECRET_KEY,
+            secretOrKey: config.JWT_SECRET,
         },
         async (jwtPayload, done) => {
             try {

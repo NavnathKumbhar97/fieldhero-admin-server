@@ -12,7 +12,11 @@ import { emailTemplate } from "./mjml"
 import { express } from "./express"
 import { Agent } from "./agent"
 import { CandidateUploadBatch } from "./candidateUploadBatch"
-import { CandidateVerification } from "./candidateVerificatio"
+import { CandidateVerification } from "./candidateVerification"
+import { Category } from "./category"
+import { Admin } from "./admin"
+import { AgentPricingTemplate } from "./agentPricingTemplate"
+import { BatchPriority } from "./batchPriority"
 
 export {
     Candidate,
@@ -29,5 +33,31 @@ export {
     User,
     Agent,
     CandidateUploadBatch,
-    CandidateVerification
+    CandidateVerification,
+    Category,
+    Admin,
+    AgentPricingTemplate,
+    BatchPriority,
+}
+
+export default {
+    Candidate,
+    Company,
+    Customer,
+    emailTemplate,
+    express,
+    Industry,
+    Permission,
+    Role,
+    SkillSet,
+    Subscription,
+    UploadImage,
+    User,
+    Agent,
+    CandidateUploadBatch,
+    CandidateVerification,
+    Category,
+    Admin,
+    AgentPricingTemplate,
+    BatchPriority,
 }

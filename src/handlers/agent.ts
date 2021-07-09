@@ -411,7 +411,7 @@ const updateAgent = async (
             },
         })
 
-        const [userLogin, user, agent] = await prisma.$transaction([
+        const [, , agent] = await prisma.$transaction([
             userLoginUpdate,
             userUpdate,
             agentUpdate,

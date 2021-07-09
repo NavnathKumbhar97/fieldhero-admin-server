@@ -25,7 +25,7 @@ const getRoles = async (all: string): Promise<helper.IResponseObject> => {
             where: {
                 isActive: whereCondition,
                 id: {
-                    notIn: whereCondition ? [1, 3] : undefined,
+                    notIn: whereCondition ? [1, 3] : [3],
                 },
             },
             orderBy: { name: "asc" },

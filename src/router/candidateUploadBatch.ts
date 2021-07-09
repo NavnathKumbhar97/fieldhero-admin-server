@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express"
+import { Router, Request, Response, json as bodyParserJson } from "express"
 // local imports
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
@@ -6,13 +6,18 @@ import * as helper from "../helper"
 
 const CandidateUploadBatchRouter = Router()
 
-//* Fetch all Candidate batches for agent
+//* Fetch all Candidate batches for current user
 CandidateUploadBatchRouter.get(
     "/candidate-upload-batches",
-    middleware.permission(helper.permissions.candidate_upload_batch_read_all),
+    middleware.permission(
+        helper.permissions.candidate_upload_batch_self_read_all
+    ),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.CandidateUploadBatch.getAllCandidateUploadBatches()
+            const result = await handler.CandidateUploadBatch.fetchAll(
+                req.query,
+                helper.getUserLoginId(req.user)
+            )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
         } catch (error) {
@@ -21,14 +26,151 @@ CandidateUploadBatchRouter.get(
     }
 )
 
-//* Download rejection summary for candidate uploaded batch
+// * fetch all candidate batches (admin)
 CandidateUploadBatchRouter.get(
-    "/candidate-upload-batches/:batchId/download-rejection-summary",
+    "/admin/candidate-upload-batches",
     middleware.permission(helper.permissions.candidate_upload_batch_read_all),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.CandidateUploadBatch.getRejectionSummaryForUploadedBatch(
-                parseInt(req.params.batchId)
+            const result = await handler.CandidateUploadBatch.fetchAllAdmin(
+                req.query
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+// * create cabdidate upload batch for the current user
+CandidateUploadBatchRouter.post(
+    "/candidate-upload-batches",
+    // 50mb
+    bodyParserJson({ limit: 1024 * 1024 * 50 }),
+    middleware.permission(helper.permissions.candidate_upload_batch_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.createCandidateRaw(
+                helper.getUserLoginId(req.user),
+                helper.getUserLoginId(req.user),
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+// * create cabdidate upload batch for any user by admin
+CandidateUploadBatchRouter.post(
+    "/admin/candidate-upload-batches",
+    // 50mb
+    bodyParserJson({ limit: 1024 * 1024 * 50 }),
+    middleware.permission(helper.permissions.candidate_upload_batch_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.createCandidateRaw(
+                helper.getUserLoginId(req.user),
+                req.body.user,
+                req.body.data
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+//* Download rejection summary for candidate uploaded batch for curent user
+CandidateUploadBatchRouter.get(
+    "/candidate-upload-batches/:batchId/download-rejection-summary",
+    middleware.permission(
+        helper.permissions.candidate_upload_batch_self_read_all
+    ),
+    async (req: Request, res: Response) => {
+        try {
+            const result =
+                await handler.CandidateUploadBatch.getRejectionSummary(
+                    parseInt(req.params.batchId),
+                    helper.getUserLoginId(req.user)
+                )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+//* Download rejection summary for candidate uploaded batch for any user by admin
+CandidateUploadBatchRouter.get(
+    "/admin/candidate-upload-batches/:batchId/download-rejection-summary",
+    middleware.permission(helper.permissions.candidate_upload_batch_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result =
+                await handler.CandidateUploadBatch.getRejectionSummary(
+                    parseInt(req.params.batchId)
+                )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+// * change pricing template for candidate uploaded batch
+CandidateUploadBatchRouter.put(
+    "/admin/candidate-upload-batches/:batchId/change-pricing-template",
+    middleware.permission(
+        helper.permissions.admin_candidate_upload_batch_change_pricing_template
+    ),
+    async (req: Request, res: Response) => {
+        try {
+            const result =
+                await handler.CandidateUploadBatch.changeAgentPricingTemplate(
+                    helper.getUserLoginId(req.user),
+                    parseInt(req.params.batchId),
+                    req.body
+                )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+CandidateUploadBatchRouter.get(
+    "/admin/candidate-upload-batches/passive-create",
+    middleware.permission(
+        helper.permissions.admin_candidate_upload_batch_create
+    ),
+    async (req: Request, res: Response) => {
+        try {
+            const result =
+                await handler.CandidateUploadBatch.fetchAdminPassiveCreate()
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+// * fetch batch stats by id for any user by admin
+CandidateUploadBatchRouter.get(
+    "/admin/candidate-upload-batches/:id/stats",
+    middleware.permission(helper.permissions.candidate_upload_batch_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.CandidateUploadBatch.fetchStatsById(
+                parseInt(req.params.id)
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })

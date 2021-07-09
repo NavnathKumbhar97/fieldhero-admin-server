@@ -18,11 +18,15 @@ import { UserRouter } from "./user"
 import { AgentRouter } from "./agent"
 import { CandidateUploadBatchRouter } from "./candidateUploadBatch"
 import { CandidateVerificationRouter } from "./candidateVerification"
+import { CategoryRouter } from "./category"
+import { AdminRouter } from "./admin"
+import { AgentPricingTemplateRouter } from "./agentPricingTemplate"
+import { BatchPriorityRouter } from "./batchPriority"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
 
-//call routers
+// public routers
 router.use(LoginRouter)
 // initiate jwt token authorization
 router.use(passport.authenticate("jwt", { session: false }))
@@ -40,6 +44,10 @@ router.use(UserRouter)
 router.use(AgentRouter)
 router.use(CandidateUploadBatchRouter)
 router.use(CandidateVerificationRouter)
+router.use(CategoryRouter)
+router.use(AdminRouter)
+router.use(AgentPricingTemplateRouter)
+router.use(BatchPriorityRouter)
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {
