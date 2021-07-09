@@ -1,4 +1,5 @@
 export default {
+    none: 0,
     user_read_all: 1,
     user_read: 2,
     user_create: 3,
@@ -66,5 +67,21 @@ export default {
     candidate_verification_read_all: 65,
     candidate_verification_read: 66,
     candidate_verification_create: 67,
-    candidate_verification_update: 68
+    candidate_verification_update: 68,
+    category_read_all: 69,
+    category_read: 70,
+    category_create: 71,
+    category_update: 72,
+    admin_candidate_upload_batch_change_pricing_template: 73,
+    admin_candidate_upload_batch_create: 74,
+    candidate_upload_batch_create: 75,
+    batch_priority_read_all: 76,
+    batch_priority_read: 77,
+    batch_priority_create: 78,
+    agent_pricing_template_read_all: 79,
+    agent_pricing_template_read: 80,
+    agent_pricing_template_create: 81,
+    agent_pricing_template_set_active: 82,
+    admin_other_industry_category_read_all: 83,
+    admin_other_industry_category_update: 84,
 }

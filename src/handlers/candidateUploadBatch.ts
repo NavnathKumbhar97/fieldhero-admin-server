@@ -1,11 +1,43 @@
 import moment from "moment"
+import paginate from "jw-paginate"
+import { performance } from "perf_hooks"
+import { CandidateBatchStatus } from "@prisma/client"
+
 // local imports
 import prisma from "../prisma"
 import * as helper from "../helper"
-import { log, httpStatus } from "../helper"
+import {
+    log,
+    httpStatus,
+    IResponseObject,
+    getHandlerResponseObject,
+    batch,
+} from "../helper"
 
-const getAllCandidateUploadBatches = async (): Promise<helper.IResponseObject> => {
+type IFetchAllQueryParam = {
+    page?: string
+    limit?: string
+    mode?: string
+}
+/**
+ * Fetch all candidate upload batches
+ * @param userLoginId if null or undefined, it's admin call means it will fetch all batches
+ * @param qParam
+ * @returns
+ */
+const fetchAll = async (
+    qParam?: IFetchAllQueryParam,
+    userLoginId?: number | null
+): Promise<helper.IResponseObject> => {
     try {
+        const page = qParam && qParam.page ? parseInt(qParam.page) : 1
+        const limit = qParam && qParam.limit ? parseInt(qParam.limit) : 10
+        const count = await prisma.candidateUploadBatch.count({
+            where: {
+                createdBy: userLoginId || undefined,
+            },
+        })
+        const _paginate = paginate(count, page, limit)
         const batches = await prisma.candidateUploadBatch.findMany({
             select: {
                 id: true,
@@ -14,6 +46,76 @@ const getAllCandidateUploadBatches = async (): Promise<helper.IResponseObject> =
                 status: true,
                 approvedCount: true,
                 rejectedCount: true,
+            },
+            where: {
+                createdBy: userLoginId || undefined,
+            },
+            take: limit,
+            skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
+            orderBy: {
+                modifiedOn: "desc",
+            },
+        })
+
+        const result = batches.map((batch) => {
+            const { ...rest } = batch
+            return {
+                ...rest,
+            }
+        })
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
+            ..._paginate,
+            items: batches,
+        })
+    } catch (error) {
+        log.error(
+            error.message,
+            "Error while fetchAll candidate upload batches"
+        )
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while fetchAll candidate upload batches"
+        )
+    }
+}
+
+const fetchAllAdmin = async (
+    qParam?: IFetchAllQueryParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const page = qParam && qParam.page ? parseInt(qParam.page) : 1
+        const limit = qParam && qParam.limit ? parseInt(qParam.limit) : 10
+        let mode: CandidateBatchStatus | undefined = undefined
+        if (qParam && qParam.mode) {
+            // if (qParam.mode === "in-progress") mode = "IN_PROGRESS"
+            // if (qParam.mode === "pending-approval")
+            //     mode = "ADMIN_APPROVAL_PENDING"
+            // if (qParam.mode === "processed") mode = "PROCESSED"
+            mode = batch.getBatchStatusFromMode(qParam.mode)
+        }
+        const count = await prisma.candidateUploadBatch.count({
+            where: {
+                status: mode,
+            },
+        })
+        const _paginate = paginate(count, page, limit)
+        const batches = await prisma.candidateUploadBatch.findMany({
+            where: { status: mode },
+            select: {
+                id: true,
+                timestamp: true,
+                count: true,
+                status: true,
+                approvedCount: true,
+                rejectedCount: true,
+                AgentPricingTemplate: {
+                    select: {
+                        id: true,
+                        templateName: true,
+                    },
+                },
                 CreatedBy: {
                     select: {
                         User: {
@@ -29,50 +131,67 @@ const getAllCandidateUploadBatches = async (): Promise<helper.IResponseObject> =
                     },
                 },
             },
+            take: limit,
+            skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
+            orderBy: {
+                modifiedOn: "desc",
+            },
         })
 
         const result = batches.map((batch) => {
-            const { CreatedBy, ...rest } = batch
+            const { CreatedBy, AgentPricingTemplate, ...rest } = batch
             return {
                 ...rest,
                 createdBy: CreatedBy?.User.fullName,
                 role: CreatedBy?.Role.name,
+                AgentPricingTemplate,
             }
         })
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
+            ..._paginate,
+            items: result,
+        })
     } catch (error) {
-        log.error(error.message, "Error while getAllCandidateBatches")
+        log.error(
+            error.message,
+            "Error while fetchAllAdmin candidate upload batches"
+        )
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "Error while getAllCandidateBatches"
+            "Error while fetchAllAdmin candidate upload batches"
         )
     }
 }
 
-const getRejectionSummaryForUploadedBatch = async (
-    batchId: number
+const getRejectionSummary = async (
+    batchId: number,
+    userLoginId?: number | null
 ): Promise<helper.IResponseObject> => {
     try {
         // check if batch no exist
         const batchFound = await prisma.candidateUploadBatch.findFirst({
             where: {
                 id: batchId,
+                createdBy: userLoginId || undefined,
             },
         })
         if (!batchFound)
             return helper.getHandlerResponseObject(
                 true,
-                httpStatus.OK,
+                httpStatus.Not_Found,
                 "Batch no does not exist"
             )
 
-        const candidateRejectionSummary = await prisma.candidateRejectionSummary.findMany(
-            {
+        const candidateRejectionSummary =
+            await prisma.candidateRejectionSummary.findMany({
                 where: {
                     CandidateRawId: {
-                        batchId,
+                        BatchId: {
+                            id: batchFound.id,
+                            createdBy: userLoginId || undefined,
+                        },
                     },
                 },
                 select: {
@@ -87,8 +206,7 @@ const getRejectionSummaryForUploadedBatch = async (
                         },
                     },
                 },
-            }
-        )
+            })
 
         const arrRejected: Array<any> = []
         const arrIgnored: Array<any> = []
@@ -194,18 +312,209 @@ const getRejectionSummaryForUploadedBatch = async (
     } catch (error) {
         log.error(
             error.message,
-            "Error while getRejectionSummaryForUploadedBatch"
+            "Error while getRejectionSummary for uploaded batch"
         )
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "Error while getRejectionSummaryForUploadedBatch"
+            "Error while getRejectionSummary for uploaded batch"
+        )
+    }
+}
+
+interface IChangeAgentPricingTemplateParam {
+    templateId: number
+}
+const changeAgentPricingTemplate = async (
+    userLoginId: number,
+    batchId: number,
+    param: IChangeAgentPricingTemplateParam
+): Promise<helper.IResponseObject> => {
+    try {
+        if (!param.templateId)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Bad_Request,
+                "templateId is required",
+                null
+            )
+
+        const batchFound = await prisma.candidateUploadBatch.findFirst({
+            where: {
+                id: batchId,
+            },
+        })
+
+        // if batch not found
+        if (!batchFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate upload batch not found",
+                null
+            )
+
+        await prisma.candidateUploadBatch.update({
+            where: {
+                id: batchFound.id,
+            },
+            data: {
+                agentPricingTemplate: param.templateId,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Pricing template changed successfully",
+            null
+        )
+    } catch (error) {
+        log.error(error.message, "Error while change agent pricing template")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while change agent pricing template"
+        )
+    }
+}
+
+const fetchAdminPassiveCreate = async () => {
+    try {
+        const users = await prisma.userLogin.findMany({
+            select: {
+                id: true,
+                User: {
+                    select: {
+                        fullName: true,
+                    },
+                },
+                Role: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        })
+
+        const result = users.map((user) => {
+            return {
+                id: user.id,
+                fullName: user.User.fullName,
+                role: user.Role.name,
+            }
+        })
+
+        //
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
+            users: result,
+        })
+    } catch (error) {
+        log.error(error.message, "Error while fetchAdminPassiveCreate")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while fetchAdminPassiveCreate"
+        )
+    }
+}
+
+const fetchStatsById = async (
+    id: number,
+    userLoginId?: number | null
+): Promise<IResponseObject> => {
+    try {
+        const batchFound = await prisma.candidateUploadBatch.findFirst({
+            select: {
+                count: true,
+                CreatedBy: {
+                    select: {
+                        User: {
+                            select: {
+                                fullName: true,
+                            },
+                        },
+                        Role: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+                createdOn: true,
+            },
+            where: {
+                id,
+                createdBy: userLoginId ? userLoginId : undefined,
+            },
+        })
+        if (!batchFound)
+            return getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Batch not found",
+                null
+            )
+
+        const [assigned, pending] = await Promise.all([
+            // assigned
+            prisma.candidate.count({
+                where: {
+                    CandidateRawId: {
+                        batchId: id,
+                    },
+                    status: "VERIFICATION_IN_PROGRESS",
+                },
+            }),
+            // pending
+            prisma.candidate.count({
+                where: {
+                    CandidateRawId: {
+                        batchId: id,
+                    },
+                    status: "SYSTEM_VERIFIED",
+                },
+            }),
+        ])
+
+        const completed = batchFound.count - assigned - pending
+
+        const result: {
+            count: number
+            pending: number
+            assigned: number
+            completed: number
+            uploadedBy: string | undefined
+            role: string | undefined
+            uploadedAt: Date
+        } = {
+            count: batchFound.count,
+            pending,
+            assigned,
+            completed,
+            uploadedBy: batchFound.CreatedBy?.User.fullName,
+            role: batchFound.CreatedBy?.Role.name,
+            uploadedAt: batchFound.createdOn,
+        }
+
+        return getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error) {
+        log.error(error.message, "Error while fetch batch stats by id")
+        return getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while fetch batch stats by id"
         )
     }
 }
 
 const CandidateUploadBatch = {
-    getAllCandidateUploadBatches,
-    getRejectionSummaryForUploadedBatch,
+    fetchAll,
+    fetchAllAdmin,
+    getRejectionSummary,
+    changeAgentPricingTemplate,
+    fetchAdminPassiveCreate,
+    fetchStatsById,
 }
 export { CandidateUploadBatch }

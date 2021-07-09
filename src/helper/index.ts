@@ -4,6 +4,8 @@ import httpStatus from "./http_status"
 import permissions from "./permissions"
 import { passwordfunction } from "./password"
 import candidate from "./candidate"
+import telegram from "./telegram"
+import batch from "./batch"
 const getExpiryTime = (): number => {
     return Date.now() + 3600000
 }
@@ -59,6 +61,30 @@ const getUserLoginId = (user: unknown): number => {
     return (user as { loginId: number }).loginId
 }
 
+const languages = {
+    ASSAMESE: "ASSAMESE",
+    BENGALI: "BENGALI",
+    BHOJPURI: "BHOJPURI",
+    ENGLISH: "ENGLISH",
+    GUJARATI: "GUJARATI",
+    HINDI: "HINDI",
+    KANNADA: "KANNADA",
+    MAITHILI: "MAITHILI",
+    MALAYALAM: "MALAYALAM",
+    MARATHI: "MARATHI",
+    ODIA: "ODIA",
+    PUNJABI: "PUNJABI",
+    SANSKRIT: "SANSKRIT",
+    SANTALI: "SANTALI",
+    TAMIL: "TAMIL",
+    TELUGU: "TELUGU",
+    URDU: "URDU",
+}
+
+const getLanguages = (): Array<string> => {
+    return Object.values(languages)
+}
+
 export {
     log,
     httpStatus,
@@ -71,4 +97,24 @@ export {
     parseDate,
     candidate,
     getUserLoginId,
+    telegram,
+    languages,
+    getLanguages,
+    batch
+}
+export default {
+    log,
+    httpStatus,
+    passwordfunction,
+    getExpiryTime,
+    getGender,
+    getHandlerResponseObject,
+    permissions,
+    parseDate,
+    candidate,
+    getUserLoginId,
+    telegram,
+    languages,
+    getLanguages,
+    batch
 }

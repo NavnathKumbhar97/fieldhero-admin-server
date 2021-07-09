@@ -9,7 +9,7 @@ const generatePassword = (
       <mj-section>
         <mj-column border="black">
           <mj-divider border-color="#2A64B5"></mj-divider>
-          <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero - Admin</mj-text>
+          <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold"><a href="${config.CLIENT_URL}" target="_blank" style="text-decoration:none;color:#2A64B5;">Field Hero - Admin</a></mj-text>
         </mj-column>
       </mj-section>
       <mj-section>
@@ -20,11 +20,13 @@ const generatePassword = (
           <mj-text>Please find your credentials below.</mj-text>
           <mj-text>UserName: <b>${email}</b></mj-text>
           <mj-text>Password: <b>${password}</b></mj-text>
+          <mj-text>You can login using given credentials on the following link:</mj-text>
+          <mj-text><a href="${config.CLIENT_URL}" target="_blank">${config.CLIENT_URL}</a></mj-text>
           <mj-divider border-color="#2A64B5"></mj-divider>
         </mj-column>
       </mj-section>
     </mj-body>
-    </mjml>`
+  </mjml>`
 }
 
 interface IForgotPasswordEmailParam {
@@ -41,7 +43,7 @@ const generateForgotPasswordEmail = (
     <mj-section>
       <mj-column border="black">        
         <mj-divider border-color="#2A64B5"></mj-divider>
-        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero - Admin</mj-text>
+        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold"><a href="${config.CLIENT_URL}" target="_blank" style="text-decoration:none;color:#2A64B5;">Field Hero - Admin</a></mj-text>
       </mj-column>
     </mj-section>
     <mj-section>
@@ -52,6 +54,7 @@ const generateForgotPasswordEmail = (
         <mj-button href="${url}" background-color="#2A64B5">Reset Password</mj-button>
         <mj-text>If button don't work for some reason, please click link below.</mj-text>
         <mj-text font-size="12px"><a href="${url}" target="_blank">${url}</a></mj-text>
+        <mj-text>Portal link: <a href="${config.CLIENT_URL}" target="_blank">${config.CLIENT_URL}</a></mj-text>
         <mj-divider border-color="#2A64B5"></mj-divider>
       </mj-column>
     </mj-section>
@@ -72,7 +75,7 @@ const generateResetPasswordSuccessEmail = (
     <mj-section>
       <mj-column border="black">        
         <mj-divider border-color="#2A64B5"></mj-divider>
-        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero - Admin</mj-text>
+        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold"><a href="${config.CLIENT_URL}" target="_blank" style="text-decoration:none;color:#2A64B5;">Field Hero - Admin</a></mj-text>
       </mj-column>
     </mj-section>
     <mj-section>
@@ -82,6 +85,7 @@ const generateResetPasswordSuccessEmail = (
         <mj-text>Your password has been reset successfully.</mj-text>
         <mj-text>Please find your new password below.</mj-text>
         <mj-text>New Password: <b>${param.password}</b></mj-text>
+        <mj-text>Portal link: <a href="${config.CLIENT_URL}" target="_blank">${config.CLIENT_URL}</a></mj-text>
         <mj-divider border-color="#2A64B5"></mj-divider>
       </mj-column>
     </mj-section>
@@ -102,7 +106,7 @@ const generateResetPasswordByAdminSuccessEmail = (
       <mj-section>
         <mj-column border="black">        
           <mj-divider border-color="#2A64B5"></mj-divider>
-          <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero</mj-text>
+          <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold"><a href="${config.CLIENT_URL}" target="_blank" style="text-decoration:none;color:#2A64B5;">Field Hero - Admin</a></mj-text>
         </mj-column>
       </mj-section>
       <mj-section>
@@ -112,6 +116,7 @@ const generateResetPasswordByAdminSuccessEmail = (
           <mj-text>Your password has been reset successfully by the Admin team.</mj-text>
           <mj-text>Please find your new password below.</mj-text>
           <mj-text>New Password: <b>${param.password}</b></mj-text>
+          <mj-text>Portal link: <a href="${config.CLIENT_URL}" target="_blank">${config.CLIENT_URL}</a></mj-text>
           <mj-divider border-color="#2A64B5"></mj-divider>
         </mj-column>
       </mj-section>
@@ -129,7 +134,7 @@ const createAgent = (
     <mj-section>
       <mj-column border="black">
         <mj-divider border-color="#2A64B5"></mj-divider>
-        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold">Field Hero - Agent</mj-text>
+        <mj-text align="center" font-size="40px" color="#2A64B5" font-weight="bold"><a href="${config.AGENT_PORTAL_URL}" target="_blank" style="text-decoration:none;color:#2A64B5;">Field Hero - Agent</a></mj-text>
       </mj-column>
     </mj-section>
     <mj-section>
@@ -141,6 +146,8 @@ const createAgent = (
         <mj-text>Please find your credentials below.</mj-text>
         <mj-text>UserName: <b>${email}</b></mj-text>
         <mj-text>Password: <b>${password}</b></mj-text>
+        <mj-text>You can login using given credentials on the following link:</mj-text>
+        <mj-text><a href="${config.AGENT_PORTAL_URL}" target="_blank">${config.AGENT_PORTAL_URL}</a></mj-text>
         <mj-divider border-color="#2A64B5"></mj-divider>
       </mj-column>
     </mj-section>

@@ -1,10 +1,7 @@
 import express, { Express, Request, Response } from "express"
 import cors from "cors"
 import helmet from "helmet"
-import pino from "pino-http"
-// local imports
-
-import { log } from "./helper"
+// local imports"
 import { routerV1 } from "./router"
 
 const isBulkCandidateUpload = (req: Request) => {
@@ -20,8 +17,6 @@ app.use((req, res, next) =>
 )
 app.use(express.urlencoded({ extended: false }))
 app.use(helmet())
-// configure pino logging with express
-// app.use(pino({ logger: log }))
 
 app.use("/api/v1", routerV1)
 
