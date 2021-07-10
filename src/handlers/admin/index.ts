@@ -12,31 +12,36 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
         const candidates = await prisma.candidate.findMany({
             where: {
                 status: "OTHER_UPDATE_PENDING",
+                CandidateCallCentreHistory: {
+                    some: {
+                        callStatus: "COMPLETED",
+                    },
+                },
                 OR: [
                     {
                         CandidateCategory: {
-                            every: {
+                            some: {
                                 categoryId: 1,
                             },
                         },
                     },
                     {
                         CandidateIndustry: {
-                            every: {
+                            some: {
                                 industryId: 1,
                             },
                         },
                     },
                     {
                         CandidateWorkHistory: {
-                            every: {
+                            some: {
                                 categoryId: 1,
                             },
                         },
                     },
                     {
                         CandidateWorkHistory: {
-                            every: {
+                            some: {
                                 industryId: 1,
                             },
                         },
@@ -87,32 +92,171 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
         })
 
         const result: Array<{
-            title: string
-            type: "INDUSTRY" | "CATEGORY"
+            text: string
+            type: "INDUSTRY" | "CATEGORY" | "WH_CATEGORY" | "WH_INDUSTRY"
             batchNo?: number
-            candidates: Array<any>
+            candidates: Array<{
+                id: number
+                choice: {
+                    selected: any
+                    title: string | null
+                    description: string | null
+                    id: number | null
+                    itemId: number
+                }
+            }>
         }> = []
         candidates.forEach((candidate) => {
+            const choice = {
+                selected: null,
+                title: null,
+                description: null,
+                id: null,
+                itemId: null,
+            }
+            // industry
             candidate.CandidateIndustry.forEach((industry) => {
                 if (industry.industryId === 1) {
                     if (industry.title) {
                         const index = result.findIndex(
                             (x) =>
-                                x.title === industry.title &&
-                                x.type === "INDUSTRY"
+                                x.text === industry.title &&
+                                x.type === "INDUSTRY" &&
+                                x.batchNo === candidate.CandidateRawId?.batchId
                         )
                         if (index > -1) {
                             result[index].candidates.push({
-                                ...candidate,
+                                id: candidate.id,
+                                choice: {
+                                    ...choice,
+                                    itemId: industry.id,
+                                },
                             })
                         } else {
                             result.push({
-                                title: industry.title,
+                                text: industry.title,
                                 type: "INDUSTRY",
                                 batchNo: candidate.CandidateRawId?.batchId,
                                 candidates: [
                                     {
-                                        ...candidate,
+                                        id: candidate.id,
+                                        choice: {
+                                            ...choice,
+                                            itemId: industry.id,
+                                        },
+                                    },
+                                ],
+                            })
+                        }
+                    }
+                }
+            })
+
+            // category
+            candidate.CandidateCategory.forEach((category) => {
+                if (category.categoryId === 1) {
+                    if (category.title) {
+                        const index = result.findIndex(
+                            (x) =>
+                                x.text === category.title &&
+                                x.type === "CATEGORY" &&
+                                x.batchNo === candidate.CandidateRawId?.batchId
+                        )
+                        if (index > -1) {
+                            result[index].candidates.push({
+                                id: candidate.id,
+                                choice: {
+                                    ...choice,
+                                    itemId: category.id,
+                                },
+                            })
+                        } else {
+                            result.push({
+                                text: category.title,
+                                type: "CATEGORY",
+                                batchNo: candidate.CandidateRawId?.batchId,
+                                candidates: [
+                                    {
+                                        id: candidate.id,
+                                        choice: {
+                                            ...choice,
+                                            itemId: category.id,
+                                        },
+                                    },
+                                ],
+                            })
+                        }
+                    }
+                }
+            })
+
+            // work history
+            candidate.CandidateWorkHistory.forEach((wh) => {
+                // wh_category
+                if (wh.categoryId === 1) {
+                    if (wh.categoryTitle) {
+                        const index = result.findIndex(
+                            (x) =>
+                                x.text === wh.categoryTitle &&
+                                x.type === "WH_CATEGORY" &&
+                                x.batchNo === candidate.CandidateRawId?.batchId
+                        )
+                        if (index > -1) {
+                            result[index].candidates.push({
+                                id: candidate.id,
+                                choice: {
+                                    ...choice,
+                                    itemId: wh.id,
+                                },
+                            })
+                        } else {
+                            result.push({
+                                text: wh.categoryTitle,
+                                type: "WH_CATEGORY",
+                                batchNo: candidate.CandidateRawId?.batchId,
+                                candidates: [
+                                    {
+                                        id: candidate.id,
+                                        choice: {
+                                            ...choice,
+                                            itemId: wh.id,
+                                        },
+                                    },
+                                ],
+                            })
+                        }
+                    }
+                }
+
+                // wh_industry
+                if (wh.industryId === 1) {
+                    if (wh.industryTitle) {
+                        const index = result.findIndex(
+                            (x) =>
+                                x.text === wh.industryTitle &&
+                                x.type === "WH_INDUSTRY" &&
+                                x.batchNo === candidate.CandidateRawId?.batchId
+                        )
+                        if (index > -1) {
+                            result[index].candidates.push({
+                                id: candidate.id,
+                                choice: {
+                                    ...choice,
+                                    itemId: wh.id,
+                                },
+                            })
+                        } else {
+                            result.push({
+                                text: wh.industryTitle,
+                                type: "WH_INDUSTRY",
+                                batchNo: candidate.CandidateRawId?.batchId,
+                                candidates: [
+                                    {
+                                        id: candidate.id,
+                                        choice: {
+                                            ...choice,
+                                            itemId: wh.id,
+                                        },
                                     },
                                 ],
                             })
@@ -122,7 +266,24 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
             })
         })
 
-        return getHandlerResponseObject(true, httpStatus.OK, "", candidates)
+        let finalResult = {
+            candidates,
+            result,
+        }
+        if (result.length) {
+            const sortedResult = result.sort((a, b) =>
+                a.type < b.type ? -1 : a.type > b.type ? 1 : 0
+            )
+            const filteredCandidates = candidates.filter((x) =>
+                sortedResult[0].candidates.find((z) => z.id === x.id)
+            )
+            finalResult = {
+                candidates: filteredCandidates,
+                result: [sortedResult[0]],
+            }
+        }
+
+        return getHandlerResponseObject(true, httpStatus.OK, "", finalResult)
     } catch (error) {
         log.error(
             error.message,

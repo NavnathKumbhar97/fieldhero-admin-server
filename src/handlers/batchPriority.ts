@@ -124,6 +124,13 @@ const passiveCreate = async (): Promise<IResponseObject> => {
                 BatchPriority: {
                     none: {},
                 },
+                CandidateRaw: {
+                    some: {
+                        Candidate: {
+                            status: "SYSTEM_VERIFIED",
+                        },
+                    },
+                },
             },
         })
         const users = await prisma.userLogin.findMany({
