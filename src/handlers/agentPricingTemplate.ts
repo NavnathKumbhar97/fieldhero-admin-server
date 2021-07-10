@@ -110,6 +110,7 @@ interface ICreateParam {
     approvalRemarks?: string
     industry: number
     category: number
+    education: number
     fullName: number
     dob: number
     gender: number
@@ -179,25 +180,15 @@ const create = async (
                 isActive: "isActive" in param ? param.isActive : false,
                 industry: param.industry,
                 category: param.category,
+                education: param.education,
                 fullName: param.fullName,
                 dob: param.dob,
-                gender: param.gender,
                 primaryLanguage: param.primaryLanguage,
                 secondaryLanguage: param.secondaryLanguage,
-                permAddress: param.permAddress,
-                permCity: param.permCity,
-                permState: param.permState,
-                permZip: param.permZip,
-                currAddress: param.currAddress,
                 currCity: param.currCity,
-                currState: param.currState,
                 currZip: param.currZip,
                 email1: param.email1,
                 contactNo1: param.contactNo1,
-                contactNo2: param.contactNo2,
-                aadharNo: param.aadhar,
-                panNo: param.pan,
-                dlNo: param.dl,
                 expYears: param.exp,
                 preferLocation1: param.location1,
                 preferLocation2: param.location2,
@@ -205,9 +196,6 @@ const create = async (
                 skill2: param.secondarySkill,
                 lastCompany: param.lastCompanyName,
                 designation: param.designation,
-                startDate: param.startDate,
-                endDate: param.endDate,
-                jobDescription: param.jobDescription,
                 totalAmount: total,
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
