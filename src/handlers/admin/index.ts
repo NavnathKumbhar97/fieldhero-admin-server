@@ -12,41 +12,41 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
         const candidates = await prisma.candidate.findMany({
             where: {
                 status: "OTHER_UPDATE_PENDING",
-                CandidateCallCentreHistory: {
-                    some: {
-                        callStatus: "COMPLETED",
-                    },
-                },
-                OR: [
-                    {
-                        CandidateCategory: {
-                            some: {
-                                categoryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateIndustry: {
-                            some: {
-                                industryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateWorkHistory: {
-                            some: {
-                                categoryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateWorkHistory: {
-                            some: {
-                                industryId: 1,
-                            },
-                        },
-                    },
-                ],
+                // CandidateCallCentreHistory: {
+                //     some: {
+                //         callStatus: "COMPLETED",
+                //     },
+                // },
+                // OR: [
+                //     {
+                //         CandidateCategory: {
+                //             some: {
+                //                 categoryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateIndustry: {
+                //             some: {
+                //                 industryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateWorkHistory: {
+                //             some: {
+                //                 categoryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateWorkHistory: {
+                //             some: {
+                //                 industryId: 1,
+                //             },
+                //         },
+                //     },
+                // ],
             },
             // take: 50,
             select: {
@@ -258,9 +258,18 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
             })
         })
 
-        let finalResult = {
-            candidates,
-            result,
+        let finalResult: {
+            candidates: Array<any>
+            result: null | any
+            stats: {
+                category: number
+                industry: number
+                wh_category: number
+                wh_industry: number
+            }
+        } = {
+            candidates: [],
+            result: null,
             stats: { category: 0, industry: 0, wh_category: 0, wh_industry: 0 },
         }
         if (result.length) {
@@ -274,15 +283,23 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
             ).length
             const stats = { category, industry, wh_category, wh_industry }
 
-            const sortedResult = result.sort((a, b) =>
-                a.type < b.type ? -1 : a.type > b.type ? 1 : 0
-            )
+            const sortedResult = result
+                .sort((a, b) =>
+                    a.type < b.type ? -1 : a.type > b.type ? 1 : 0
+                )
+                .sort((a, b) =>
+                    (a.batchNo as number) < (b.batchNo as number)
+                        ? -1
+                        : (a.batchNo as number) > (b.batchNo as number)
+                        ? 1
+                        : 0
+                )
             const filteredCandidates = candidates.filter((x) =>
                 sortedResult[0].candidates.find((z) => z.id === x.id)
             )
             finalResult = {
                 candidates: filteredCandidates,
-                result: [sortedResult[0]],
+                result: sortedResult[0],
                 stats,
             }
         }
@@ -550,6 +567,8 @@ const updateOtherIndustriesCategories = async (
                                 industryId: { equals: 1 },
                             },
                         },
+                    },
+                    {
                         CandidateCategory: {
                             some: {
                                 categoryId: { equals: 1 },

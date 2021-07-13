@@ -89,10 +89,6 @@ const fetchAllAdmin = async (
         const limit = qParam && qParam.limit ? parseInt(qParam.limit) : 10
         let mode: CandidateBatchStatus | undefined = undefined
         if (qParam && qParam.mode) {
-            // if (qParam.mode === "in-progress") mode = "IN_PROGRESS"
-            // if (qParam.mode === "pending-approval")
-            //     mode = "ADMIN_APPROVAL_PENDING"
-            // if (qParam.mode === "processed") mode = "PROCESSED"
             mode = batch.getBatchStatusFromMode(qParam.mode)
         }
         const count = await prisma.candidateUploadBatch.count({
