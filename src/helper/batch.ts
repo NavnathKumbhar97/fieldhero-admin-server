@@ -21,12 +21,6 @@ const getBatchStatusFromMode = (
 
 const processLastCandidateFromBatch = async (candidateId: number) => {
     try {
-        const approvalPendingCount = await prisma.candidate.count({
-            where: {
-                id: candidateId,
-                status: "APPROVAL_PENDING",
-            },
-        })
         const uploadBatch = await prisma.candidateUploadBatch.findFirst({
             where: {
                 CandidateRaw: {
@@ -44,6 +38,39 @@ const processLastCandidateFromBatch = async (candidateId: number) => {
             },
         })
         if (uploadBatch) {
+            let approvalPendingCount = await prisma.candidate.count({
+                where: {
+                    CandidateRawId: {
+                        batchId: uploadBatch.id,
+                    },
+                    status: "APPROVAL_PENDING",
+                },
+            })
+            if (approvalPendingCount === uploadBatch.count) {
+                await prisma.candidate.updateMany({
+                    where: {
+                        CandidateRawId: {
+                            CandidateRejectionSummary: {
+                                some: {
+                                    rejectedBy: "USER",
+                                },
+                            },
+                            batchId: uploadBatch.id,
+                        },
+                    },
+                    data: {
+                        status: "REJECTED",
+                    },
+                })
+                approvalPendingCount = await prisma.candidate.count({
+                    where: {
+                        CandidateRawId: {
+                            batchId: uploadBatch.id,
+                        },
+                        status: "APPROVAL_PENDING",
+                    },
+                })
+            }
             if (
                 approvalPendingCount ===
                 uploadBatch.count - (uploadBatch?.rejectedCount || 0)
@@ -89,6 +116,11 @@ const processBatchCalculation = async (batchId: number, batchCount: number) => {
                 },
                 CandidateRawId: {
                     batchId,
+                    CandidateRejectionSummary: {
+                        none: {
+                            rejectedBy: "USER",
+                        },
+                    },
                 },
             },
             select: {
@@ -109,6 +141,9 @@ const processBatchCalculation = async (batchId: number, batchCount: number) => {
                     none: {
                         isSubmitted: true,
                     },
+                },
+                CandidateRawId: {
+                    batchId,
                 },
             },
         })
@@ -186,7 +221,7 @@ const processBatchCalculation = async (batchId: number, batchCount: number) => {
                 let msg = ""
                 msg += "\nModule: *Candidate Bulk Upload*\n"
                 msg += "✔️Batch processed successfully.✔️ Awaiting approval.\n"
-                msg += "\nBatch no: #️⃣*" + batchId + "*\n"
+                msg += "\nBatch no: #️⃣ *" + batchId + "*\n"
                 msg += "Approved: *" + approved.length + "*\n"
                 msg += "Rejected: *" + rejected.length + "*\n"
                 telegram.sendMessage(msg)

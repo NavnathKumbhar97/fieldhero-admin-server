@@ -895,7 +895,7 @@ model AgentPricingTemplate {
   isActive             Boolean                @default(false)
   industry             Float                  @default(0)
   category             Float                  @default(0)
-  education             Float                  @default(0)
+  education            Float                  @default(0)
   fullName             Float                  @default(0)
   dob                  Float                  @default(0)
   // gender               Float                  @default(0)

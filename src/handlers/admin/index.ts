@@ -12,41 +12,41 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
         const candidates = await prisma.candidate.findMany({
             where: {
                 status: "OTHER_UPDATE_PENDING",
-                CandidateCallCentreHistory: {
-                    some: {
-                        callStatus: "COMPLETED",
-                    },
-                },
-                OR: [
-                    {
-                        CandidateCategory: {
-                            some: {
-                                categoryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateIndustry: {
-                            some: {
-                                industryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateWorkHistory: {
-                            some: {
-                                categoryId: 1,
-                            },
-                        },
-                    },
-                    {
-                        CandidateWorkHistory: {
-                            some: {
-                                industryId: 1,
-                            },
-                        },
-                    },
-                ],
+                // CandidateCallCentreHistory: {
+                //     some: {
+                //         callStatus: "COMPLETED",
+                //     },
+                // },
+                // OR: [
+                //     {
+                //         CandidateCategory: {
+                //             some: {
+                //                 categoryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateIndustry: {
+                //             some: {
+                //                 industryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateWorkHistory: {
+                //             some: {
+                //                 categoryId: 1,
+                //             },
+                //         },
+                //     },
+                //     {
+                //         CandidateWorkHistory: {
+                //             some: {
+                //                 industryId: 1,
+                //             },
+                //         },
+                //     },
+                // ],
             },
             // take: 50,
             select: {
@@ -116,76 +116,72 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
             }
             // industry
             candidate.CandidateIndustry.forEach((industry) => {
-                if (industry.industryId === 1) {
-                    if (industry.title) {
-                        const index = result.findIndex(
-                            (x) =>
-                                x.text === industry.title &&
-                                x.type === "INDUSTRY" &&
-                                x.batchNo === candidate.CandidateRawId?.batchId
-                        )
-                        if (index > -1) {
-                            result[index].candidates.push({
-                                id: candidate.id,
-                                choice: {
-                                    ...choice,
-                                    itemId: industry.id,
-                                },
-                            })
-                        } else {
-                            result.push({
-                                text: industry.title,
-                                type: "INDUSTRY",
-                                batchNo: candidate.CandidateRawId?.batchId,
-                                candidates: [
-                                    {
-                                        id: candidate.id,
-                                        choice: {
-                                            ...choice,
-                                            itemId: industry.id,
-                                        },
+                if (industry.industryId === 1 && industry.title) {
+                    const index = result.findIndex(
+                        (x) =>
+                            x.text === industry.title &&
+                            x.type === "INDUSTRY" &&
+                            x.batchNo === candidate.CandidateRawId?.batchId
+                    )
+                    if (index > -1) {
+                        result[index].candidates.push({
+                            id: candidate.id,
+                            choice: {
+                                ...choice,
+                                itemId: industry.id,
+                            },
+                        })
+                    } else {
+                        result.push({
+                            text: industry.title,
+                            type: "INDUSTRY",
+                            batchNo: candidate.CandidateRawId?.batchId,
+                            candidates: [
+                                {
+                                    id: candidate.id,
+                                    choice: {
+                                        ...choice,
+                                        itemId: industry.id,
                                     },
-                                ],
-                            })
-                        }
+                                },
+                            ],
+                        })
                     }
                 }
             })
 
             // category
             candidate.CandidateCategory.forEach((category) => {
-                if (category.categoryId === 1) {
-                    if (category.title) {
-                        const index = result.findIndex(
-                            (x) =>
-                                x.text === category.title &&
-                                x.type === "CATEGORY" &&
-                                x.batchNo === candidate.CandidateRawId?.batchId
-                        )
-                        if (index > -1) {
-                            result[index].candidates.push({
-                                id: candidate.id,
-                                choice: {
-                                    ...choice,
-                                    itemId: category.id,
-                                },
-                            })
-                        } else {
-                            result.push({
-                                text: category.title,
-                                type: "CATEGORY",
-                                batchNo: candidate.CandidateRawId?.batchId,
-                                candidates: [
-                                    {
-                                        id: candidate.id,
-                                        choice: {
-                                            ...choice,
-                                            itemId: category.id,
-                                        },
+                if (category.categoryId === 1 && category.title) {
+                    const index = result.findIndex(
+                        (x) =>
+                            x.text === category.title &&
+                            x.type === "CATEGORY" &&
+                            x.batchNo === candidate.CandidateRawId?.batchId
+                    )
+                    if (index > -1) {
+                        result[index].candidates.push({
+                            id: candidate.id,
+                            choice: {
+                                ...choice,
+                                itemId: category.id,
+                            },
+                        })
+                    } else {
+                        result.push({
+                            text: category.title,
+                            type: "CATEGORY",
+                            batchNo: candidate.CandidateRawId?.batchId,
+                            candidates: [
+                                {
+                                    id: candidate.id,
+                                    choice: {
+                                        ...choice,
+                                        itemId: category.id,
                                     },
-                                ],
-                            })
-                        }
+                                },
+                            ],
+                        })
                     }
                 }
             })
@@ -193,93 +189,118 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
             // work history
             candidate.CandidateWorkHistory.forEach((wh) => {
                 // wh_category
-                if (wh.categoryId === 1) {
-                    if (wh.categoryTitle) {
-                        const index = result.findIndex(
-                            (x) =>
-                                x.text === wh.categoryTitle &&
-                                x.type === "WH_CATEGORY" &&
-                                x.batchNo === candidate.CandidateRawId?.batchId
-                        )
-                        if (index > -1) {
-                            result[index].candidates.push({
-                                id: candidate.id,
-                                choice: {
-                                    ...choice,
-                                    itemId: wh.id,
-                                },
-                            })
-                        } else {
-                            result.push({
-                                text: wh.categoryTitle,
-                                type: "WH_CATEGORY",
-                                batchNo: candidate.CandidateRawId?.batchId,
-                                candidates: [
-                                    {
-                                        id: candidate.id,
-                                        choice: {
-                                            ...choice,
-                                            itemId: wh.id,
-                                        },
+                if (wh.categoryId === 1 && wh.categoryTitle) {
+                    const index = result.findIndex(
+                        (x) =>
+                            x.text === wh.categoryTitle &&
+                            x.type === "WH_CATEGORY" &&
+                            x.batchNo === candidate.CandidateRawId?.batchId
+                    )
+                    if (index > -1) {
+                        result[index].candidates.push({
+                            id: candidate.id,
+                            choice: {
+                                ...choice,
+                                itemId: wh.id,
+                            },
+                        })
+                    } else {
+                        result.push({
+                            text: wh.categoryTitle,
+                            type: "WH_CATEGORY",
+                            batchNo: candidate.CandidateRawId?.batchId,
+                            candidates: [
+                                {
+                                    id: candidate.id,
+                                    choice: {
+                                        ...choice,
+                                        itemId: wh.id,
                                     },
-                                ],
-                            })
-                        }
+                                },
+                            ],
+                        })
                     }
                 }
 
                 // wh_industry
-                if (wh.industryId === 1) {
-                    if (wh.industryTitle) {
-                        const index = result.findIndex(
-                            (x) =>
-                                x.text === wh.industryTitle &&
-                                x.type === "WH_INDUSTRY" &&
-                                x.batchNo === candidate.CandidateRawId?.batchId
-                        )
-                        if (index > -1) {
-                            result[index].candidates.push({
-                                id: candidate.id,
-                                choice: {
-                                    ...choice,
-                                    itemId: wh.id,
-                                },
-                            })
-                        } else {
-                            result.push({
-                                text: wh.industryTitle,
-                                type: "WH_INDUSTRY",
-                                batchNo: candidate.CandidateRawId?.batchId,
-                                candidates: [
-                                    {
-                                        id: candidate.id,
-                                        choice: {
-                                            ...choice,
-                                            itemId: wh.id,
-                                        },
+                if (wh.industryId === 1 && wh.industryTitle) {
+                    const index = result.findIndex(
+                        (x) =>
+                            x.text === wh.industryTitle &&
+                            x.type === "WH_INDUSTRY" &&
+                            x.batchNo === candidate.CandidateRawId?.batchId
+                    )
+                    if (index > -1) {
+                        result[index].candidates.push({
+                            id: candidate.id,
+                            choice: {
+                                ...choice,
+                                itemId: wh.id,
+                            },
+                        })
+                    } else {
+                        result.push({
+                            text: wh.industryTitle,
+                            type: "WH_INDUSTRY",
+                            batchNo: candidate.CandidateRawId?.batchId,
+                            candidates: [
+                                {
+                                    id: candidate.id,
+                                    choice: {
+                                        ...choice,
+                                        itemId: wh.id,
                                     },
-                                ],
-                            })
-                        }
+                                },
+                            ],
+                        })
                     }
                 }
             })
         })
 
-        let finalResult = {
-            candidates,
-            result,
+        let finalResult: {
+            candidates: Array<any>
+            result: null | any
+            stats: {
+                category: number
+                industry: number
+                wh_category: number
+                wh_industry: number
+            }
+        } = {
+            candidates: [],
+            result: null,
+            stats: { category: 0, industry: 0, wh_category: 0, wh_industry: 0 },
         }
         if (result.length) {
-            const sortedResult = result.sort((a, b) =>
-                a.type < b.type ? -1 : a.type > b.type ? 1 : 0
-            )
+            const category = result.filter((x) => x.type === "CATEGORY").length
+            const industry = result.filter((x) => x.type === "INDUSTRY").length
+            const wh_category = result.filter(
+                (x) => x.type === "WH_CATEGORY"
+            ).length
+            const wh_industry = result.filter(
+                (x) => x.type === "WH_INDUSTRY"
+            ).length
+            const stats = { category, industry, wh_category, wh_industry }
+
+            const sortedResult = result
+                .sort((a, b) =>
+                    a.type < b.type ? -1 : a.type > b.type ? 1 : 0
+                )
+                .sort((a, b) =>
+                    (a.batchNo as number) < (b.batchNo as number)
+                        ? -1
+                        : (a.batchNo as number) > (b.batchNo as number)
+                        ? 1
+                        : 0
+                )
             const filteredCandidates = candidates.filter((x) =>
                 sortedResult[0].candidates.find((z) => z.id === x.id)
             )
             finalResult = {
                 candidates: filteredCandidates,
-                result: [sortedResult[0]],
+                result: sortedResult[0],
+                stats,
             }
         }
 
@@ -546,6 +567,8 @@ const updateOtherIndustriesCategories = async (
                                 industryId: { equals: 1 },
                             },
                         },
+                    },
+                    {
                         CandidateCategory: {
                             some: {
                                 categoryId: { equals: 1 },

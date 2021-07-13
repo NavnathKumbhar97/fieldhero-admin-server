@@ -16,6 +16,8 @@ const formatMessage = (msg: string): string => {
         .join("\\(")
         .split(")")
         .join("\\)")
+        .split("#")
+        .join("\\#")
 }
 
 const sendMessage = async (message: string): Promise<void> => {
@@ -31,7 +33,10 @@ const sendMessage = async (message: string): Promise<void> => {
             log.error("Telegram chat id is missing. Message not sent.")
         }
     } catch (error) {
-        log.error(error.message, "Error while sendMessage in telegram")
+        log.error(
+            error.response.data.toString(),
+            "Error while sendMessage in telegram"
+        )
     }
 }
 
