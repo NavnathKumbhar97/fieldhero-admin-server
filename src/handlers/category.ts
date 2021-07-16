@@ -92,9 +92,15 @@ const create = async (
     param: ICreateParam
 ): Promise<IResponseObject> => {
     try {
+        if (!param.title)
+            return getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Title is required"
+            )
         const categoryFound = await prisma.category.findFirst({
             where: {
-                title: param.title,
+                title: param.title.toUpperCase(),
             },
         })
         if (categoryFound)
@@ -151,6 +157,12 @@ const updateById = async (
                 false,
                 httpStatus.Not_Found,
                 "Category not found"
+            )
+        if (!param.title)
+            return getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Title is required"
             )
         const category = await prisma.category.update({
             where: {
