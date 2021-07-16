@@ -379,6 +379,17 @@ const changeAgentPricingTemplate = async (
 const fetchAdminPassiveCreate = async () => {
     try {
         const users = await prisma.userLogin.findMany({
+            where: {
+                Role: {
+                    RolePermission: {
+                        some: {
+                            permissionId: {
+                                in: [74, 74, 61],
+                            },
+                        },
+                    },
+                },
+            },
             select: {
                 id: true,
                 User: {
@@ -423,7 +434,9 @@ const fetchStatsById = async (
     try {
         const batchFound = await prisma.candidateUploadBatch.findFirst({
             select: {
+                id: true,
                 count: true,
+                rejectedCount: true,
                 CreatedBy: {
                     select: {
                         User: {
@@ -453,43 +466,150 @@ const fetchStatsById = async (
                 null
             )
 
-        const [assigned, pending] = await Promise.all([
-            // assigned
-            prisma.candidate.count({
-                where: {
+        prisma.candidateVerification.findMany({
+            where: {
+                CandidateId: {
                     CandidateRawId: {
-                        batchId: id,
+                        batchId: batchFound.id,
                     },
                     status: "VERIFICATION_IN_PROGRESS",
+                },
+            },
+            select: {
+                candidateId: true,
+                createdBy: true,
+            },
+        })
+
+        const [assigned, pending, completed] = await Promise.all([
+            // assigned
+            prisma.candidateVerification.findMany({
+                where: {
+                    CandidateId: {
+                        CandidateRawId: {
+                            batchId: batchFound.id,
+                        },
+                        status: "VERIFICATION_IN_PROGRESS",
+                    },
+                },
+                select: {
+                    candidateId: true,
+                    CreatedBy: {
+                        select: {
+                            id: true,
+                            User: {
+                                select: {
+                                    fullName: true,
+                                },
+                            },
+                        },
+                    },
                 },
             }),
             // pending
             prisma.candidate.count({
                 where: {
                     CandidateRawId: {
-                        batchId: id,
+                        batchId: batchFound.id,
                     },
                     status: "SYSTEM_VERIFIED",
                 },
             }),
+            // completed
+            prisma.candidateVerification.findMany({
+                where: {
+                    CandidateId: {
+                        CandidateRawId: {
+                            batchId: batchFound.id,
+                        },
+                        status: {
+                            in: ["OTHER_UPDATE_PENDING", "APPROVAL_PENDING"],
+                        },
+                    },
+                },
+                select: {
+                    candidateId: true,
+                    CreatedBy: {
+                        select: {
+                            id: true,
+                            User: {
+                                select: {
+                                    fullName: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            }),
         ])
+        type AssignedTo = {
+            id: number | undefined
+            name: string | undefined
+            stats: {
+                assigned: number
+                inprogress: number
+                completed: number
+            }
+        }
+        const assignedTo: Array<AssignedTo> = []
+        assigned.forEach((item) => {
+            const found = assignedTo.find((x) => x.id === item.CreatedBy?.id)
+            if (found) {
+                found.stats.assigned += 1
+                found.stats.inprogress += 1
+            } else {
+                assignedTo.push({
+                    id: item.CreatedBy?.id,
+                    name: item.CreatedBy?.User.fullName,
+                    stats: {
+                        assigned: 1,
+                        completed: 0,
+                        inprogress: 1,
+                    },
+                })
+            }
+        })
+        completed.forEach((item) => {
+            const found = assignedTo.find((x) => x.id === item.CreatedBy?.id)
+            if (found) {
+                found.stats.assigned += 1
+                found.stats.completed += 1
+            } else {
+                assignedTo.push({
+                    id: item.CreatedBy?.id,
+                    name: item.CreatedBy?.User.fullName,
+                    stats: {
+                        assigned: 1,
+                        completed: 1,
+                        inprogress: 0,
+                    },
+                })
+            }
+        })
 
-        const completed = batchFound.count - assigned - pending
+        const rejectedCount = batchFound.rejectedCount || 0
+
+        const completedCount =
+            batchFound.count - assigned.length - pending - rejectedCount
 
         const result: {
+            batchNo: number
             count: number
             pending: number
             assigned: number
             completed: number
             uploadedBy: string | undefined
+            assignedTo: Array<AssignedTo>
             role: string | undefined
             uploadedAt: Date
         } = {
-            count: batchFound.count,
+            batchNo: batchFound.id,
+            count: batchFound.count - rejectedCount,
             pending,
-            assigned,
-            completed,
+            assigned: assigned.length,
+            completed: completedCount,
             uploadedBy: batchFound.CreatedBy?.User.fullName,
+            assignedTo,
             role: batchFound.CreatedBy?.Role.name,
             uploadedAt: batchFound.createdOn,
         }
