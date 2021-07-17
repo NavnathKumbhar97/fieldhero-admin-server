@@ -350,7 +350,7 @@ const updateOtherIndustriesCategories = async (
                 if (!categoryFound) {
                     const categoryCreated = await prisma.category.create({
                         data: {
-                            title: param.text,
+                            title: param.text.toUpperCase(),
                             description: param.description,
                             createdBy: userLoginId,
                             modifiedBy: userLoginId,
@@ -405,7 +405,7 @@ const updateOtherIndustriesCategories = async (
                 if (!industryFound) {
                     const industryCreated = await prisma.industry.create({
                         data: {
-                            title: param.text,
+                            title: param.text.toUpperCase(),
                             description: param.description,
                             createdBy: userLoginId,
                             modifiedBy: userLoginId,
@@ -461,7 +461,7 @@ const updateOtherIndustriesCategories = async (
                     if (!categoryFound) {
                         const categoryCreated = await prisma.category.create({
                             data: {
-                                title: param.text,
+                                title: param.text.toUpperCase(),
                                 description: param.description,
                                 createdBy: userLoginId,
                                 modifiedBy: userLoginId,
@@ -518,7 +518,7 @@ const updateOtherIndustriesCategories = async (
                     if (!industryFound) {
                         const industryCreated = await prisma.industry.create({
                             data: {
-                                title: param.text,
+                                title: param.text.toUpperCase(),
                                 description: param.description,
                                 createdBy: userLoginId,
                                 modifiedBy: userLoginId,

@@ -74,9 +74,16 @@ const createIndustry = async (
     param: createIndustryParam
 ): Promise<helper.IResponseObject> => {
     try {
+        if (!param.title) {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Title is required"
+            )
+        }
         const industryFound = await prisma.industry.findFirst({
             where: {
-                title: param.title,
+                title: param.title.toUpperCase(),
             },
         })
         if (industryFound) {
@@ -89,7 +96,7 @@ const createIndustry = async (
 
         const industry = await prisma.industry.create({
             data: {
-                title: param.title,
+                title: param.title.toUpperCase(),
                 description: param.description || undefined,
                 isActive: "isActive" in param ? param.isActive : true,
                 createdBy: userLoginId,
@@ -136,13 +143,19 @@ const updateIndustryById = async (
                 httpStatus.Not_Found,
                 "Industry not found"
             )
-
+        if (!param.title) {
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Conflict,
+                "Title is required"
+            )
+        }
         const industry = await prisma.industry.update({
             where: {
                 id: param.id,
             },
             data: {
-                title: param.title,
+                title: param.title.toUpperCase(),
                 description: param.description || undefined,
                 isActive: "isActive" in param ? param.isActive : undefined,
                 modifiedBy: userLoginId,
