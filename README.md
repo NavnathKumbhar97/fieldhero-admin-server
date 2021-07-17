@@ -50,6 +50,10 @@ DATABASE_URL=postgresql://johndoe:randompassword@localhost:5432/mydb?schema=publ
 # Telegram
 TELEGRAM_BOT_TOKEN=token
 TELEGRAM_CHAT_ID=chatId
+# for prisma seed.ts
+SYSADM_NAME="User"
+SYSADM_EMAIL="user@email.com"
+SYSADM_CONTACT=1234512345
 ```
 
 ## Manual Deploy
