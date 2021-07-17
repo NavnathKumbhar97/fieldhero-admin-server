@@ -7,7 +7,7 @@ COPY package*.json ./
 COPY tsconfig*.json ./
 COPY ./.eslintrc ./
 COPY ./nodemailer.ts ./
-COPY ./prisma ./
+COPY ./prisma ./prisma
 COPY ./src ./src
 RUN npm ci
 RUN npx prisma migrate deploy
@@ -17,7 +17,7 @@ FROM node:14.16.1-alpine AS prod-builder
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./
-COPY ./prisma ./
+COPY ./prisma ./prisma
 RUN npm ci --only=production
 RUN npx prisma generate
 # production stage
