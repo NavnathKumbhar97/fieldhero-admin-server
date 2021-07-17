@@ -77,7 +77,8 @@ const processLastCandidateFromBatch = async (candidateId: number) => {
             ) {
                 processBatchCalculation(
                     uploadBatch.id,
-                    uploadBatch.count - (uploadBatch?.rejectedCount || 0)
+                    uploadBatch.count - (uploadBatch?.rejectedCount || 0),
+                    uploadBatch?.rejectedCount || 0
                 )
             }
         }
@@ -90,7 +91,11 @@ const processLastCandidateFromBatch = async (candidateId: number) => {
     }
 }
 
-const processBatchCalculation = async (batchId: number, batchCount: number) => {
+const processBatchCalculation = async (
+    batchId: number,
+    batchCount: number,
+    systemRejectCount: number = 0
+) => {
     try {
         const approved = await prisma.candidate.findMany({
             where: {
@@ -223,7 +228,8 @@ const processBatchCalculation = async (batchId: number, batchCount: number) => {
                 msg += "✔️Batch processed successfully.✔️ Awaiting approval.\n"
                 msg += "\nBatch no: #️⃣ *" + batchId + "*\n"
                 msg += "Approved: *" + approved.length + "*\n"
-                msg += "Rejected: *" + rejected.length + "*\n"
+                msg +=
+                    "Rejected: *" + rejected.length + systemRejectCount + "*\n"
                 telegram.sendMessage(msg)
             }
         }
