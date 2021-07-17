@@ -15,6 +15,13 @@ export const TELEGRAM_BOT_TOKEN: string = process.env.TELEGRAM_BOT_TOKEN || ""
 export const TELEGRAM_CHAT_ID: string | undefined =
     process.env.TELEGRAM_CHAT_ID || undefined
 
+// for prisma seed.ts
+export const SysAdm = {
+    name: process.env.SYSADM_NAME || "User",
+    email: process.env.SYSADM_EMAIL || "user@email.com",
+    contactNo: process.env.SYSADM_CONTACT || "9876543210",
+}
+
 export default {
     PORT,
     CLIENT_URL,
@@ -27,4 +34,5 @@ export default {
     JWT_SECRET,
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
+    SysAdm,
 }
