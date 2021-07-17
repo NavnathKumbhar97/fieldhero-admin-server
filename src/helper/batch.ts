@@ -94,7 +94,7 @@ const processLastCandidateFromBatch = async (candidateId: number) => {
 const processBatchCalculation = async (
     batchId: number,
     batchCount: number,
-    systemRejectCount: number = 0
+    systemRejectCount = 0
 ) => {
     try {
         const approved = await prisma.candidate.findMany({
