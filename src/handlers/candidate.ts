@@ -41,6 +41,7 @@ const getCandidates = async (
         const candidates = await prisma.candidate.findMany({
             where: {
                 isActive: whereCondition,
+                status: "APPROVED",
             },
             include: {
                 CandidateOther: true,
@@ -378,6 +379,7 @@ const createCandidateRaw = async (
         message += "Module: *Candidate Bulk Upload*\n"
         message += "Uploaded by: *" + userInfo?.fullName + "*\n"
         message += "\n✔Bulk upload successfully✔\n"
+        message += "Batch no: *" + response.id + "*\n"
         message += "✔Total uploaded: *" + response.count + "*✔"
         telegram.sendMessage(message)
         return helper.getHandlerResponseObject(

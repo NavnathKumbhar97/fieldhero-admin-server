@@ -180,4 +180,23 @@ CandidateUploadBatchRouter.get(
     }
 )
 
+CandidateUploadBatchRouter.post(
+    "/admin/candidate-upload-batches/:id/approval",
+    middleware.permission(
+        helper.permissions.admin_candidate_upload_batch_approval
+    ),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Admin.Candidate.UploadBatch.approval(
+                helper.getUserLoginId(req.user),
+                parseInt(req.params.id)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 export { CandidateUploadBatchRouter }

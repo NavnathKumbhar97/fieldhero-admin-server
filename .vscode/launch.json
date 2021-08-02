@@ -20,5 +20,14 @@
             "type": "pwa-node",
             "console": "integratedTerminal"
         },
+        {
+            "name": "Launch Debug Script",
+            "request": "launch",
+            "runtimeArgs": ["run-script", "debug"],
+            "runtimeExecutable": "npm",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "pwa-node",
+            "console": "integratedTerminal"
+        }
     ]
 }

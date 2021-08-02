@@ -1,8 +1,12 @@
 import { Prisma } from "@prisma/client"
+import mjml from "mjml"
 // local import
 import prisma from "../prisma"
 import log from "./log"
 import telegram from "./telegram"
+import config from "../config"
+import { emailTemplate } from "../handlers"
+import mailer from "../../nodemailer"
 
 const getBatchStatusFromMode = (
     mode: string
@@ -229,7 +233,9 @@ const processBatchCalculation = async (
                 msg += "\nBatch no: #️⃣ *" + batchId + "*\n"
                 msg += "Approved: *" + approved.length + "*\n"
                 msg +=
-                    "Rejected: *" + rejected.length + systemRejectCount + "*\n"
+                    "Rejected: *" +
+                    (rejected.length + systemRejectCount) +
+                    "*\n"
                 telegram.sendMessage(msg)
             }
         }
@@ -241,13 +247,98 @@ const processBatchCalculation = async (
     }
 }
 
+const afterBatchApprovedTelegramNotification = async (
+    batchNo: number,
+    approvalStatus: "APPROVED" | "REJECTED",
+    approvedBy: number,
+    batchTotal: number
+) => {
+    try {
+        const userFound = await prisma.user.findFirst({
+            where: {
+                UserLogin: {
+                    id: approvedBy,
+                },
+            },
+        })
+
+        // send telegram notification
+        let msg = ""
+        msg += "\nModule: *Candidate Bulk Upload*\n"
+        msg += "✔️Batch *" + approvalStatus + "* successfully.✔️\n"
+        msg += "\nBatch no: #️⃣ *" + batchNo + "*\n"
+        msg += "Approved by: *" + userFound?.fullName + "*\n"
+        msg += "Amount payable to agent: *" + batchTotal + "*\n"
+        await telegram.sendMessage(msg)
+    } catch (error) {
+        log.error(
+            error.toString(),
+            "Error while afterBatchApprovedTelegramNotification"
+        )
+    }
+}
+
+const afterBatchApprovedEmailToAgent = async (batchNo: number) => {
+    try {
+        const batchFound = await prisma.candidateUploadBatch.findFirst({
+            where: {
+                id: batchNo,
+            },
+            select: {
+                id: true,
+                count: true,
+                approvedCount: true,
+                rejectedCount: true,
+                paymentAmount: true,
+                CreatedBy: {
+                    select: {
+                        User: true,
+                        roleId: true,
+                        email: true,
+                    },
+                },
+            },
+        })
+
+        // if batch not found or batch owner is not agent
+        if (!batchFound || batchFound.CreatedBy?.roleId !== 3) return
+
+        const html = mjml(
+            emailTemplate.batchApprovedToAgent(
+                batchFound.CreatedBy.User.fullName,
+                batchFound.id,
+                batchFound.count,
+                batchFound.approvedCount || 0,
+                batchFound.rejectedCount || 0,
+                batchFound.paymentAmount || 0
+            )
+        ).html
+
+        mailer.sendMail({
+            to: [batchFound.CreatedBy.email],
+            from: config.EMAIL_FROM,
+            subject: "FieldHero - Batch Processed",
+            html,
+        })
+    } catch (error) {
+        log.error(
+            error.toString(),
+            "Error while afterBatchApprovedEmailToAgent"
+        )
+    }
+}
+
 export {
     getBatchStatusFromMode,
     processBatchCalculation,
     processLastCandidateFromBatch,
+    afterBatchApprovedTelegramNotification,
+    afterBatchApprovedEmailToAgent,
 }
 export default {
     getBatchStatusFromMode,
     processBatchCalculation,
     processLastCandidateFromBatch,
+    afterBatchApprovedTelegramNotification,
+    afterBatchApprovedEmailToAgent,
 }

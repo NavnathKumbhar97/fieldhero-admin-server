@@ -683,6 +683,14 @@ async function main() {
                 group: "Agent Pricing Template",
                 isActive: true,
             },
+            {
+                id: 85,
+                name: "admin_candidate_upload_batch_approval",
+                description: null,
+                displayName: "Approval",
+                group: "Admin - Candidate Upload Batch",
+                isActive: true,
+            },
         ],
     })
 
@@ -762,11 +770,11 @@ async function main() {
             20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36,
             37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53,
             54, 55, 56, 57, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73,
-            74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84,
+            74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85,
         ], // System Administrator
         2: [9], // User
         3: [9, 52, 58, 59, 60, 61], // Agent
-        4: [69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84], // Admin
+        4: [69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85], // Admin
         5: [5, 7, 8, 9, 65, 66, 67, 68], // Call Centre Staff
     }
     const inputRolePerms: Array<{ role: number; perm: number }> = []

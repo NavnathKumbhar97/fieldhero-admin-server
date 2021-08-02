@@ -591,6 +591,7 @@ model Candidate {
   education                  String?                      @db.VarChar(40)
   note                       String?                      @db.VarChar(500)
   status                     CandidateStatus              @default(INACTIVE)
+  costToAgent                Float?                       @default(0)
   isActive                   Boolean                      @default(true)
   createdOn                  DateTime                     @default(now())
   modifiedOn                 DateTime                     @updatedAt

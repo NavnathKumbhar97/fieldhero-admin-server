@@ -16,6 +16,7 @@ export const TELEGRAM_CHAT_ID: string | undefined =
     process.env.TELEGRAM_CHAT_ID || undefined
 
 // for prisma seed.ts
+export const DATABASE_URL: string = process.env.DATABASE_URL || ""
 export const SysAdm = {
     name: process.env.SYSADM_NAME || "User",
     email: process.env.SYSADM_EMAIL || "user@email.com",
@@ -35,4 +36,5 @@ export default {
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
     SysAdm,
+    DATABASE_URL
 }
