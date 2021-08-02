@@ -6,6 +6,7 @@ import {
     httpStatus,
     batch,
 } from "../../helper"
+import Candidate from "./candidate"
 
 const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
     try {
@@ -648,6 +649,7 @@ const Admin = {
     fetchOtherIndustriesCategories,
     fetchOtherIndustriesCategoriesPassive,
     updateOtherIndustriesCategories,
+    Candidate,
 }
 
-export { Admin }
+export { Admin, Candidate }

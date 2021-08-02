@@ -84,4 +84,5 @@ export default {
     agent_pricing_template_set_active: 82,
     admin_other_industry_category_read_all: 83,
     admin_other_industry_category_update: 84,
+    admin_candidate_upload_batch_approval: 85,
 }
