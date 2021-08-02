@@ -9,7 +9,7 @@ import { AskConfirmation } from "./helper"
 
 const prisma = new PrismaClient()
 
-const main = async (fileName: string = "file") => {
+const main = async (fileName = "file") => {
     const answer: boolean = await AskConfirmation()
 
     if (answer) {

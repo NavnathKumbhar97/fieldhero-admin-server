@@ -59,7 +59,7 @@ UploadRouter.post(
                     data: null,
                 })
 
-            const path = req.file.destination + "/" + req.file.filename
+            const path = file.destination + "/" + file.filename
             const result = await handler.UploadImage.updateCandidateProfileById(
                 parseInt(req.params.id),
                 path
