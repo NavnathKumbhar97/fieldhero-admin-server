@@ -61,90 +61,135 @@ const approval = async (
                 "Batch not found"
             )
 
-        let batchTotal = 0
-        const transactionReqs = []
-        if (batchFound.AgentPricingTemplate) {
-            const verifications = await prisma.candidateVerification.findMany({
-                where: {
-                    CandidateId: {
-                        CandidateRawId: {
-                            batchId: batchFound.id,
+        const approved = await prisma.candidate.findMany({
+            where: {
+                CandidateCallCentreHistory: {
+                    some: {
+                        callStatus: "COMPLETED",
+                        candidateConsent: "RECEIVED",
+                        isSubmitted: true,
+                    },
+                },
+                CandidateRawId: {
+                    batchId,
+                },
+            },
+            select: {
+                id: true,
+                CandidateVerification: true,
+            },
+        })
+        const rejected = await prisma.candidate.findMany({
+            where: {
+                CandidateCallCentreHistory: {
+                    some: {
+                        isSubmitted: true,
+                        candidateConsent: "DECLINED",
+                    },
+                },
+                CandidateRawId: {
+                    batchId,
+                    CandidateRejectionSummary: {
+                        none: {
+                            rejectedBy: "USER",
                         },
                     },
                 },
-            })
+            },
+            select: {
+                id: true,
+            },
+        })
 
-            for (const _verification of verifications) {
-                let total = 0
-                // 1
-                if (_verification.industry)
-                    total += batchFound.AgentPricingTemplate.industry
-                // 2
-                if (_verification.category)
-                    total += batchFound.AgentPricingTemplate.category
-                // 3
-                if (_verification.fullName)
-                    total += batchFound.AgentPricingTemplate.fullName
-                // 4
-                if (_verification.dob)
-                    total += batchFound.AgentPricingTemplate.dob
-                // 5
-                if (_verification.contactNo1)
-                    total += batchFound.AgentPricingTemplate.contactNo1
-                // 6
-                if (_verification.currCity)
-                    total += batchFound.AgentPricingTemplate.currCity
-                // 7
-                if (_verification.currZip)
-                    total += batchFound.AgentPricingTemplate.currZip
-                // 8
-                if (_verification.email1)
-                    total += batchFound.AgentPricingTemplate.email1
-                // 9
-                if (_verification.primaryLanguage)
-                    total += batchFound.AgentPricingTemplate.primaryLanguage
-                // 10
-                if (_verification.secondaryLanguage)
-                    total += batchFound.AgentPricingTemplate.secondaryLanguage
-                // 11
-                if (_verification.skill1)
-                    total += batchFound.AgentPricingTemplate.skill1
-                // 12
-                if (_verification.skill2)
-                    total += batchFound.AgentPricingTemplate.skill2
-                // 13
-                if (_verification.preferLocation1)
-                    total += batchFound.AgentPricingTemplate.preferLocation1
-                // 14
-                if (_verification.preferLocation2)
-                    total += batchFound.AgentPricingTemplate.preferLocation2
-                // 15
-                if (_verification.education)
-                    total += batchFound.AgentPricingTemplate.education
-                // 16
-                if (_verification.expYears)
-                    total += batchFound.AgentPricingTemplate.expYears
-                // 17
-                if (_verification.lastCompany)
-                    total += batchFound.AgentPricingTemplate.lastCompany
-                // 18
-                if (_verification.designation)
-                    total += batchFound.AgentPricingTemplate.designation
+        let batchTotal = 0
+        const transactionReqs = []
+        for (const _candidate of approved) {
+            const { CandidateVerification: _verification } = _candidate
+            let total = 0
+            // 1
+            if (_verification?.industry)
+                total += batchFound?.AgentPricingTemplate?.industry || 0
+            // 2
+            if (_verification?.category)
+                total += batchFound?.AgentPricingTemplate?.category || 0
+            // 3
+            if (_verification?.fullName)
+                total += batchFound?.AgentPricingTemplate?.fullName || 0
+            // 4
+            if (_verification?.dob)
+                total += batchFound?.AgentPricingTemplate?.dob || 0
+            // 5
+            if (_verification?.contactNo1)
+                total += batchFound?.AgentPricingTemplate?.contactNo1 || 0
+            // 6
+            if (_verification?.currCity)
+                total += batchFound?.AgentPricingTemplate?.currCity || 0
+            // 7
+            if (_verification?.currZip)
+                total += batchFound?.AgentPricingTemplate?.currZip || 0
+            // 8
+            if (_verification?.email1)
+                total += batchFound?.AgentPricingTemplate?.email1 || 0
+            // 9
+            if (_verification?.primaryLanguage)
+                total += batchFound?.AgentPricingTemplate?.primaryLanguage || 0
+            // 10
+            if (_verification?.secondaryLanguage)
+                total +=
+                    batchFound?.AgentPricingTemplate?.secondaryLanguage || 0
+            // 11
+            if (_verification?.skill1)
+                total += batchFound?.AgentPricingTemplate?.skill1 || 0
+            // 12
+            if (_verification?.skill2)
+                total += batchFound?.AgentPricingTemplate?.skill2 || 0
+            // 13
+            if (_verification?.preferLocation1)
+                total += batchFound?.AgentPricingTemplate?.preferLocation1 || 0
+            // 14
+            if (_verification?.preferLocation2)
+                total += batchFound?.AgentPricingTemplate?.preferLocation2 || 0
+            // 15
+            if (_verification?.education)
+                total += batchFound?.AgentPricingTemplate?.education || 0
+            // 16
+            if (_verification?.expYears)
+                total += batchFound?.AgentPricingTemplate?.expYears || 0
+            // 17
+            if (_verification?.lastCompany)
+                total += batchFound?.AgentPricingTemplate?.lastCompany || 0
+            // 18
+            if (_verification?.designation)
+                total += batchFound?.AgentPricingTemplate?.designation || 0
 
-                batchTotal += total
-                transactionReqs.push(
-                    prisma.candidate.update({
-                        where: {
-                            id: _verification.candidateId,
-                        },
-                        data: {
-                            costToAgent: total,
-                            status: "APPROVED",
-                            modifiedBy: userLoginId,
-                        },
-                    })
-                )
-            }
+            batchTotal += total
+            transactionReqs.push(
+                prisma.candidate.update({
+                    where: {
+                        id: _candidate.id,
+                    },
+                    data: {
+                        costToAgent: total,
+                        status: "APPROVED",
+                        modifiedBy: userLoginId,
+                    },
+                })
+            )
+        }
+
+        for (const _candidate of rejected) {
+            transactionReqs.push(
+                prisma.candidate.update({
+                    where: {
+                        id: _candidate.id,
+                    },
+                    data: {
+                        costToAgent: 0,
+                        status: "REJECTED",
+                        modifiedBy: userLoginId,
+                    },
+                })
+            )
         }
 
         transactionReqs.push(

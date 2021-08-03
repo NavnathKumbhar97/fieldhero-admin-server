@@ -159,30 +159,7 @@ const processBatchCalculation = async (
         if (pending.length === 0) {
             if (rejected.length + approved.length === batchCount) {
                 const reqs = []
-                reqs.push(
-                    prisma.candidate.updateMany({
-                        where: {
-                            id: {
-                                in: approved.map((x) => x.id),
-                            },
-                        },
-                        data: {
-                            status: "APPROVED",
-                        },
-                    })
-                )
-                reqs.push(
-                    prisma.candidate.updateMany({
-                        where: {
-                            id: {
-                                in: rejected.map((x) => x.id),
-                            },
-                        },
-                        data: {
-                            status: "REJECTED",
-                        },
-                    })
-                )
+
                 type IRejSummary =
                     Prisma.CandidateRejectionSummaryCreateManyInput
                 const rejSummary = rejected
@@ -268,7 +245,7 @@ const afterBatchApprovedTelegramNotification = async (
         msg += "✔️Batch *" + approvalStatus + "* successfully.✔️\n"
         msg += "\nBatch no: #️⃣ *" + batchNo + "*\n"
         msg += "Approved by: *" + userFound?.fullName + "*\n"
-        msg += "Amount payable to agent: *" + batchTotal + "*\n"
+        msg += "Amount payable to agent: *" + batchTotal + "* INR\n"
         await telegram.sendMessage(msg)
     } catch (error) {
         log.error(
