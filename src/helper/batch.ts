@@ -200,6 +200,13 @@ const processBatchCalculation = async (
                         },
                     })
                 )
+                reqs.push(
+                    prisma.batchPriority.deleteMany({
+                        where: {
+                            batchId: batchId,
+                        },
+                    })
+                )
 
                 await prisma.$transaction(reqs)
 
