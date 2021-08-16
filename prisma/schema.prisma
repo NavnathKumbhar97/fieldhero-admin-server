@@ -126,6 +126,18 @@ enum CandidateStatus {
   INACTIVE
 }
 
+enum CompanyInquiryStatus {
+  PENDING
+  IN_PROGRESS
+  PROCESSEDS
+}
+
+enum CandidateInquiryStatus {
+  PENDING
+  IN_PROGRESS
+  PROCESSEDS
+}
+
 // Models
 
 model Permission {
@@ -263,8 +275,6 @@ model UserLogin {
   SkillOnCandidateWorkHistoryModifiedBy SkillOnCandidateWorkHistory[] @relation("modifiedBySkillOnCandidateWorkHistoryToUserLogin")
   AgentPricingTemplateCreatedBy         AgentPricingTemplate[]        @relation("createdByAgentPricingTemplateToUserLogin")
   AgentPricingTemplateModifiedBy        AgentPricingTemplate[]        @relation("modifiedByAgentPricingTemplateToUserLogin")
-  // CandidateEducationCreatedBy           CandidateEducation[]          @relation("createdByCandidateEducation")
-  // CandidateEducationModifiedBy          CandidateEducation[]          @relation("modifiedByCandidateEducation")
   CandidateIndustryCreatedBy            CandidateIndustry[]           @relation("createdByCandidateIndustry")
   CandidateIndustryModifiedBy           CandidateIndustry[]           @relation("modifiedByCandidateIndustry")
   CandidateCategoryCreatedBy            CandidateCategory[]           @relation("createdByCandidateCategory")
@@ -279,6 +289,12 @@ model UserLogin {
   BatchPriority                         BatchPriority[]
   BatchPriorityCreatedBy                BatchPriority[]               @relation("createdByBatchPriority")
   BatchPriorityModifiedBy               BatchPriority[]               @relation("modifiedByBatchPriority")
+  CompanyInquiryCreatedBy               CompanyInquiry[]              @relation("createdByCompanyInquiry")
+  CompanyInquiryModifiedBy              CompanyInquiry[]              @relation("modifiedByCompanyInquiry")
+  CandidateInquiryCreatedBy             CandidateInquiry[]            @relation("createdByCandidateInquiry")
+  CandidateInquiryModifiedBy            CandidateInquiry[]            @relation("modifiedByCandidateInquiry")
+  EmailTemplateCreatedBy                EmailTemplate[]               @relation("createdByEmailTemplate")
+  EmailTemplateModifiedBy               EmailTemplate[]               @relation("modifiedByEmailTemplate")
 }
 
 model RolePermission {
@@ -950,19 +966,6 @@ model SMSLog {
   ModifiedBy UserLogin? @relation("modifiedBySMSLog", fields: [modifiedBy], references: [id])
 }
 
-model EmailLog {
-  id         Int         @id @default(autoincrement())
-  email      String      @db.VarChar(80)
-  fullName   String?     @db.VarChar(100)
-  reason     EmailReason
-  createdOn  DateTime    @default(now())
-  modifiedOn DateTime    @updatedAt
-  createdBy  Int?
-  CreatedBy  UserLogin?  @relation("createdByEmailLog", fields: [createdBy], references: [id])
-  modifiedBy Int?
-  ModifiedBy UserLogin?  @relation("modifiedByEmailLog", fields: [modifiedBy], references: [id])
-}
-
 model CandidateVerification {
   id                Int        @id @default(autoincrement())
   candidateId       Int
@@ -1005,4 +1008,66 @@ model BatchPriority {
   CreatedBy  UserLogin?           @relation("createdByBatchPriority", fields: [createdBy], references: [id])
   modifiedBy Int?
   ModifiedBy UserLogin?           @relation("modifiedByBatchPriority", fields: [modifiedBy], references: [id])
+}
+
+model CompanyInquiry {
+  id          Int                  @id @default(autoincrement())
+  fullName    String               @db.VarChar(100)
+  designation String               @db.VarChar(40)
+  companyName String               @db.VarChar(80)
+  contactNo   String               @db.VarChar(10)
+  email       String               @db.VarChar(40)
+  query       String               @db.VarChar(500)
+  status      CompanyInquiryStatus @default(PENDING)
+  comment     String?              @db.VarChar(500)
+  createdOn   DateTime             @default(now())
+  modifiedOn  DateTime             @updatedAt
+  createdBy   Int?
+  CreatedBy   UserLogin?           @relation("createdByCompanyInquiry", fields: [createdBy], references: [id])
+  modifiedBy  Int?
+  ModifiedBy  UserLogin?           @relation("modifiedByCompanyInquiry", fields: [modifiedBy], references: [id])
+}
+
+model CandidateInquiry {
+  id         Int                    @id @default(autoincrement())
+  fullName   String                 @db.VarChar(100)
+  contactNo  String                 @db.VarChar(10)
+  email      String?                @db.VarChar(40)
+  jobType    String?                @db.VarChar(50)
+  location   String?                @db.VarChar(80)
+  status     CandidateInquiryStatus @default(PENDING)
+  comment    String?                @db.VarChar(500)
+  createdOn  DateTime               @default(now())
+  modifiedOn DateTime               @updatedAt
+  createdBy  Int?
+  CreatedBy  UserLogin?             @relation("createdByCandidateInquiry", fields: [createdBy], references: [id])
+  modifiedBy Int?
+  ModifiedBy UserLogin?             @relation("modifiedByCandidateInquiry", fields: [modifiedBy], references: [id])
+}
+
+model EmailTemplate {
+  id         Int        @id @default(autoincrement())
+  templateId String     @unique @db.VarChar(10)
+  template   String     @db.Text
+  note       String?    @db.VarChar(500)
+  createdOn  DateTime   @default(now())
+  modifiedOn DateTime   @updatedAt
+  createdBy  Int?
+  CreatedBy  UserLogin? @relation("createdByEmailTemplate", fields: [createdBy], references: [id])
+  modifiedBy Int?
+  ModifiedBy UserLogin? @relation("modifiedByEmailTemplate", fields: [modifiedBy], references: [id])
+  EmailLog   EmailLog[]
+}
+
+model EmailLog {
+  id         Int           @id @default(autoincrement())
+  templateId Int
+  TemplateId EmailTemplate @relation(fields: [templateId], references: [id])
+  emailTo    String        @db.VarChar(80)
+  createdOn  DateTime      @default(now())
+  modifiedOn DateTime      @updatedAt
+  createdBy  Int?
+  CreatedBy  UserLogin?    @relation("createdByEmailLog", fields: [createdBy], references: [id])
+  modifiedBy Int?
+  ModifiedBy UserLogin?    @relation("modifiedByEmailLog", fields: [modifiedBy], references: [id])
 }
