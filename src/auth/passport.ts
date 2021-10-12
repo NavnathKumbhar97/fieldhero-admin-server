@@ -67,7 +67,7 @@ passport.use(
                     roleId: Role.uuid,
                     permissions: RolePermission.map((x) => x.permissionId),
                 })
-            } catch (error) {
+            } catch (error: any) {
                 log.error(error.message, "error while login")
                 done(error)
             }
@@ -115,7 +115,7 @@ passport.use(
                         ...user.UserLogin?.Role,
                     },
                 })
-            } catch (error) {
+            } catch (error: any) {
                 log.error(error.message, "error while jwt")
                 done(error)
             }

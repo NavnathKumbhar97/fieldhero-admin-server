@@ -12,10 +12,12 @@ CustomerRouter.get(
     middleware.permission(helper.permissions.customer_read_all),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.Customer.getCustomers(req.query.all as string)
+            const result = await handler.Customer.getCustomers(
+                req.query.all as string
+            )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -32,7 +34,7 @@ CustomerRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -53,7 +55,7 @@ CustomerRouter.put(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -70,7 +72,7 @@ CustomerRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -91,7 +93,7 @@ CustomerRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -109,7 +111,7 @@ CustomerRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -121,17 +123,18 @@ CustomerRouter.put(
     middleware.permission(helper.permissions.customer_subscription_update),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.Customer.updateCustomerSubscriptionsById(
-                helper.getUserLoginId(req.user),
-                {
-                    customerId: req.params.id,
-                    id: req.params.subId,
-                    ...req.body,
-                }
-            )
+            const result =
+                await handler.Customer.updateCustomerSubscriptionsById(
+                    helper.getUserLoginId(req.user),
+                    {
+                        customerId: req.params.id,
+                        id: req.params.subId,
+                        ...req.body,
+                    }
+                )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -151,7 +154,7 @@ CustomerRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

@@ -23,7 +23,7 @@ const getIndustries = async (all: string): Promise<helper.IResponseObject> => {
             "",
             industries
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getIndustries")
         return helper.getHandlerResponseObject(
             false,
@@ -52,7 +52,7 @@ const getIndustryById = async (id: number): Promise<helper.IResponseObject> => {
             "",
             industry
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getIndustryById")
         return helper.getHandlerResponseObject(
             false,
@@ -110,7 +110,7 @@ const createIndustry = async (
             "Industry created successfully",
             industry
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createIndustry")
         return helper.getHandlerResponseObject(
             false,
@@ -168,7 +168,7 @@ const updateIndustryById = async (
             "Industry updated successfully",
             industry
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateIndustryById")
         return helper.getHandlerResponseObject(
             false,

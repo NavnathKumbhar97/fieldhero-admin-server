@@ -34,7 +34,7 @@ const fetchAll = async (all: string): Promise<IResponseObject> => {
             "",
             agentPricingTemplates
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch all agent pricing templates"
@@ -91,7 +91,7 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
             ModifiedBy: ModifiedBy?.User.fullName,
         }
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch agent pricing template by id"
@@ -223,7 +223,7 @@ const create = async (
             "Agent pricing template created successfully",
             template
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while create agent pricing template")
         return getHandlerResponseObject(
             false,
@@ -237,47 +237,56 @@ const setActiveById = async (
     userLoginId: number,
     id: number
 ): Promise<IResponseObject> => {
-    const templateFound = await prisma.agentPricingTemplate.findFirst({
-        where: {
-            id,
-        },
-        select: { id: true },
-    })
+    try {
+        const templateFound = await prisma.agentPricingTemplate.findFirst({
+            where: {
+                id,
+            },
+            select: { id: true },
+        })
 
-    // if template not found
-    if (!templateFound)
+        // if template not found
+        if (!templateFound)
+            return getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Agent pricing template not found",
+                null
+            )
+
+        await prisma.agentPricingTemplate.update({
+            where: {
+                id,
+            },
+            data: {
+                isActive: true,
+                modifiedBy: userLoginId,
+            },
+        })
+        await prisma.agentPricingTemplate.updateMany({
+            where: {
+                id: { not: id },
+            },
+            data: {
+                isActive: false,
+                modifiedBy: userLoginId,
+            },
+        })
+
         return getHandlerResponseObject(
-            false,
-            httpStatus.Not_Found,
-            "Agent pricing template not found",
+            true,
+            httpStatus.OK,
+            "Agent pricing template set to active successfully",
             null
         )
-
-    await prisma.agentPricingTemplate.update({
-        where: {
-            id,
-        },
-        data: {
-            isActive: true,
-            modifiedBy: userLoginId,
-        },
-    })
-    await prisma.agentPricingTemplate.updateMany({
-        where: {
-            id: { not: id },
-        },
-        data: {
-            isActive: false,
-            modifiedBy: userLoginId,
-        },
-    })
-
-    return getHandlerResponseObject(
-        true,
-        httpStatus.OK,
-        "Agent pricing template set to active successfully",
-        null
-    )
+    } catch (error: any) {
+        log.error(error.message, "Error while setActiveById")
+        return getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while setActiveById"
+        )
+    }
 }
 
 const AgentPricingTemplate = { fetchAll, fetchById, create, setActiveById }

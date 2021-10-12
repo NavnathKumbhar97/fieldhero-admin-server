@@ -17,7 +17,7 @@ CompanyRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -34,7 +34,7 @@ CompanyRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -52,7 +52,7 @@ CompanyRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -73,7 +73,7 @@ CompanyRouter.put(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

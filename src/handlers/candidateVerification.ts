@@ -165,7 +165,7 @@ const createCandidateVerification = async (
             httpStatus.Created,
             "Candidate verification created successfully"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createCandidateVerification")
         return getHandlerResponseObject(
             false,
@@ -237,7 +237,7 @@ const getCandidateVerifications = async (
             }
         })
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCandidateVerification")
         return getHandlerResponseObject(
             false,
@@ -392,7 +392,7 @@ const getCandidateVerificationById = async (
             secondaryLanguageRaw: CandidateRawId?.secondaryLang,
         }
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCandidateVerificationById")
         return getHandlerResponseObject(
             false,
@@ -722,7 +722,7 @@ const updateCandidateVerificationById = async (
             httpStatus.No_Content,
             "Candidate Verification updated successfully"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCandidateVerificationById")
         return getHandlerResponseObject(
             false,
@@ -758,7 +758,7 @@ const fetchPassiveUpdate = async (): Promise<IResponseObject> => {
             industries,
             categories,
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetchPassiveUpdate")
         return getHandlerResponseObject(
             false,
@@ -811,7 +811,7 @@ const getDashboardForUser = async (
             },
         }
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getDashboardForUser")
         return getHandlerResponseObject(
             false,
@@ -850,7 +850,7 @@ const updateCandidateUploadBatch = async (
                 modifiedBy: userLoginId,
             },
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCandidateUploadBatch")
     }
 }
@@ -884,7 +884,7 @@ const updateCandidateRejectionSummary = async (
             },
         })
         await Promise.all([rejectionSummaryReq, uploadBatchReq])
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCandidateRejectionSummary")
     }
 }

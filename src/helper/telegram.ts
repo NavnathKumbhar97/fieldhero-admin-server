@@ -32,7 +32,7 @@ const sendMessage = async (message: string): Promise<void> => {
         } else {
             log.error("Telegram chat id is missing. Message not sent.")
         }
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.response.data.toString(),
             "Error while sendMessage in telegram"

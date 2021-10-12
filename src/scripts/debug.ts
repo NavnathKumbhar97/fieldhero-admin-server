@@ -18,29 +18,67 @@ const main = async () => {
     // const answer: boolean = await AskConfirmation()
     const answer = true
     if (answer) {
-        const result = await prisma.candidateVerification.findMany({
-            where: {
-                CandidateId: {
-                    CandidateRawId: {
-                        batchId: 42,
-                    },
-                    status: "VERIFICATION_IN_PROGRESS",
-                },
-            },
-            select: {
-                candidateId: true,
-                CreatedBy: {
-                    select: {
-                        User: {
-                            select: {
-                                fullName: true,
-                            },
-                        },
-                    },
-                },
-            },
-        })
-        const result2 = await prisma.permission.findMany({})
+        // const result = await prisma.candidate.findMany({
+        //     select: {
+        //         id: true,
+        //         CandidateIndustry: {
+        //             select: {
+        //                 id: true,
+        //                 IndustryId: {
+        //                     select: { title: true },
+        //                 },
+        //             },
+        //         },
+        //         CandidateCategory: {
+        //             select: {
+        //                 id: true,
+        //                 CategoryId: {
+        //                     select: {
+        //                         title: true,
+        //                     },
+        //                 },
+        //             },
+        //         },
+        //     },
+        //     where: {
+        //         isActive: true,
+        //         status: "APPROVAL_PENDING",
+        //         OR: true
+        //             ? [
+        //                   {
+        //                       fullName: {
+        //                           contains: undefined,
+        //                       },
+        //                   },
+        //                   {
+        //                       id: undefined,
+        //                   },
+        //                   {
+        //                       contactNo1: {
+        //                           contains: undefined,
+        //                       },
+        //                   },
+        //                   {
+        //                       contactNo2: {
+        //                           contains: undefined,
+        //                       },
+        //                   },
+        //                   {
+        //                       CandidateIndustry: {
+        //                           some: {
+        //                               industryId: {
+        //                                   in: [5, 6, 4, 8, 9, 7, 2],
+        //                               },
+        //                           },
+        //                       },
+        //                   },
+        //               ]
+        //             : undefined,
+        //     },
+        //     orderBy: {
+        //         fullName: "asc",
+        //     },
+        // })
 
         console.log("Temp data done successful")
         process.exit(0)

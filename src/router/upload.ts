@@ -43,33 +43,33 @@ const upload = multer({ storage: storage, fileFilter: fileFilter })
 
 //Upload route
 
-UploadRouter.post(
-    "/upload-profile/:id",
-    middleware.permission(
-        helper.permissions.candidate_basic_upload_profile_image
-    ),
-    upload.single("image"),
-    async (req: Request, res: Response) => {
-        try {
-            const file = req.file
-            if (!file)
-                return res.status(httpStatus.Not_Found).json({
-                    code: httpStatus.Not_Found,
-                    message: "File not found",
-                    data: null,
-                })
+// UploadRouter.post(
+//     "/upload-profile/:id",
+//     middleware.permission(
+//         helper.permissions.candidate_basic_upload_profile_image
+//     ),
+//     upload.single("image"),
+//     async (req: Request, res: Response) => {
+//         try {
+//             const file = req.file
+//             if (!file)
+//                 return res.status(httpStatus.Not_Found).json({
+//                     code: httpStatus.Not_Found,
+//                     message: "File not found",
+//                     data: null,
+//                 })
 
-            const path = file.destination + "/" + file.filename
-            const result = await handler.UploadImage.updateCandidateProfileById(
-                parseInt(req.params.id),
-                path
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
+//             const path = file.destination + "/" + file.filename
+//             const result = await handler.UploadImage.updateCandidateProfileById(
+//                 parseInt(req.params.id),
+//                 path
+//             )
+//             const { code, data, message } = result
+//             res.status(code).json({ code, message, data })
+//         } catch (error) {
+//             handler.express.handleRouterError(res, error)
+//         }
+//     }
+// )
 
 export { UploadRouter }

@@ -17,7 +17,7 @@ AgentPricingTemplateRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -34,7 +34,7 @@ AgentPricingTemplateRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -52,7 +52,7 @@ AgentPricingTemplateRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -70,7 +70,7 @@ AgentPricingTemplateRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
+import controller from "../controller"
 
 const UserRouter = Router()
 
@@ -18,7 +19,7 @@ UserRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -39,7 +40,7 @@ UserRouter.put(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -54,10 +55,17 @@ UserRouter.get(
             const result = await handler.User.getUsers(req.query.all as string)
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
+)
+
+// * Get logged in user dashboard
+UserRouter.get(
+    "/users/dashboard",
+    middleware.permission(helper.permissions.none),
+    controller.User.getDashboard
 )
 
 //* Fetch User By Id
@@ -71,7 +79,7 @@ UserRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -90,7 +98,7 @@ UserRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

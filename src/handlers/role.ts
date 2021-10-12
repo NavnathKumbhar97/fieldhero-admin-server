@@ -32,7 +32,7 @@ const getRoles = async (all: string): Promise<helper.IResponseObject> => {
         })
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", roles)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getRoles")
         return helper.getHandlerResponseObject(
             false,
@@ -76,7 +76,7 @@ const getRoleById = async (id: number): Promise<helper.IResponseObject> => {
         }
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getRoleById")
         return helper.getHandlerResponseObject(
             false,
@@ -126,7 +126,7 @@ const createRole = async (
             "Role created successfully",
             role
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createRole")
         return helper.getHandlerResponseObject(
             false,
@@ -195,7 +195,7 @@ const updateRoleById = async (
             "Role updated successfully",
             updatedRole
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateRoleById")
         return helper.getHandlerResponseObject(
             false,

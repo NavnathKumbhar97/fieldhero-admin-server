@@ -18,7 +18,7 @@ IndustryRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -35,7 +35,7 @@ IndustryRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -53,7 +53,7 @@ IndustryRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -74,7 +74,7 @@ IndustryRouter.put(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

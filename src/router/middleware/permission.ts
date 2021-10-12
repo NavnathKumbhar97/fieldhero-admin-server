@@ -37,7 +37,7 @@ export default (permissionTocheck: number) => {
                 return
             }
             next()
-        } catch (error) {
+        } catch (error: any) {
             log.error(error.message, "Error in permission middleware")
             res.status(httpStatus.Forbidden).send("Forbidden")
         }

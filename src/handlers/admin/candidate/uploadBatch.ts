@@ -1,6 +1,7 @@
 import moment from "moment"
+import generatePassword from "generate-password"
 // local imports
-import {
+import helper, {
     getHandlerResponseObject,
     IResponseObject,
     httpStatus,
@@ -76,6 +77,8 @@ const approval = async (
             },
             select: {
                 id: true,
+                fullName: true,
+                email1: true,
                 CandidateVerification: true,
             },
         })
@@ -103,6 +106,11 @@ const approval = async (
 
         let batchTotal = 0
         const transactionReqs = []
+        const arrCandidateEmail: Array<{
+            fullName: string
+            password: string
+            email?: string
+        }> = []
         for (const _candidate of approved) {
             const { CandidateVerification: _verification } = _candidate
             let total = 0
@@ -163,6 +171,16 @@ const approval = async (
                 total += batchFound?.AgentPricingTemplate?.designation || 0
 
             batchTotal += total
+
+            const pwd = generatePassword.generate({
+                length: 8,
+                numbers: true,
+                strict: true,
+                lowercase: true,
+                uppercase: false,
+            })
+            const pwdHash = await helper.passwordfunction.encryptPassword(pwd)
+            console.log({ id: _candidate.id, pwd })
             transactionReqs.push(
                 prisma.candidate.update({
                     where: {
@@ -172,9 +190,16 @@ const approval = async (
                         costToAgent: total,
                         status: "APPROVED",
                         modifiedBy: userLoginId,
+                        passwordHash: pwdHash,
                     },
                 })
             )
+
+            arrCandidateEmail.push({
+                fullName: _candidate.fullName,
+                email: _candidate.email1 || undefined,
+                password: pwd,
+            })
         }
 
         for (const _candidate of rejected) {
@@ -215,13 +240,14 @@ const approval = async (
             batchTotal
         )
         batchHelper.afterBatchApprovedEmailToAgent(batchFound.id)
+        batchHelper.afterBatchApprovedEmailToCandidates(arrCandidateEmail)
 
         return getHandlerResponseObject(
             true,
             httpStatus.OK,
             "Batch approval done successful"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.toString(),
             "Error while candidate upload batch approval"

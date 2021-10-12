@@ -112,23 +112,19 @@ const createUser = async (
             },
         })
 
-        const html = mjml(
-            emailTemplate.generatePassword(
-                param.fullName,
-                param.email,
-                autoPassword
-            ),
-            { beautify: true }
+        const _template = emailTemplate.generatePassword(
+            param.fullName,
+            param.email,
+            autoPassword
         )
-        mailer
-            .sendMail({
-                to: [param.email],
-                from: config.EMAIL_FROM,
-                subject: "Fieldhero Admin - Your Password",
-                html: html.html,
-            })
-            .then((success) => log.info(success))
-            .catch((err) => log.error(err))
+
+        const html = mjml(_template.template).html
+        helper.Email.sendEmail(
+            _template.id,
+            html,
+            param.email,
+            "Fieldhero Admin - Your Password"
+        )
 
         return helper.getHandlerResponseObject(
             true,
@@ -136,7 +132,7 @@ const createUser = async (
             "User created successfully",
             user
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createUser")
         return helper.getHandlerResponseObject(
             false,
@@ -193,7 +189,7 @@ const getUsers = async (all: string): Promise<helper.IResponseObject> => {
         }))
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getUsers")
         return helper.getHandlerResponseObject(
             false,
@@ -256,7 +252,7 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
         }
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getUserById")
         return helper.getHandlerResponseObject(
             false,
@@ -359,7 +355,7 @@ const updateUserById = async (
             "User updated successfully",
             result
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateUserById")
         return helper.getHandlerResponseObject(
             false,
@@ -402,33 +398,26 @@ const createResetPasswordToken = async (
             },
         })
 
-        const html = mjml(
-            emailTemplate.generateForgotPasswordEmail({
-                fullName: userLogin.User.fullName,
-                email: userLogin.email,
-                token,
-            })
-        ).html
-        mailer
-            .sendMail({
-                to: [userLogin.email],
-                from: config.EMAIL_FROM,
-                subject: "Fieldhero Admin - Reset Password Request",
-                html,
-            })
-            .catch((err) => {
-                log.error(
-                    err.message,
-                    "Error in nodemailer while createResetPasswordToken"
-                )
-            })
+        const _template = emailTemplate.generateForgotPasswordEmail({
+            fullName: userLogin.User.fullName,
+            email: userLogin.email,
+            token,
+        })
+        const html = mjml(_template.template).html
+
+        helper.Email.sendEmail(
+            _template.id,
+            html,
+            userLogin.email,
+            "Fieldhero Admin - Reset Password Request"
+        )
 
         return helper.getHandlerResponseObject(
             false,
             httpStatus.OK,
             "Password reset request has been sent on your email"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createResetPasswordToken")
         return helper.getHandlerResponseObject(
             false,
@@ -505,31 +494,24 @@ const resetPasswordForUser = async (
             },
         })
 
-        const html = mjml(
-            emailTemplate.generateResetPasswordSuccessEmail({
-                fullName: userLoginFound.User.fullName,
-                password: newPassword,
-            })
-        ).html
-        mailer
-            .sendMail({
-                to: [userLogin.email],
-                from: config.EMAIL_FROM,
-                subject: "Fieldhero Admin - Password Reset Successfully",
-                html,
-            })
-            .catch((err) => {
-                log.error(
-                    err.message,
-                    "Error in nodemailer while resetPasswordForUser"
-                )
-            })
+        const _template = emailTemplate.generateResetPasswordSuccessEmail({
+            fullName: userLoginFound.User.fullName,
+            password: newPassword,
+        })
+        const html = mjml(_template.template).html
+        helper.Email.sendEmail(
+            _template.id,
+            html,
+            userLogin.email,
+            "Fieldhero Admin - Password Reset Successfully"
+        )
+
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
             "Password reset successfully. New password has been sent on your email"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while resetPasswordForUser")
         return helper.getHandlerResponseObject(
             false,
@@ -586,7 +568,7 @@ const changePassword = async (
             httpStatus.OK,
             "Password changed successfully"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while changePassword")
         return helper.getHandlerResponseObject(
             false,

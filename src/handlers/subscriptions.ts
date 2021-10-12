@@ -38,7 +38,7 @@ const getSubscriptions = async (
             "",
             subscriptions
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getSubscriptions")
         return helper.getHandlerResponseObject(
             false,
@@ -73,7 +73,7 @@ const getSubscriptionById = async (
             "",
             subscripition
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getSubscriptionById")
         return helper.getHandlerResponseObject(
             false,
@@ -131,7 +131,7 @@ const createSubscripition = async (
             "Subscription created successfully",
             subscripition
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createSubscripition")
         return helper.getHandlerResponseObject(
             false,
@@ -183,7 +183,7 @@ const updatedSubscriptionById = async (
             "Subscription updated successfully",
             subscripition
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updatedSubscriptionById")
         return helper.getHandlerResponseObject(
             false,

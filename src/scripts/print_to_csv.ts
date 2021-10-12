@@ -13,9 +13,57 @@ const main = async (fileName = "file") => {
     const answer: boolean = await AskConfirmation()
 
     if (answer) {
-        const result = await prisma.candidateVersioning.findMany({
-            select: { industry: true },
-            distinct: "industry",
+        const result = await prisma.candidate.findMany({
+            where: {
+                CandidateIndustry: {
+                    some: {
+                        title: "FMCG",
+                    },
+                },
+            },
+
+            select: {
+                passwordHash: false,
+                id: true,
+                fullName: true,
+                contactNo1: true,
+                contactNo2: true,
+                email1: true,
+                email2: true,
+                currCity: true,
+                currAddress: true,
+                currState: true,
+                currZip: true,
+                permCity: true,
+                permAddress: true,
+                permState: true,
+                permZip: true,
+                skill1: true,
+                skill2: true,
+                preferLocation1: true,
+                preferLocation2: true,
+                expYears: true,
+                aadharNo: true,
+                panNo: true,
+                dlNo: true,
+                primaryLanguage: true,
+                secondaryLanguage: true,
+                thirdLanguage: true,
+                status: true,
+                dob: true,
+                gender: true,
+                education: true,
+                CandidateCategory: {
+                    select: {
+                        title: true,
+                    },
+                },
+                CandidateIndustry: {
+                    select: {
+                        title: true,
+                    },
+                },
+            },
         })
         const csvString = await j2c.json2csvAsync(result)
         const writePath = path.join(
@@ -29,4 +77,4 @@ const main = async (fileName = "file") => {
     process.exit(0)
 }
 
-main("industry")
+main("candidates")

@@ -47,7 +47,7 @@ const update = async (
             httpStatus.OK,
             "Batch priority updated successfully."
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while update batch priority")
         return getHandlerResponseObject(
             false,
@@ -103,7 +103,7 @@ const fetchAll = async (): Promise<IResponseObject> => {
         })
 
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetch all batch priority")
         return getHandlerResponseObject(
             false,
@@ -177,7 +177,7 @@ const passiveCreate = async (): Promise<IResponseObject> => {
         }
 
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch passive create for batch priority"
@@ -237,7 +237,7 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
         })
 
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetch batch priority by id")
         return getHandlerResponseObject(
             false,

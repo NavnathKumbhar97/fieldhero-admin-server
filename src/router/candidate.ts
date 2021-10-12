@@ -12,12 +12,27 @@ CandidateRouter.get(
     middleware.permission(helper.permissions.candidate_read_all),
     async (req: Request, res: Response) => {
         try {
+            console.log(req.query)
             const result = await handler.Candidate.getCandidates(
-                req.query as { all: string; page: string; limit: string }
+                req.query as any
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+CandidateRouter.get(
+    "/candidates/passive",
+    middleware.permission(helper.permissions.candidate_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.fetchAllPassive()
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -34,7 +49,7 @@ CandidateRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -73,7 +88,7 @@ CandidateRouter.put(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -94,100 +109,7 @@ CandidateRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-// * Fetch all Candidate Trainig-Cerf
-CandidateRouter.get(
-    "/candidates/:id/training-cert",
-    middleware.permission(helper.permissions.candidate_certification_read_all),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.getCandidateTrainingCerts(
-                parseInt(req.params.id)
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-// * get Candidate Tranining-cref By Id
-CandidateRouter.get(
-    "/candidates/:id/training-cert/:certId",
-    middleware.permission(helper.permissions.candidate_certification_read),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.getCandidateTrainingCertById(
-                parseInt(req.params.id),
-                parseInt(req.params.certId)
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-// * Create Candidate Trainig-Cerf
-CandidateRouter.post(
-    "/candidates/:id/training-cert",
-    middleware.permission(helper.permissions.candidate_certification_create),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.addCandidateTrainingCert(
-                helper.getUserLoginId(req.user),
-                {
-                    ...req.body,
-                    candidate: req.params.id,
-                }
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-// * Update Candidate Trainig-Cerf
-CandidateRouter.put(
-    "/candidates/:id/training-cert/:certId",
-    middleware.permission(helper.permissions.candidate_certification_update),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.updateCandidateTrainingCertById(
-                helper.getUserLoginId(req.user),
-                {
-                    id: req.params.certId,
-                    candidate: req.params.id,
-                    ...req.body,
-                }
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-//* Delete Candiate Traninig Cert
-CandidateRouter.delete(
-    "/candidates/:id/training-cert/:certId",
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.removeCandidateTrainingCert({
-                id: parseInt(req.params.certId),
-            })
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -204,7 +126,7 @@ CandidateRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -222,7 +144,7 @@ CandidateRouter.get(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -243,7 +165,7 @@ CandidateRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -255,17 +177,18 @@ CandidateRouter.put(
     middleware.permission(helper.permissions.candidate_work_history_update),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.Candidate.updateCandidateWorkHistoryById(
-                helper.getUserLoginId(req.user),
-                {
-                    id: req.params.workId,
-                    candidate: req.params.id,
-                    ...req.body,
-                }
-            )
+            const result =
+                await handler.Candidate.updateCandidateWorkHistoryById(
+                    helper.getUserLoginId(req.user),
+                    {
+                        id: req.params.workId,
+                        candidate: req.params.id,
+                        ...req.body,
+                    }
+                )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -281,7 +204,7 @@ CandidateRouter.delete(
             })
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

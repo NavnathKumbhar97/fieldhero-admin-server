@@ -306,7 +306,7 @@ const fetchOtherIndustriesCategories = async (): Promise<IResponseObject> => {
         }
 
         return getHandlerResponseObject(true, httpStatus.OK, "", finalResult)
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch other industries and categories"
@@ -599,7 +599,7 @@ const updateOtherIndustriesCategories = async (
                 id: responseId,
             }
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while update other industries and categories"
@@ -632,7 +632,7 @@ const fetchOtherIndustriesCategoriesPassive =
                 categories,
             }
             return getHandlerResponseObject(true, httpStatus.OK, "", result)
-        } catch (error) {
+        } catch (error: any) {
             log.error(
                 error.message,
                 "Error while fetch other industries and categories passive"

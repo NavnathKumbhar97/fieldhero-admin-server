@@ -46,7 +46,7 @@ const getCustomers = async (all: string): Promise<helper.IResponseObject> => {
         })
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCustomers")
         return helper.getHandlerResponseObject(
             false,
@@ -90,7 +90,7 @@ const getCustomerById = async (id: number): Promise<helper.IResponseObject> => {
         const result = { ...other, email: CustomerLogin?.email }
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCustomerById")
         return helper.getHandlerResponseObject(
             false,
@@ -104,13 +104,12 @@ const getCustomerSubscriptions = async (
     customerId: number
 ): Promise<helper.IResponseObject> => {
     try {
-        const customerSubscriptions = await prisma.customerSubscription.findMany(
-            {
+        const customerSubscriptions =
+            await prisma.customerSubscription.findMany({
                 where: {
                     customerId,
                 },
-            }
-        )
+            })
 
         return helper.getHandlerResponseObject(
             true,
@@ -118,7 +117,7 @@ const getCustomerSubscriptions = async (
             "",
             customerSubscriptions
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCustomerSubscriptions")
         return helper.getHandlerResponseObject(
             false,
@@ -139,14 +138,13 @@ const getCustomerSubscriptionsById = async (
     subscriptionId: number
 ): Promise<helper.IResponseObject> => {
     try {
-        const customerSubscription = await prisma.customerSubscription.findFirst(
-            {
+        const customerSubscription =
+            await prisma.customerSubscription.findFirst({
                 where: {
                     customerId,
                     id: subscriptionId,
                 },
-            }
-        )
+            })
         if (!customerSubscription)
             return helper.getHandlerResponseObject(
                 false,
@@ -160,7 +158,7 @@ const getCustomerSubscriptionsById = async (
             "",
             customerSubscription
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCustomerSubscriptionsById")
         return helper.getHandlerResponseObject(
             false,
@@ -217,7 +215,7 @@ const createCustomerSubscription = async (
             "Customer subscription created successfully",
             customerSubscription
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createCustomerSubscription")
         return helper.getHandlerResponseObject(
             false,
@@ -255,8 +253,8 @@ const updateCustomerSubscriptionsById = async (
                 "Customer not found"
             )
 
-        const customerSubscription = await prisma.customerSubscription.updateMany(
-            {
+        const customerSubscription =
+            await prisma.customerSubscription.updateMany({
                 where: {
                     id: param.id,
                     customerId: param.customerId,
@@ -270,8 +268,7 @@ const updateCustomerSubscriptionsById = async (
                     comment: param.comment,
                     modifiedBy: userLoginId,
                 },
-            }
-        )
+            })
 
         return helper.getHandlerResponseObject(
             true,
@@ -279,7 +276,7 @@ const updateCustomerSubscriptionsById = async (
             "Customer subscription updated successfully",
             customerSubscription
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCustomerSubscriptionsById")
         return helper.getHandlerResponseObject(
             false,
@@ -344,31 +341,25 @@ const resetLoginPasswordForCustomer = async (
             },
         })
 
-        const html = mjml(
+        const _template =
             emailTemplate.generateResetPasswordByAdminSuccessEmail({
                 fullName: customerLogin.CustomerId.fullName,
                 password: newPassword,
             })
-        ).html
-        mailer
-            .sendMail({
-                to: [customerLogin.email],
-                from: config.EMAIL_FROM,
-                subject: "Fieldhero Customer - Password Reset Successfully",
-                html,
-            })
-            .catch((err) => {
-                log.error(
-                    err.message,
-                    "Error in nodemailer while resetLoginPasswordForCustomer"
-                )
-            })
+        const html = mjml(_template.template).html
+        helper.Email.sendEmail(
+            _template.id,
+            html,
+            customerLogin.email,
+            "FieldHero Customer - Password Reset Successfully"
+        )
+
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
             "Password reset successfully. New password has been sent on your email"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while resetLoginPasswordForCustomer")
         return helper.getHandlerResponseObject(
             false,
@@ -425,7 +416,7 @@ const updateCustomer = async (
             "Customer updated successfully",
             customer
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCustomer")
         return helper.getHandlerResponseObject(
             false,

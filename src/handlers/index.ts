@@ -2,7 +2,6 @@ import { Industry } from "./industry"
 import { SkillSet } from "./skillset"
 import { Company } from "./company"
 import { Candidate } from "./candidate"
-import { UploadImage } from "./upload"
 import { Subscription } from "./subscriptions"
 import { Customer } from "./customer"
 import { Role } from "./role"
@@ -29,7 +28,6 @@ export {
     Role,
     SkillSet,
     Subscription,
-    UploadImage,
     User,
     Agent,
     CandidateUploadBatch,
@@ -51,7 +49,6 @@ export default {
     Role,
     SkillSet,
     Subscription,
-    UploadImage,
     User,
     Agent,
     CandidateUploadBatch,

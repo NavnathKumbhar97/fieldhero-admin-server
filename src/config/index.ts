@@ -1,3 +1,4 @@
+export const NODE_ENV: string = process.env.NODE_ENV || "development"
 export const PORT: number = parseInt(process.env.PORT || "8080")
 export const CLIENT_URL: string = process.env.CLIENT_URL || "http://localhost"
 export const AGENT_PORTAL_URL: string =
@@ -36,5 +37,6 @@ export default {
     TELEGRAM_BOT_TOKEN,
     TELEGRAM_CHAT_ID,
     SysAdm,
-    DATABASE_URL
+    DATABASE_URL,
+    NODE_ENV,
 }

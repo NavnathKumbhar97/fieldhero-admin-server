@@ -54,7 +54,7 @@ LoginRouter.post(
                             },
                             message: "User logged in successfully",
                         })
-                    } catch (error) {
+                    } catch (error: any) {
                         handler.express.handleRouterError(res, error)
                     }
                 }
@@ -94,7 +94,7 @@ LoginRouter.post(
                     })
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -137,7 +137,7 @@ LoginRouter.get(
                     })
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

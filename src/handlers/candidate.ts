@@ -25,6 +25,12 @@ interface IGetCandidatesParam {
     all: string
     page: string
     limit: string
+    status?: string
+    industry?: string
+    category?: string
+    fullName?: string
+    contact?: string
+    id?: string
 }
 const getCandidates = async (
     param: IGetCandidatesParam
@@ -35,18 +41,121 @@ const getCandidates = async (
         const page = "page" in param ? parseInt(param.page) : 1,
             limit = "limit" in param ? parseInt(param.limit) : 10
 
-        const count = await prisma.candidate.count()
+        const isNotUndefined =
+            param.fullName ||
+            param.contact ||
+            param.id ||
+            param.industry ||
+            param.category
+
+        const count = await prisma.candidate.count({
+            where: {
+                isActive: whereCondition,
+                status: "APPROVED",
+                OR: isNotUndefined
+                    ? [
+                          {
+                              fullName: {
+                                  contains: param.fullName,
+                              },
+                          },
+                          {
+                              id: param.id ? parseInt(param.id) : undefined,
+                          },
+                          {
+                              contactNo1: {
+                                  contains: param.contact,
+                              },
+                          },
+                          {
+                              contactNo2: {
+                                  contains: param.contact,
+                              },
+                          },
+                          {
+                              CandidateIndustry: {
+                                  some: {
+                                      industryId: {
+                                          in: param.industry
+                                              ?.split(",")
+                                              .map((x) => parseInt(x)),
+                                      },
+                                  },
+                              },
+                          },
+                          {
+                              CandidateCategory: {
+                                  some: {
+                                      categoryId: {
+                                          in: param.category
+                                              ?.split(",")
+                                              .map((x) => parseInt(x)),
+                                      },
+                                  },
+                              },
+                          },
+                      ]
+                    : undefined,
+            },
+        })
 
         const _paginate = paginate(count, page, limit)
+        console.log(param.industry?.split(",").map((x) => parseInt(x)))
         const candidates = await prisma.candidate.findMany({
             where: {
                 isActive: whereCondition,
                 status: "APPROVED",
+                OR: isNotUndefined
+                    ? [
+                          {
+                              fullName: {
+                                  contains: param.fullName,
+                              },
+                          },
+                          {
+                              id: param.id ? parseInt(param.id) : undefined,
+                          },
+                          {
+                              contactNo1: {
+                                  contains: param.contact,
+                              },
+                          },
+                          {
+                              contactNo2: {
+                                  contains: param.contact,
+                              },
+                          },
+                          {
+                              CandidateIndustry: {
+                                  some: {
+                                      industryId: {
+                                          in: param.industry
+                                              ?.split(",")
+                                              .map((x) => parseInt(x)),
+                                      },
+                                  },
+                              },
+                          },
+                          {
+                              CandidateCategory: {
+                                  some: {
+                                      categoryId: {
+                                          in: param.category
+                                              ?.split(",")
+                                              .map((x) => parseInt(x)),
+                                      },
+                                  },
+                              },
+                          },
+                      ]
+                    : undefined,
             },
-            include: {
-                CandidateOther: true,
-                CandidateTraining: true,
-                CandidateJobPreference: true,
+            select: {
+                id: true,
+                fullName: true,
+                contactNo1: true,
+                status: true,
+                isActive: true,
             },
             take: limit,
             skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
@@ -61,7 +170,7 @@ const getCandidates = async (
         }
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCandidates")
         return helper.getHandlerResponseObject(
             false,
@@ -71,21 +180,57 @@ const getCandidates = async (
     }
 }
 
-/*
- * get Candidate By Id
- */
+// fetch passive for fetch all candidates
+const fetchAllPassive = async (): Promise<helper.IResponseObject> => {
+    try {
+        const [industries, categories] = await Promise.all([
+            prisma.industry.findMany({
+                where: {
+                    isActive: true,
+                },
+                select: {
+                    id: true,
+                    title: true,
+                },
+                orderBy: {
+                    title: "asc",
+                },
+            }),
+            prisma.category.findMany({
+                where: {
+                    isActive: true,
+                },
+                select: {
+                    id: true,
+                    title: true,
+                },
+                orderBy: {
+                    title: "asc",
+                },
+            }),
+        ])
 
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
+            industries,
+            categories,
+        })
+    } catch (error: any) {
+        log.error(error.message, "Error while fetchAllPassive")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while fetchAllPassive"
+        )
+    }
+}
+
+// * get candidate by id
 const getCandidateById = async (
     id: number
 ): Promise<helper.IResponseObject> => {
     try {
         const candidate = await prisma.candidate.findFirst({
             where: { id },
-            include: {
-                CandidateOther: true,
-                CandidateTraining: true,
-                CandidateJobPreference: true,
-            },
         })
         if (!candidate)
             return helper.getHandlerResponseObject(
@@ -100,7 +245,7 @@ const getCandidateById = async (
             "",
             candidate
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getIndustries")
         return helper.getHandlerResponseObject(
             false,
@@ -110,9 +255,7 @@ const getCandidateById = async (
     }
 }
 
-/*
- * Create Candidate
- */
+// * create candidate
 interface createCandidateParam {
     fullName: string
     birthDate: Date
@@ -170,15 +313,6 @@ const createCandidate = async (
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
                 approvedBy: userLoginId,
-                CandidateOther: {
-                    create: {
-                        expYears: param.totalExpYears,
-                        expMonths: param.totalExpMonths,
-                        registrationStatus: param.registrationStatus,
-                        createdBy: userLoginId,
-                        modifiedBy: userLoginId,
-                    },
-                },
             },
         })
 
@@ -188,7 +322,7 @@ const createCandidate = async (
             "Candidate created successfully",
             candidate
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createCandidate")
         return helper.getHandlerResponseObject(
             false,
@@ -271,14 +405,6 @@ const updateCandidateById = async (
                 approvedOn: moment().utc().format(),
                 modifiedBy: userLoginId,
                 approvedBy: userLoginId,
-                CandidateOther: {
-                    update: {
-                        expYears: param.totalExpYears,
-                        expMonths: param.totalExpMonths,
-                        registrationStatus: param.registrationStatus,
-                        modifiedBy: userLoginId,
-                    },
-                },
             },
         })
 
@@ -288,7 +414,7 @@ const updateCandidateById = async (
             "Candidate updated successfully",
             candidate
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCandidateById")
         return helper.getHandlerResponseObject(
             false,
@@ -388,7 +514,7 @@ const createCandidateRaw = async (
             `Bulk upload successfully. Total uploaded: ${response.count}`,
             response
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createCandidateRaw")
         return helper.getHandlerResponseObject(
             false,
@@ -964,221 +1090,8 @@ const candidateBatchSystemCheck = async (
                 (end - start) / 1000
             }s`
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while candidateBatchSystemCheck")
-    }
-}
-
-/*
- * create Candidate Traning certificate
- */
-interface createCandidateTrainingCertParam {
-    type: "TRAINING" | "CERTIFICATE" | "OTHER"
-    title: string
-    issueDate: Date
-    issuedBy: string
-    description: string
-    candidate: number
-    skillId: any
-}
-
-const addCandidateTrainingCert = async (
-    userLoginId: number,
-    param: createCandidateTrainingCertParam
-): Promise<helper.IResponseObject> => {
-    try {
-        const candidateTraining = await prisma.candidateTraining.create({
-            data: {
-                title: param.title,
-                type: param.type,
-                issueDate: param.issueDate,
-                issuedBy: param.issuedBy,
-                description: param.description,
-                CandidateId: {
-                    connect: {
-                        id: param.candidate,
-                    },
-                },
-                SkillId: {
-                    connectOrCreate: {
-                        where: {
-                            id: param.skillId,
-                        },
-                        create: {
-                            title: param.skillId,
-                            createdBy: userLoginId,
-                            modifiedBy: userLoginId,
-                        },
-                    },
-                },
-                CreatedBy: { connect: { id: userLoginId } },
-                ModifiedBy: { connect: { id: userLoginId } },
-            },
-        })
-
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.Created,
-            "Candidate training/certificare created successfully",
-            candidateTraining
-        )
-    } catch (error) {
-        log.error(error.message, "Error while addCandidateTrainingCert")
-        return helper.getHandlerResponseObject(
-            false,
-            httpStatus.Bad_Request,
-            "Error while addCandidateTrainingCert"
-        )
-    }
-}
-/*
- * get Candidate Traning certificate By Id
- */
-const getCandidateTrainingCertById = async (
-    id: number,
-    certId: number
-): Promise<helper.IResponseObject> => {
-    try {
-        const candidateTraining = await prisma.candidateTraining.findFirst({
-            where: {
-                id: certId,
-                candidateId: id,
-            },
-            include: {
-                SkillId: true,
-            },
-        })
-
-        if (!candidateTraining)
-            return helper.getHandlerResponseObject(
-                false,
-                httpStatus.Not_Found,
-                "Candidate training/certificate not found"
-            )
-
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.OK,
-            "",
-            candidateTraining
-        )
-    } catch (error) {
-        log.error(error.message, "Error while getCandidateTrainingCertById")
-        return helper.getHandlerResponseObject(
-            false,
-            httpStatus.Bad_Request,
-            "Error while getCandidateTrainingCertById"
-        )
-    }
-}
-
-/*
- * update Candidate Traning certificate By Id
- */
-interface updateCandidateTrainingCertParam {
-    id: number
-    type: "TRAINING" | "CERTIFICATE" | "OTHER"
-    title: string
-    issueDate: Date
-    issuedBy: string
-    description: string
-    candidate: number
-    skillId: any
-}
-const updateCandidateTrainingCertById = async (
-    userLoginId: number,
-    param: updateCandidateTrainingCertParam
-): Promise<helper.IResponseObject> => {
-    try {
-        const candidateTrainingFound = await prisma.candidateTraining.findFirst(
-            {
-                where: {
-                    id: param.id,
-                },
-            }
-        )
-        if (!candidateTrainingFound)
-            return helper.getHandlerResponseObject(
-                false,
-                httpStatus.Not_Found,
-                "Candidate training/certificate not found"
-            )
-
-        const candidateTraining = await prisma.candidateTraining.update({
-            where: {
-                id: param.id,
-            },
-            data: {
-                title: param.title,
-                type: param.type,
-                issueDate: param.issueDate,
-                issuedBy: param.issuedBy,
-                description: param.description,
-                SkillId: {
-                    connectOrCreate: {
-                        where: {
-                            id: param.skillId,
-                        },
-                        create: {
-                            title: param.skillId,
-                            createdBy: userLoginId,
-                            modifiedBy: userLoginId,
-                        },
-                    },
-                },
-                ModifiedBy: {
-                    connect: {
-                        id: userLoginId,
-                    },
-                },
-            },
-        })
-
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.No_Content,
-            "Candidate training/certificate updated successfully",
-            candidateTraining
-        )
-    } catch (error) {
-        log.error(error.message, "Error while updateCandidateTrainingCertById")
-        return helper.getHandlerResponseObject(
-            false,
-            httpStatus.Bad_Request,
-            "Error while updateCandidateTrainingCertById"
-        )
-    }
-}
-
-/*
- * remove Candidate Traning certificate By Id
- */
-interface removeCandidateTrainingCertParam {
-    id: number
-}
-const removeCandidateTrainingCert = async (
-    param: removeCandidateTrainingCertParam
-): Promise<helper.IResponseObject> => {
-    try {
-        const deletedRow = await prisma.candidateTraining.delete({
-            where: {
-                id: param.id,
-            },
-        })
-
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.No_Content,
-            "Candidate training/certificate deleted successfully",
-            deletedRow
-        )
-    } catch (error) {
-        log.error(error.message, "Error while removeCandidateTrainingCert")
-        return helper.getHandlerResponseObject(
-            false,
-            httpStatus.Bad_Request,
-            "Error while removeCandidateTrainingCert"
-        )
     }
 }
 
@@ -1210,7 +1123,7 @@ const getCandidateWorkHistoryById = async (
             "",
             candidateWorkHistory
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCandidateWorkHistoryById")
         return helper.getHandlerResponseObject(
             false,
@@ -1287,7 +1200,7 @@ const addCandidateWorkHistory = async (
             "Candidate work history created successfully",
             candidateWorkHistory
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while addCandidateWorkHistory")
         return helper.getHandlerResponseObject(
             false,
@@ -1377,7 +1290,7 @@ const updateCandidateWorkHistoryById = async (
             "Candidate work history updated successfully",
             candidateWorkHistory
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateCandidateWorkHistoryById")
         return helper.getHandlerResponseObject(
             false,
@@ -1410,7 +1323,7 @@ const removeCandidateWorkHistory = async (
             httpStatus.No_Content,
             "Candidate work history deleted successfully"
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while removeCandidateWorkHistory")
         return helper.getHandlerResponseObject(
             false,
@@ -1439,7 +1352,7 @@ const getCandidatesWorkHistory = async (
             "",
             candidatesWorkHistories
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCandidatesWorkHistory")
         return helper.getHandlerResponseObject(
             false,
@@ -1449,55 +1362,18 @@ const getCandidatesWorkHistory = async (
     }
 }
 
-/*
- * get Candidate Traning Certificate
- */
-
-const getCandidateTrainingCerts = async (
-    id: number
-): Promise<helper.IResponseObject> => {
-    try {
-        const candidateTrainings = await prisma.candidateTraining.findMany({
-            where: {
-                candidateId: id,
-            },
-            include: {
-                SkillId: true,
-            },
-        })
-
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.OK,
-            "",
-            candidateTrainings
-        )
-    } catch (error) {
-        log.error(error.message, "Error while getCandidateTrainingCerts")
-        return helper.getHandlerResponseObject(
-            false,
-            httpStatus.Bad_Request,
-            "Error while getCandidateTrainingCerts"
-        )
-    }
-}
-
 const Candidate = {
     getCandidates,
     getCandidateById,
     createCandidate,
     updateCandidateById,
-    addCandidateTrainingCert,
-    updateCandidateTrainingCertById,
-    removeCandidateTrainingCert,
     addCandidateWorkHistory,
     updateCandidateWorkHistoryById,
     removeCandidateWorkHistory,
     getCandidatesWorkHistory,
-    getCandidateTrainingCerts,
-    getCandidateTrainingCertById,
     getCandidateWorkHistoryById,
     createCandidateRaw,
+    fetchAllPassive,
 }
 
 export { Candidate }

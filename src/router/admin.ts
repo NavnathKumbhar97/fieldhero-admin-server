@@ -15,7 +15,7 @@ AdminRouter.get(
             const result = await handler.Admin.fetchOtherIndustriesCategories()
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -31,7 +31,7 @@ AdminRouter.get(
                 await handler.Admin.fetchOtherIndustriesCategoriesPassive()
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -49,7 +49,7 @@ AdminRouter.post(
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

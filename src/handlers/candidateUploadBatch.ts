@@ -68,7 +68,7 @@ const fetchAll = async (
             ..._paginate,
             items: batches,
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetchAll candidate upload batches"
@@ -148,7 +148,7 @@ const fetchAllAdmin = async (
             ..._paginate,
             items: result,
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while fetchAllAdmin candidate upload batches"
@@ -305,7 +305,7 @@ const getRejectionSummary = async (
             arrRejected,
             arrIgnored,
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while getRejectionSummary for uploaded batch"
@@ -366,7 +366,7 @@ const changeAgentPricingTemplate = async (
             "Pricing template changed successfully",
             null
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while change agent pricing template")
         return helper.getHandlerResponseObject(
             false,
@@ -417,7 +417,7 @@ const fetchAdminPassiveCreate = async () => {
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
             users: result,
         })
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetchAdminPassiveCreate")
         return helper.getHandlerResponseObject(
             false,
@@ -615,7 +615,7 @@ const fetchStatsById = async (
         }
 
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetch batch stats by id")
         return getHandlerResponseObject(
             false,

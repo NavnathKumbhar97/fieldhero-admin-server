@@ -13,7 +13,6 @@ import { SubscriptionRouter } from "./subscriptions"
 import { CustomerRouter } from "./customer"
 import { RoleRouter } from "./role"
 import { PermissionRouter } from "./permission"
-import { UploadRouter } from "./upload"
 import { UserRouter } from "./user"
 import { AgentRouter } from "./agent"
 import { CandidateUploadBatchRouter } from "./candidateUploadBatch"
@@ -35,7 +34,6 @@ router.use(IndustryRouter)
 router.use(SkillRouter)
 router.use(CompanyRouter)
 router.use(CandidateRouter)
-router.use(UploadRouter)
 router.use(SubscriptionRouter)
 router.use(CustomerRouter)
 router.use(PermissionRouter)

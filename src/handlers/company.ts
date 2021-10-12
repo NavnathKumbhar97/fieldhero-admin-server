@@ -33,13 +33,8 @@ const getCompanies = async (all: string): Promise<helper.IResponseObject> => {
             industry: comp.IndustryId?.title,
         }))
 
-        return helper.getHandlerResponseObject(
-            true,
-            httpStatus.OK,
-            "",
-            result
-        )
-    } catch (error) {
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+    } catch (error: any) {
         log.error(error.message, "Error while getCompanies")
         return helper.getHandlerResponseObject(
             false,
@@ -70,7 +65,7 @@ const getCompanyById = async (id: number): Promise<helper.IResponseObject> => {
             )
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", company)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getCompanyById")
         return helper.getHandlerResponseObject(
             false,
@@ -145,7 +140,7 @@ const createCompany = async (
             "Company created successfully",
             company
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createCompany")
         return helper.getHandlerResponseObject(
             false,
@@ -214,7 +209,7 @@ const updatedCompanyById = async (
             "Company updated successfully",
             company
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updatedCompanyById")
         return helper.getHandlerResponseObject(
             false,

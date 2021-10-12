@@ -22,7 +22,7 @@ const getSkills = async (all: string): Promise<helper.IResponseObject> => {
         })
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", skills)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getSkills")
         return helper.getHandlerResponseObject(
             false,
@@ -48,7 +48,7 @@ const getSkillById = async (id: number): Promise<helper.IResponseObject> => {
             )
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", skill)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getSkillById")
         return helper.getHandlerResponseObject(
             false,
@@ -99,7 +99,7 @@ const createSkill = async (
             "Skill created successfully",
             skill
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createSkill")
         return helper.getHandlerResponseObject(
             false,
@@ -151,7 +151,7 @@ const updateSkillById = async (
             "Skill updated successfully",
             skill
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateSkillById")
         return helper.getHandlerResponseObject(
             false,

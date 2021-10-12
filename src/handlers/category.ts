@@ -24,7 +24,7 @@ const fetchAll = async (all: string): Promise<IResponseObject> => {
             orderBy: { title: "asc" },
         })
         return getHandlerResponseObject(true, httpStatus.OK, "", categories)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetch all categories")
         return getHandlerResponseObject(
             false,
@@ -72,7 +72,7 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
             ModifiedBy: ModifiedBy?.User.fullName,
         }
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while fetch category by id")
         return getHandlerResponseObject(
             false,
@@ -126,7 +126,7 @@ const create = async (
             "Category created successfully",
             category
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while create category")
         return getHandlerResponseObject(
             false,
@@ -182,7 +182,7 @@ const updateById = async (
             "Category updated successfully",
             category
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while update category by id")
         return getHandlerResponseObject(
             false,

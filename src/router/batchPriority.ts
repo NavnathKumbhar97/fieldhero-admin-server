@@ -18,7 +18,7 @@ BatchPriorityRouter.post(
             )
             const { code, message, data } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -33,7 +33,7 @@ BatchPriorityRouter.get(
             const result = await handler.BatchPriority.fetchAll()
             const { code, message, data } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -48,7 +48,7 @@ BatchPriorityRouter.get(
             const result = await handler.BatchPriority.passiveCreate()
             const { code, message, data } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }
@@ -65,7 +65,7 @@ BatchPriorityRouter.get(
             )
             const { code, message, data } = result
             res.status(code).json({ code, message, data })
-        } catch (error) {
+        } catch (error: any) {
             handler.express.handleRouterError(res, error)
         }
     }

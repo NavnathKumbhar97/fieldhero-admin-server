@@ -4,9 +4,8 @@ import mjml from "mjml"
 import prisma from "../prisma"
 import log from "./log"
 import telegram from "./telegram"
-import config from "../config"
 import { emailTemplate } from "../handlers"
-import mailer from "../../nodemailer"
+import helper from "."
 
 const getBatchStatusFromMode = (
     mode: string
@@ -86,7 +85,7 @@ const processLastCandidateFromBatch = async (candidateId: number) => {
                 )
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while processLastCandidateFromBatch with candidate id " +
@@ -223,7 +222,7 @@ const processBatchCalculation = async (
                 telegram.sendMessage(msg)
             }
         }
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.message,
             "Error while processBatchCalculation with batch no " + batchId
@@ -254,7 +253,7 @@ const afterBatchApprovedTelegramNotification = async (
         msg += "Approved by: *" + userFound?.fullName + "*\n"
         msg += "Amount payable to agent: *" + batchTotal + "* INR\n"
         await telegram.sendMessage(msg)
-    } catch (error) {
+    } catch (error: any) {
         log.error(
             error.toString(),
             "Error while afterBatchApprovedTelegramNotification"
@@ -287,27 +286,54 @@ const afterBatchApprovedEmailToAgent = async (batchNo: number) => {
         // if batch not found or batch owner is not agent
         if (!batchFound || batchFound.CreatedBy?.roleId !== 3) return
 
-        const html = mjml(
-            emailTemplate.batchApprovedToAgent(
-                batchFound.CreatedBy.User.fullName,
-                batchFound.id,
-                batchFound.count,
-                batchFound.approvedCount || 0,
-                batchFound.rejectedCount || 0,
-                batchFound.paymentAmount || 0
-            )
-        ).html
+        const _template = emailTemplate.batchApprovedToAgent(
+            batchFound.CreatedBy.User.fullName,
+            batchFound.id,
+            batchFound.count,
+            batchFound.approvedCount || 0,
+            batchFound.rejectedCount || 0,
+            batchFound.paymentAmount || 0
+        )
+        const html = mjml(_template.template).html
 
-        mailer.sendMail({
-            to: [batchFound.CreatedBy.email],
-            from: config.EMAIL_FROM,
-            subject: "FieldHero - Batch Processed",
+        helper.Email.sendEmail(
+            _template.id,
             html,
-        })
-    } catch (error) {
+            batchFound.CreatedBy.email,
+            "FieldHero - Batch Processed"
+        )
+    } catch (error: any) {
         log.error(
             error.toString(),
             "Error while afterBatchApprovedEmailToAgent"
+        )
+    }
+}
+
+const afterBatchApprovedEmailToCandidates = async (
+    arrCandidates: Array<{ fullName: string; password: string; email?: string }>
+) => {
+    try {
+        for (const _candidate of arrCandidates) {
+            const _template = emailTemplate.welcomeToCandidate(
+                _candidate.fullName,
+                _candidate.password
+            )
+            const html = mjml(_template.template).html
+
+            if (_candidate.email) {
+                helper.Email.sendEmail(
+                    _template.id,
+                    html,
+                    _candidate.email,
+                    "FieldHero -  Welcome to FieldHero"
+                )
+            }
+        }
+    } catch (error: any) {
+        log.error(
+            error.toString(),
+            "Error while afterBatchApprovedEmailToCandidates"
         )
     }
 }
@@ -318,6 +344,7 @@ export {
     processLastCandidateFromBatch,
     afterBatchApprovedTelegramNotification,
     afterBatchApprovedEmailToAgent,
+    afterBatchApprovedEmailToCandidates,
 }
 export default {
     getBatchStatusFromMode,
@@ -325,4 +352,5 @@ export default {
     processLastCandidateFromBatch,
     afterBatchApprovedTelegramNotification,
     afterBatchApprovedEmailToAgent,
+    afterBatchApprovedEmailToCandidates,
 }

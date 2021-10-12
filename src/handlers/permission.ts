@@ -27,7 +27,7 @@ const getPermissions = async (all: string): Promise<helper.IResponseObject> => {
             "",
             permissions
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getPermissions")
         return helper.getHandlerResponseObject(
             false,
@@ -62,7 +62,7 @@ const getPermissionsById = async (
             "",
             permission
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getPermissionsById")
         return helper.getHandlerResponseObject(
             false,

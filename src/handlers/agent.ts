@@ -38,7 +38,7 @@ const getAllAgents = async (): Promise<helper.IResponseObject> => {
             contactNo: agent.UserId.UserLogin?.contactNo,
         }))
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getAllAgents")
         return helper.getHandlerResponseObject(
             false,
@@ -120,7 +120,7 @@ const getAgentById = async (id: number): Promise<helper.IResponseObject> => {
         const { UserLogin, ...otherInUserId } = UserId
         const result = { ...otherInAgent, ...otherInUserId, ...UserLogin }
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while getAgentById")
         return helper.getHandlerResponseObject(
             false,
@@ -278,19 +278,18 @@ const createAgent = async (
         })
 
         if (process.env.NODE_ENV !== "test") {
-            const html = mjml(
-                handler.emailTemplate.createAgent(
-                    param.fullName,
-                    param.email,
-                    password
-                )
-            ).html
-            mailer.sendMail({
-                to: [param.email],
-                from: config.EMAIL_FROM,
-                subject: "Fieldhero - Agent - Account Created Successfully",
+            const _template = handler.emailTemplate.createAgent(
+                param.fullName,
+                param.email,
+                password
+            )
+            const html = mjml(_template.template).html
+            helper.Email.sendEmail(
+                _template.id,
                 html,
-            })
+                param.email,
+                "Fieldhero - Agent - Account Created Successfully"
+            )
         }
 
         return helper.getHandlerResponseObject(
@@ -299,7 +298,7 @@ const createAgent = async (
             "Agent created successfully",
             agent
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while createAgent")
         return helper.getHandlerResponseObject(
             false,
@@ -423,7 +422,7 @@ const updateAgent = async (
             "Agent updated successfully",
             agent
         )
-    } catch (error) {
+    } catch (error: any) {
         log.error(error.message, "Error while updateAgent")
         return helper.getHandlerResponseObject(
             false,

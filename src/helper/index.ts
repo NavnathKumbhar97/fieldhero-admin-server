@@ -6,6 +6,7 @@ import { passwordfunction } from "./password"
 import candidate from "./candidate"
 import telegram from "./telegram"
 import batch from "./batch"
+import Email from "./email"
 const getExpiryTime = (): number => {
     return Date.now() + 3600000
 }
@@ -100,7 +101,8 @@ export {
     telegram,
     languages,
     getLanguages,
-    batch
+    batch,
+    Email,
 }
 export default {
     log,
@@ -116,5 +118,6 @@ export default {
     telegram,
     languages,
     getLanguages,
-    batch
+    batch,
+    Email,
 }
