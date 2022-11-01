@@ -177,10 +177,19 @@ const createCandidateVerification = async (
 
 // get candidate verification assigned to user
 const getCandidateVerifications = async (
-    userLoginId: number | null | undefined
+    userLoginId: number | null | undefined,
+    take:any,skip:any
 ): Promise<IResponseObject> => {
     try {
-        const candidates = await prisma.candidate.findMany({
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.candidate.count({
+            where: {
+                createdBy: userLoginId,
+            },
+        })
+        const candidates = await prisma.candidate.findMany({take:limit,skip:page,
             select: {
                 id: true,
                 fullName: true,
@@ -236,7 +245,7 @@ const getCandidateVerifications = async (
                 batchNo: CandidateRawId?.batchId,
             }
         })
-        return getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCandidateVerification")
         return getHandlerResponseObject(

@@ -7,10 +7,18 @@ import {
 } from "../helper"
 
 // * fetch all agent pricing templates
-const fetchAll = async (all: string): Promise<IResponseObject> => {
+const fetchAll = async (all: string,take:any,skip:any): Promise<IResponseObject> => {
     try {
-        let whereCondition: true | undefined = true
+        let whereCondition:  undefined 
         if (all === "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.agentPricingTemplate.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
 
         const agentPricingTemplates =
             await prisma.agentPricingTemplate.findMany({
@@ -32,7 +40,7 @@ const fetchAll = async (all: string): Promise<IResponseObject> => {
             true,
             httpStatus.OK,
             "",
-            agentPricingTemplates
+            {agentPricingTemplates,count}
         )
     } catch (error: any) {
         log.error(

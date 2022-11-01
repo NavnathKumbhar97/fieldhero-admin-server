@@ -9,12 +9,21 @@ const { log, httpStatus } = helper
  * @param all
  */
 
-const getRoles = async (all: string): Promise<helper.IResponseObject> => {
+const getRoles = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const roles = await prisma.role.findMany({
+        const count = await prisma.role.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const roles = await prisma.role.findMany({take: limit, skip:page,
             select: {
                 id: true,
                 name: true,
@@ -31,7 +40,7 @@ const getRoles = async (all: string): Promise<helper.IResponseObject> => {
             orderBy: { name: "asc" },
         })
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", roles)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {roles,count})
     } catch (error: any) {
         log.error(error.message, "Error while getRoles")
         return helper.getHandlerResponseObject(

@@ -9,9 +9,17 @@ import mailer from "../../nodemailer"
 import moment from "moment"
 const { log, httpStatus } = helper
 
-const getAllAgents = async (): Promise<helper.IResponseObject> => {
+const getAllAgents = async (take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
-        const agents = await prisma.agent.findMany({
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.agent.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+        const agents = await prisma.agent.findMany({take:limit,skip:page,
             select: {
                 id: true,
                 agentNo: true,
@@ -37,7 +45,7 @@ const getAllAgents = async (): Promise<helper.IResponseObject> => {
             email: agent.UserId.UserLogin?.email,
             contactNo: agent.UserId.UserLogin?.contactNo,
         }))
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getAllAgents")
         return helper.getHandlerResponseObject(

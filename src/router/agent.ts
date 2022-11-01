@@ -13,7 +13,8 @@ AgentRouter.get(
     middleware.permission(helper.permissions.agent_read_all),
     async (req: Request, res: Response): Promise<void> => {
         try {
-            const result = await handler.Agent.getAllAgents()
+            const result = await handler.Agent.getAllAgents(Number(req.query.take),
+            Number(req.query.skip))
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
         } catch (error: any) {

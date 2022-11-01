@@ -56,22 +56,22 @@ CandidateRouter.get(
 )
 
 //* create candidate
-// CandidateRouter.post(
-//     "/candidates",
-//     middleware.permission(helper.permissions.candidate_create),
-//     async (req: Request, res: Response) => {
-//         try {
-//             const result = await handler.Candidate.createCandidate(
-//                 helper.getUserLoginId(req.user),
-//                 req.body
-//             )
-//             const { code, data, message } = result
-//             res.status(code).json({ code, message, data })
-//         } catch (error) {
-//             handler.express.handleRouterError(res, error)
-//         }
-//     }
-// )
+CandidateRouter.post(
+    "/candidates",
+    middleware.permission(helper.permissions.candidate_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.createCandidate(
+                helper.getUserLoginId(req.user),
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error:any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 //* Update candiate
 CandidateRouter.put(

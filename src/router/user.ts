@@ -52,7 +52,8 @@ UserRouter.get(
     middleware.permission(helper.permissions.user_read_all),
     async (req: Request, res: Response) => {
         try {
-            const result = await handler.User.getUsers(req.query.all as string)
+            const result = await handler.User.getUsers(req.query.all as string ,Number(req.query.take),
+            Number(req.query.skip))
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
         } catch (error: any) {

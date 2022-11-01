@@ -36,7 +36,7 @@ const fetchAll = async (
             where: {
                 createdBy: userLoginId || undefined,
             },
-        })
+        }) 
         const _paginate = paginate(count, page, limit)
         const batches = await prisma.candidateUploadBatch.findMany({
             select: {
@@ -66,7 +66,7 @@ const fetchAll = async (
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
             ..._paginate,
-            items: batches,
+            result,count
         })
     } catch (error: any) {
         log.error(

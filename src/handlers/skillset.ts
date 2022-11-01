@@ -7,12 +7,21 @@ const { log, httpStatus } = helper
 /*
  * Get All Skills
  */
-const getSkills = async (all: string): Promise<helper.IResponseObject> => {
+const getSkills = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const skills = await prisma.skill.findMany({
+        const count = await prisma.skill.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const skills = await prisma.skill.findMany({take: limit, skip:page,
             where: {
                 isActive: whereCondition,
             },
@@ -21,7 +30,7 @@ const getSkills = async (all: string): Promise<helper.IResponseObject> => {
             },
         })
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", skills)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {skills,count})
     } catch (error: any) {
         log.error(error.message, "Error while getSkills")
         return helper.getHandlerResponseObject(

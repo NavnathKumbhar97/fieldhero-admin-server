@@ -31,7 +31,9 @@ CandidateVerificationRouter.get(
         try {
             const result =
                 await handler.CandidateVerification.getCandidateVerifications(
-                    helper.getUserLoginId(req.user)
+                    helper.getUserLoginId(req.user),
+                    Number(req.query.take),
+                    Number(req.query.skip)
                 )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })

@@ -32,6 +32,8 @@ CandidateUploadBatchRouter.get(
     middleware.permission(helper.permissions.candidate_upload_batch_read_all),
     async (req: Request, res: Response) => {
         try {
+            console.log(req.query);
+            
             const result = await handler.CandidateUploadBatch.fetchAllAdmin(
                 req.query
             )

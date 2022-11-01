@@ -8,13 +8,22 @@ const { log, httpStatus } = helper
  * get All Subscription Plan Details
  */
 const getSubscriptions = async (
-    all: string
+    all: string,take:any,skip:any
 ): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const subscriptions = await prisma.subscription.findMany({
+        const count = await prisma.subscription.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const subscriptions = await prisma.subscription.findMany({take: limit, skip:page,
             select: {
                 id: true,
                 planName: true,
@@ -36,7 +45,7 @@ const getSubscriptions = async (
             true,
             httpStatus.OK,
             "",
-            subscriptions
+            {subscriptions,count}
         )
     } catch (error: any) {
         log.error(error.message, "Error while getSubscriptions")

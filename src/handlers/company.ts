@@ -5,12 +5,20 @@ import prisma from "../prisma"
 const { log, httpStatus } = helper
 
 //* get All Companies Details
-const getCompanies = async (all: string): Promise<helper.IResponseObject> => {
+const getCompanies = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const companies = await prisma.company.findMany({
+        const count = await prisma.company.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const companies = await prisma.company.findMany({take:limit,skip:page,
             where: {
                 isActive: whereCondition,
             },
@@ -33,7 +41,7 @@ const getCompanies = async (all: string): Promise<helper.IResponseObject> => {
             industry: comp.IndustryId?.title,
         }))
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCompanies")
         return helper.getHandlerResponseObject(

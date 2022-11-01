@@ -8,12 +8,20 @@ import {
 } from "../helper"
 
 //* fetch all categories
-const fetchAll = async (all: string): Promise<IResponseObject> => {
+const fetchAll = async (all:any,take:any,skip:any): Promise<IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all === "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const categories = await prisma.category.findMany({
+        const count = await prisma.category.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const categories = await prisma.category.findMany({take:limit,skip:page,
             where: { isActive: whereCondition },
             select: {
                 id: true,
@@ -23,7 +31,7 @@ const fetchAll = async (all: string): Promise<IResponseObject> => {
             },
             orderBy: { title: "asc" },
         })
-        return getHandlerResponseObject(true, httpStatus.OK, "", categories)
+        return getHandlerResponseObject(true, httpStatus.OK, "", {categories,count})
     } catch (error: any) {
         log.error(error.message, "Error while fetch all categories")
         return getHandlerResponseObject(

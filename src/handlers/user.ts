@@ -146,12 +146,21 @@ const createUser = async (
  * Get All User Details
  * @param all
  */
-const getUsers = async (all: string): Promise<helper.IResponseObject> => {
+const getUsers = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const users = await prisma.user.findMany({
+        const count = await prisma.user.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const users = await prisma.user.findMany({take: limit, skip:page,
             select: {
                 id: true,
                 fullName: true,
@@ -188,7 +197,7 @@ const getUsers = async (all: string): Promise<helper.IResponseObject> => {
             role: user.UserLogin?.Role.name,
         }))
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getUsers")
         return helper.getHandlerResponseObject(

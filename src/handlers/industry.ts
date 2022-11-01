@@ -5,12 +5,20 @@ import prisma from "../prisma"
 const { log, httpStatus } = helper
 
 // * get All Industries Details
-const getIndustries = async (all: string): Promise<helper.IResponseObject> => {
+const getIndustries = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const industries = await prisma.industry.findMany({
+        const count = await prisma.industry.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const industries = await prisma.industry.findMany({take:limit,skip:page,
             where: {
                 isActive: whereCondition,
             },
@@ -21,7 +29,7 @@ const getIndustries = async (all: string): Promise<helper.IResponseObject> => {
             true,
             httpStatus.OK,
             "",
-            industries
+            {industries,count}
         )
     } catch (error: any) {
         log.error(error.message, "Error while getIndustries")

@@ -50,52 +50,7 @@ const getCandidates = async (
 
         const count = await prisma.candidate.count({
             where: {
-                isActive: whereCondition,
-                status: "APPROVED",
-                OR: isNotUndefined
-                    ? [
-                          {
-                              fullName: {
-                                  contains: param.fullName,
-                              },
-                          },
-                          {
-                              id: param.id ? parseInt(param.id) : undefined,
-                          },
-                          {
-                              contactNo1: {
-                                  contains: param.contact,
-                              },
-                          },
-                          {
-                              contactNo2: {
-                                  contains: param.contact,
-                              },
-                          },
-                          {
-                              CandidateIndustry: {
-                                  some: {
-                                      industryId: {
-                                          in: param.industry
-                                              ?.split(",")
-                                              .map((x) => parseInt(x)),
-                                      },
-                                  },
-                              },
-                          },
-                          {
-                              CandidateCategory: {
-                                  some: {
-                                      categoryId: {
-                                          in: param.category
-                                              ?.split(",")
-                                              .map((x) => parseInt(x)),
-                                      },
-                                  },
-                              },
-                          },
-                      ]
-                    : undefined,
+                createdBy: undefined,
             },
         })
 
@@ -104,51 +59,6 @@ const getCandidates = async (
         const candidates = await prisma.candidate.findMany({
             where: {
                 isActive: whereCondition,
-                status: "APPROVED",
-                OR: isNotUndefined
-                    ? [
-                          {
-                              fullName: {
-                                  contains: param.fullName,
-                              },
-                          },
-                          {
-                              id: param.id ? parseInt(param.id) : undefined,
-                          },
-                          {
-                              contactNo1: {
-                                  contains: param.contact,
-                              },
-                          },
-                          {
-                              contactNo2: {
-                                  contains: param.contact,
-                              },
-                          },
-                          {
-                              CandidateIndustry: {
-                                  some: {
-                                      industryId: {
-                                          in: param.industry
-                                              ?.split(",")
-                                              .map((x) => parseInt(x)),
-                                      },
-                                  },
-                              },
-                          },
-                          {
-                              CandidateCategory: {
-                                  some: {
-                                      categoryId: {
-                                          in: param.category
-                                              ?.split(",")
-                                              .map((x) => parseInt(x)),
-                                      },
-                                  },
-                              },
-                          },
-                      ]
-                    : undefined,
             },
             select: {
                 id: true,
@@ -156,6 +66,7 @@ const getCandidates = async (
                 contactNo1: true,
                 status: true,
                 isActive: true,
+                
             },
             take: limit,
             skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
@@ -169,7 +80,7 @@ const getCandidates = async (
             ..._paginate,
         }
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCandidates")
         return helper.getHandlerResponseObject(
@@ -231,6 +142,29 @@ const getCandidateById = async (
     try {
         const candidate = await prisma.candidate.findFirst({
             where: { id },
+            select:{
+                id: true,
+                fullName: true,
+                contactNo1: true,
+                status: true,
+                isActive: true,
+                dob: true,
+                gender: true,
+                permAddress: true,
+                permCity:true,
+                permState: true,
+                permCountry: true,
+                permZip: true,
+                currAddress: true,
+                currCity:true,
+                currState:true,
+                currCountry:true,
+                currZip:true,
+                email1:true,
+                email2: true,
+                contactNo2:true,
+                aadharNo: true,
+            }
         })
         if (!candidate)
             return helper.getHandlerResponseObject(
@@ -339,16 +273,16 @@ interface updateCandidateParam {
     fullName: string
     birthDate: Date
     gender: "MALE" | "FEMALE" | "OTHER" | null
-    perm_address: string
-    perm_city: string
-    perm_state: string
-    perm_country: string
-    perm_zip: string
-    curr_address: string
-    curr_city: string
-    curr_state: string
-    curr_country: string
-    curr_zip: string
+    permAddress: string
+    permCity: string
+    permState: string
+    permCountry: string
+    permZip: string
+    currAddress: string
+    currCity: string
+    currState: string
+    currCountry: string
+    currZip: string
     email1: string
     email2: string
     contactNo1: string
@@ -380,22 +314,22 @@ const updateCandidateById = async (
 
         const candidate = await prisma.candidate.update({
             where: {
-                id: candidateFound.id,
+                id: param.id,
             },
             data: {
                 fullName: param.fullName,
                 dob: param.birthDate,
                 gender: param.gender,
-                permAddress: param.perm_address,
-                permCity: param.perm_city,
-                permState: param.perm_state,
-                permCountry: param.perm_country,
-                permZip: param.perm_zip,
-                currAddress: param.curr_address,
-                currCity: param.curr_city,
-                currState: param.curr_state,
-                currCountry: param.curr_country,
-                currZip: param.curr_zip,
+                permAddress: param.permAddress,
+                permCity: param.permCity,
+                permState: param.permState,
+                permCountry: param.permCountry,
+                permZip: param.permZip,
+                currAddress: param.currAddress,
+                currCity: param.currCity,
+                currState: param.currState,
+                currCountry: param.currCountry,
+                currZip: param.currZip,
                 email1: param.email1,
                 email2: param.email2,
                 contactNo1: param.contactNo1,

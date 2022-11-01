@@ -11,12 +11,21 @@ import prisma from "../prisma"
 const { log, httpStatus } = helper
 
 // * Get all customers
-const getCustomers = async (all: string): Promise<helper.IResponseObject> => {
+const getCustomers = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
 
-        const customers = await prisma.customer.findMany({
+        const count = await prisma.customer.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+
+        const customers = await prisma.customer.findMany({take:limit,skip:page,
             where: {
                 isActive: whereCondition,
             },
@@ -45,7 +54,7 @@ const getCustomers = async (all: string): Promise<helper.IResponseObject> => {
             return { ...rest, email: CustomerLogin?.email }
         })
 
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCustomers")
         return helper.getHandlerResponseObject(

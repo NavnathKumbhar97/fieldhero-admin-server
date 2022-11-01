@@ -15,7 +15,8 @@ SkillRouter.get(
     async (req: Request, res: Response) => {
         try {
             const result = await handler.SkillSet.getSkills(
-                req.query.all as string
+                req.query.all as string ,Number(req.query.take),
+                Number(req.query.skip)
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
