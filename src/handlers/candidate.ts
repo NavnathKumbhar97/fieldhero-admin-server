@@ -241,12 +241,12 @@ const createCandidate = async (
                 contactNo1: param.contactNo1,
                 contactNo2: param.contactNo2,
                 aadharNo: param.aadharNo,
-                candidateRawid: userLoginId, // ! wrong value
+                // candidateRawid: userLoginId, // ! wrong value
                 isActive: param.isActive,
-                approvedOn: moment().utc().format(),
-                createdBy: userLoginId,
-                modifiedBy: userLoginId,
-                approvedBy: userLoginId,
+                // approvedOn: moment().utc().format(),
+                // createdBy: userLoginId,
+                // modifiedBy: userLoginId,
+                // approvedBy: userLoginId,
             },
         })
 
