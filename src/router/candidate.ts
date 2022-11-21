@@ -23,6 +23,25 @@ CandidateRouter.get(
         }
     }
 )
+CandidateRouter.get(
+    "/filter-candidate",
+    middleware.permission(helper.permissions.candidate_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            console.log(req.query)
+            const result = await handler.Candidate.filterRecords(
+                req.query as any,
+                req.params.fullName,
+                req.params.contact,
+                req.params as any
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 CandidateRouter.get(
     "/candidates/passive",

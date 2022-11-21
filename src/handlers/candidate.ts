@@ -30,7 +30,7 @@ interface IGetCandidatesParam {
     category?: string
     fullName?: string
     contact?: string
-    id?: string
+    id?: number
 }
 const getCandidates = async (
     param: IGetCandidatesParam
@@ -70,6 +70,66 @@ const getCandidates = async (
             },
             take: limit,
             skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
+            orderBy: {
+                fullName: "asc",
+            },
+        })
+
+        const result = {
+            Candidates: candidates,
+            ..._paginate,
+        }
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getCandidates")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidates"
+        )
+    }
+}
+const filterRecords = async (
+    param: IGetCandidatesParam,
+    fullName:String,
+    contact:String,
+    id:number
+): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        
+
+        const isNotUndefined =
+            param.fullName ||
+            param.contact ||
+            param.id ||
+            param.industry ||
+            param.category 
+
+        const count = await prisma.candidate.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const _paginate = paginate(count)
+
+        const candidates = await prisma.candidate.findMany({
+            where: {
+                isActive: whereCondition,
+                fullName:param.fullName,
+                contactNo1:param.contact,
+                id:param.id,
+            },
+            select: {
+                id: true,
+                fullName: true,
+                contactNo1: true,
+                status: true,
+                isActive: true,
+                
+            },
             orderBy: {
                 fullName: "asc",
             },
@@ -1308,6 +1368,7 @@ const Candidate = {
     getCandidateWorkHistoryById,
     createCandidateRaw,
     fetchAllPassive,
+    filterRecords
 }
 
 export { Candidate }
