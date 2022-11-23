@@ -115,30 +115,30 @@ const createCompany = async (
                 companyName: param.companyName,
                 description: param.description,
                 isActive: param.isActive,
-                IndustryId: {
-                    connectOrCreate: {
-                        where: {
-                            id:
-                                typeof param.industryId === "number"
-                                    ? param.industryId
-                                    : undefined,
-                            title:
-                                typeof param.industryId === "string"
-                                    ? param.industryId
-                                    : undefined,
-                        },
-                        create: {
-                            title:
-                                typeof param.industryId === "number"
-                                    ? param.industryId + ""
-                                    : param.industryId,
-                            createdBy: userLoginId,
-                            modifiedBy: userLoginId,
-                        },
-                    },
-                },
-                CreatedBy: { connect: { id: userLoginId } },
-                ModifiedBy: { connect: { id: userLoginId } },
+                // IndustryId: {
+                //     connectOrCreate: {
+                //         where: {
+                //             id:
+                //                 typeof param.industryId === "number"
+                //                     ? param.industryId
+                //                     : undefined,
+                //             title:
+                //                 typeof param.industryId === "string"
+                //                     ? param.industryId
+                //                     : undefined,
+                //         },
+                //         create: {
+                //             title:
+                //                 typeof param.industryId === "number"
+                //                     ? param.industryId + ""
+                //                     : param.industryId,
+                //             createdBy: userLoginId,
+                //             modifiedBy: userLoginId,
+                //         },
+                //     },
+                // },
+                // CreatedBy: { connect: { id: userLoginId } },
+                // ModifiedBy: { connect: { id: userLoginId } },
             },
         })
 
