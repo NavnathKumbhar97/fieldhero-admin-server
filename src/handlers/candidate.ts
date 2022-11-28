@@ -7,6 +7,8 @@ import prisma from "../prisma"
 import * as helper from "../helper"
 import { log, httpStatus, telegram } from "../helper"
 import { IRejected } from "../helper/candidate"
+import logger from "../logs"
+import path from "path"
 
 const {
     handleString,
@@ -30,7 +32,8 @@ interface IGetCandidatesParam {
     category?: string
     fullName?: string
     contact?: string
-    id?: number
+    id?: number,
+    isActive?:boolean
 }
 const getCandidates = async (
     param: IGetCandidatesParam
@@ -79,10 +82,11 @@ const getCandidates = async (
             Candidates: candidates,
             ..._paginate,
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidates |  Message: Candidates fetched successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCandidates")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidates |  Message: Error while getCandidates.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -118,10 +122,11 @@ const filterRecords = async (
 
         const candidates = await prisma.candidate.findMany({
             where: {
-                isActive: whereCondition,
+                id,
+                isActive:whereCondition,
                 fullName:param.fullName,
                 contactNo1:param.contact,
-                id:param.id,
+
             },
             select: {
                 id: true,
@@ -140,14 +145,15 @@ const filterRecords = async (
             Candidates: candidates,
             ..._paginate,
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : filterRecords |  Message: Candidates filtered successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
-        log.error(error.message, "Error while getCandidates")
+        log.error(error.message, "Error while filterCandidates")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : filterRecords |  Message: Error while filterCandidates.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "Error while getCandidates"
+            "Error while filterCandidates"
         )
     }
 }
@@ -181,13 +187,14 @@ const fetchAllPassive = async (): Promise<helper.IResponseObject> => {
                 },
             }),
         ])
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAllPassive |  Message: Fetch passive for fetch all candidates successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
             industries,
             categories,
         })
     } catch (error: any) {
         log.error(error.message, "Error while fetchAllPassive")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAllPassive |  Message: Error while fetchAllPassive.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -233,7 +240,7 @@ const getCandidateById = async (
                 httpStatus.Not_Found,
                 "Candidate not found"
             )
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidateById |  Message: Candidate fetched by Id successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -241,11 +248,12 @@ const getCandidateById = async (
             candidate
         )
     } catch (error: any) {
-        log.error(error.message, "Error while getIndustries")
+        log.error(error.message, "Error while getCandidateById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidateById |  Message: Error while getCandidateById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "Error while getIndustries"
+            "Error while getCandidateById"
         )
     }
 }
@@ -310,7 +318,7 @@ const createCandidate = async (
                 // approvedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createCandidate |  Message: Candidate created successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
@@ -319,6 +327,7 @@ const createCandidate = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCandidate")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createCandidate |  Message: Error while createCandidate.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -402,7 +411,7 @@ const updateCandidateById = async (
                 approvedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateById |  Message: Candidate updated successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -411,6 +420,7 @@ const updateCandidateById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateCandidateById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateById |  Message: Error while updateCandidateById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -503,6 +513,7 @@ const createCandidateRaw = async (
         message += "Batch no: *" + response.id + "*\n"
         message += "✔Total uploaded: *" + response.count + "*✔"
         telegram.sendMessage(message)
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createCandidateRaw |  Message: Bulk upload successfully. Total uploaded: ${response.count}.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
@@ -511,6 +522,7 @@ const createCandidateRaw = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCandidateRaw")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createCandidateRaw |  Message: Error while createCandidateRaw.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -1085,8 +1097,12 @@ const candidateBatchSystemCheck = async (
                 (end - start) / 1000
             }s`
         )
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : candidateBatchSystemCheck |  Message: System check done for batchNo: ${batchId} within ${
+            (end - start) / 1000
+        }s.`);
     } catch (error: any) {
         log.error(error.message, "Error while candidateBatchSystemCheck")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : candidateBatchSystemCheck |  Message: Error while candidateBatchSystemCheck.`);
     }
 }
 
@@ -1111,7 +1127,7 @@ const getCandidateWorkHistoryById = async (
                 httpStatus.Not_Found,
                 "Candidate work history not found"
             )
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidateWorkHistoryById |  Message: Candidate work history fetched by Id successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -1120,6 +1136,7 @@ const getCandidateWorkHistoryById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getCandidateWorkHistoryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidateWorkHistoryById |  Message: Error while getCandidateWorkHistoryById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -1188,7 +1205,7 @@ const addCandidateWorkHistory = async (
                 modifiedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : addCandidateWorkHistory |  Message: Candidate work history created successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
@@ -1197,6 +1214,7 @@ const addCandidateWorkHistory = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while addCandidateWorkHistory")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : addCandidateWorkHistory |  Message: Error while addCandidateWorkHistory.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -1278,7 +1296,7 @@ const updateCandidateWorkHistoryById = async (
         })
 
         const [candidateWorkHistory] = await prisma.$transaction([updateCWH])
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateWorkHistoryById |  Message: Candidate work history updated successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -1287,6 +1305,7 @@ const updateCandidateWorkHistoryById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateCandidateWorkHistoryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateWorkHistoryById |  Message: Error while updateCandidateWorkHistoryById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -1312,7 +1331,7 @@ const removeCandidateWorkHistory = async (
         })
 
         await prisma.$transaction([deleteCWH])
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : removeCandidateWorkHistory |  Message: Candidate work history deleted successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -1320,6 +1339,7 @@ const removeCandidateWorkHistory = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while removeCandidateWorkHistory")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : removeCandidateWorkHistory |  Message: Error while removeCandidateWorkHistory.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -1340,7 +1360,7 @@ const getCandidatesWorkHistory = async (
                     candidateId: id,
                 },
             })
-
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidatesWorkHistory |  Message: Candidate work history fetched by id successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -1349,6 +1369,7 @@ const getCandidatesWorkHistory = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getCandidatesWorkHistory")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidatesWorkHistory |  Message: Error while getCandidatesWorkHistory.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

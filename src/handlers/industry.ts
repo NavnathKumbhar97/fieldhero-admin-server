@@ -1,4 +1,6 @@
 // local imports
+import path from "path"
+import logger from "../logs"
 import * as helper from "../helper"
 import prisma from "../prisma"
 
@@ -24,6 +26,7 @@ const getIndustries = async (all: string,take:any,skip:any): Promise<helper.IRes
             },
             orderBy: { title: "asc" },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Industries fetched successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -33,6 +36,8 @@ const getIndustries = async (all: string,take:any,skip:any): Promise<helper.IRes
         )
     } catch (error: any) {
         log.error(error.message, "Error while getIndustries")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Error while getIndustries.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -47,12 +52,16 @@ const getIndustryById = async (id: number): Promise<helper.IResponseObject> => {
         const industry = await prisma.industry.findFirst({
             where: { id },
         })
-        if (!industry)
+        if (!industry){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : getIndustryById | Message: Industry not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Industry not found"
-            )
+                )
+            }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Industries fetched by id successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -62,6 +71,8 @@ const getIndustryById = async (id: number): Promise<helper.IResponseObject> => {
         )
     } catch (error: any) {
         log.error(error.message, "Error while getIndustryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Error while getIndustryByIdy.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -83,6 +94,7 @@ const createIndustry = async (
 ): Promise<helper.IResponseObject> => {
     try {
         if (!param.title) {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createIndustry | Message: Title is required.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
@@ -95,6 +107,7 @@ const createIndustry = async (
             },
         })
         if (industryFound) {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createIndustry | Message: Industry already exist.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
@@ -111,6 +124,7 @@ const createIndustry = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createIndustry | Message: Industry created successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -120,6 +134,8 @@ const createIndustry = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createIndustry")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createIndustry | Message: Error while createIndustry.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -145,13 +161,19 @@ const updateIndustryById = async (
                 id: param.id,
             },
         })
-        if (!industryFound)
+        if (!industryFound){
+
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Industry not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Industry not found"
             )
+        }
         if (!param.title) {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Title is required.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
@@ -169,6 +191,7 @@ const updateIndustryById = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Industry updated successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -178,6 +201,8 @@ const updateIndustryById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateIndustryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Error while updateIndustryById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

@@ -41,7 +41,9 @@
         "passport-local": "^1.0.0",
         "pino": "^6.13.1",
         "pino-http": "^5.3.0",
-        "pino-pretty": "^6.0.0"
+        "pino-pretty": "^6.0.0",
+        "winston": "^3.8.2",
+        "winston-mongodb": "^5.1.0"
     },
     "devDependencies": {
         "@types/bcrypt": "^3.0.1",

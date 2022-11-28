@@ -7,6 +7,8 @@ import { emailTemplate } from "../handlers"
 import * as config from "../config"
 import mailer from "../../nodemailer"
 import prisma from "../prisma"
+import logger from "../logs"
+import path from "path"
 
 const { log, httpStatus } = helper
 
@@ -53,10 +55,11 @@ const getCustomers = async (all: string,take:any,skip:any): Promise<helper.IResp
             const { CustomerLogin, ...rest } = cust
             return { ...rest, email: CustomerLogin?.email }
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Customer fetched successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCustomers")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Error while getCustomers.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -88,19 +91,22 @@ const getCustomerById = async (id: number): Promise<helper.IResponseObject> => {
             },
         })
 
-        if (!customer)
+        if (!customer){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : getCustomerById | Message: Customer not found.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Customer not found"
-            )
+                )
+            }
 
         const { CustomerLogin, ...other } = customer
         const result = { ...other, email: CustomerLogin?.email }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomerById | Message: Customer fetched by id successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getCustomerById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomerById | Message: Error while getCustomerById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -119,6 +125,7 @@ const getCustomerSubscriptions = async (
                     customerId,
                 },
             })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomerSubscriptions | Message: Get Customer Subscriptions fetched by id successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -128,6 +135,8 @@ const getCustomerSubscriptions = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getCustomerSubscriptions")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomerSubscriptions | Message: Error while getCustomerSubscriptions.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -154,13 +163,15 @@ const getCustomerSubscriptionsById = async (
                     id: subscriptionId,
                 },
             })
-        if (!customerSubscription)
+        if (!customerSubscription){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : getCustomerSubscriptionsById | Message: Customer subscription not found.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Customer subscription not found"
-            )
-
+                )
+            }
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomerSubscriptionsById | Message: Get Customer Subscriptions By Id.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -169,6 +180,7 @@ const getCustomerSubscriptionsById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getCustomerSubscriptionsById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomerSubscriptionsById | Message: Error while getCustomerSubscriptionsById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -398,11 +410,14 @@ const updateCustomer = async (
             },
         })
         if (!customerFound)
+        {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateCustomer | Message: Customer not found.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Customer not found"
-            )
+                )
+            }
 
         const customer = await prisma.customer.update({
             where: {
@@ -418,6 +433,7 @@ const updateCustomer = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCustomer | Message: Customer updated successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -427,6 +443,7 @@ const updateCustomer = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateCustomer")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateCustomer | Message: Error while updateCustomer.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

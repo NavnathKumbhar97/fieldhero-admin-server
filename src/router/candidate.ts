@@ -33,7 +33,8 @@ CandidateRouter.get(
                 req.query as any,
                 req.params.fullName,
                 req.params.contact,
-                req.params as any
+                req.params as any,
+                
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })

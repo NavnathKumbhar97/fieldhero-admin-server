@@ -1,4 +1,6 @@
 // local imports
+import path from "path"
+import logger from "../logs"
 import * as helper from "../helper"
 import prisma from "../prisma"
 
@@ -40,10 +42,11 @@ const getCompanies = async (all: string,take:any,skip:any): Promise<helper.IResp
             isActive: comp.isActive,
             industry: comp.IndustryId?.title,
         }))
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCompanies | Message: Comapny fetched successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCompanies")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCompanies | Message: Error while getCompanies.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -65,16 +68,20 @@ const getCompanyById = async (id: number): Promise<helper.IResponseObject> => {
                 IndustryId: true,
             },
         })
-        if (!company)
+        if (!company){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : getCompanyById | Message: Company not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Company not found"
-            )
-
+                )
+            }
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCompanyById | Message: Company fetched successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", company)
     } catch (error: any) {
         log.error(error.message, "Error while getCompanyById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCompanyById | Message: Error while getCompanyById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -103,6 +110,7 @@ const createCompany = async (
             },
         })
         if (companyFound) {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createCompany | Message: Company already exist.`);
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
@@ -141,7 +149,7 @@ const createCompany = async (
                 // ModifiedBy: { connect: { id: userLoginId } },
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createCompany | Message: Company created successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
@@ -150,6 +158,7 @@ const createCompany = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCompany")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createCompany | Message: Error while createCompany.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -178,12 +187,15 @@ const updatedCompanyById = async (
                 id: param.id,
             },
         })
-        if (!companyFound)
+        if (!companyFound){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updatedCompanyById | Message: Company not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Company not found"
-            )
+                )
+            }
 
         let industryId: number | undefined =
             typeof param.industryId !== "string" ? param.industryId : undefined
@@ -210,7 +222,7 @@ const updatedCompanyById = async (
                 modifiedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updatedCompanyById | Message: Company updated successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -219,6 +231,7 @@ const updatedCompanyById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updatedCompanyById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updatedCompanyById | Message: Error while updatedCompanyById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

@@ -6,6 +6,9 @@ import {
     httpStatus,
 } from "../helper"
 
+import logger from "../logs"
+import path from "path"
+
 // * fetch all agent pricing templates
 const fetchAll = async (all: string,take:any,skip:any): Promise<IResponseObject> => {
     try {
@@ -36,6 +39,7 @@ const fetchAll = async (all: string,take:any,skip:any): Promise<IResponseObject>
                     id: "desc",
                 },
             })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Agent Pricing Templates Fetched Successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -47,6 +51,7 @@ const fetchAll = async (all: string,take:any,skip:any): Promise<IResponseObject>
             error.message,
             "Error while fetch all agent pricing templates"
         )
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Error while fetch all agent pricing templates.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -98,12 +103,15 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
             CreatedBy: CreatedBy?.User.fullName,
             ModifiedBy: ModifiedBy?.User.fullName,
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchById |  Message: Agent Pricing Templates Fetched by Id Successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch agent pricing template by id"
         )
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchById |  Message: Error while fetch agent pricing template by id.`);
+
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -177,8 +185,7 @@ const create = async (
             )
         const { templateName, description, isActive, ...other } = param
         const total: number = Object.values(other).reduce(
-            (prev: number, curr: number) => prev + curr,
-            0
+            (prev: number, curr: number) => prev + curr,0
         )
         const template = await prisma.agentPricingTemplate.create({
             data: {
@@ -224,7 +231,7 @@ const create = async (
                 },
             })
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : create |  Message: Agent Pricing Template Created Successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.Created,
@@ -233,6 +240,7 @@ const create = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while create agent pricing template")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : create |  Message: Error while create agent pricing template.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -280,7 +288,7 @@ const setActiveById = async (
                 modifiedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : setActiveById |  Message: Agent pricing template set to active successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -289,6 +297,7 @@ const setActiveById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while setActiveById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : setActiveById |  Message: Error while setActiveById.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

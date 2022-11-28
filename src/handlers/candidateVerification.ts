@@ -7,6 +7,8 @@ import {
     log,
     batch,
 } from "../helper"
+import logger from "../logs"
+import path from "path"
 
 // assign new candidate verification to user
 const createCandidateVerification = async (
@@ -75,12 +77,14 @@ const createCandidateVerification = async (
                 },
             })
 
-        if (!assignedCandidate?.candidateRawid)
+        if (!assignedCandidate?.candidateRawid){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createCandidateVerification | Message: No more candidate available for verification.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "No more candidate available for verification"
-            )
+                )
+            }
 
         await prisma.$transaction([
             prisma.candidate.update({
@@ -159,6 +163,7 @@ const createCandidateVerification = async (
                 },
             }),
         ])
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createCandidateVerification | Message: Candidate verification created successfully.`);
 
         return getHandlerResponseObject(
             true,
@@ -167,6 +172,7 @@ const createCandidateVerification = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCandidateVerification")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createCandidateVerification | Message: Error while createCandidateVerification.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -245,9 +251,11 @@ const getCandidateVerifications = async (
                 batchNo: CandidateRawId?.batchId,
             }
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidateVerification | Message: Candidate verification fetched successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCandidateVerification")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidateVerification | Message: Error while getCandidateVerification.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -400,9 +408,11 @@ const getCandidateVerificationById = async (
             primaryLanguageRaw: CandidateRawId?.primaryLang,
             secondaryLanguageRaw: CandidateRawId?.secondaryLang,
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidateVerificationById | Message: Candidate verification fetched by id successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getCandidateVerificationById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidateVerificationById | Message: Error while getCandidateVerificationById.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -515,12 +525,14 @@ const updateCandidateVerificationById = async (
                 },
             },
         })
-        if (!candidateFound)
+        if (!candidateFound){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateVerificationById | Message: Item not found.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Item not found"
-            )
+                )
+            }
 
         const requests = []
         if (param.callCentre.candidateConsent === "RECEIVED") {
@@ -726,6 +738,7 @@ const updateCandidateVerificationById = async (
         if (param.callCentre.isSubmitted) {
             batch.processLastCandidateFromBatch(candidateFound.id)
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateVerificationById | Message: Candidate Verification updated successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -733,6 +746,7 @@ const updateCandidateVerificationById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateCandidateVerificationById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateVerificationById | Message: Error while updateCandidateVerificationById.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -763,12 +777,14 @@ const fetchPassiveUpdate = async (): Promise<IResponseObject> => {
                 },
             }),
         ])
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchPassiveUpdate | Message: Candidate fetch Passiv update successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", {
             industries,
             categories,
         })
     } catch (error: any) {
         log.error(error.message, "Error while fetchPassiveUpdate")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchPassiveUpdate | Message: Error while fetchPassiveUpdate.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -819,9 +835,11 @@ const getDashboardForUser = async (
                 assignedCandidate: assignedCandidateCount,
             },
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getDashboardForUser | Message: Get Dashboard For User successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getDashboardForUser")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getDashboardForUser | Message: Error while getDashboardForUser.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

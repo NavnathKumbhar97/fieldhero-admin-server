@@ -1,4 +1,6 @@
 // local imports
+import path from "path"
+import logger from "../logs"
 import * as helper from "../helper"
 import prisma from "../prisma"
 
@@ -39,10 +41,13 @@ const getRoles = async (all: string,take:any,skip:any): Promise<helper.IResponse
             },
             orderBy: { name: "asc" },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getRoles | Message: Role fetched successfully.`);
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {roles,count})
     } catch (error: any) {
         log.error(error.message, "Error while getRoles")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getRoles | Message: Error while getRoles.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -71,22 +76,28 @@ const getRoleById = async (id: number): Promise<helper.IResponseObject> => {
                 },
             },
         })
-        if (!_role)
+        if (!_role){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : getRolesById | Message: Role not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Role not found"
-            )
-
+                )
+                
+            }
         const { RolePermission, ...rest } = _role
         const result = {
             ...rest,
             permissions: RolePermission.map((x) => x.permissionId),
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getRolesById | Message: Role fetched successfully.`);
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getRoleById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getRolesById | Message: Error while getRoleById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -128,6 +139,7 @@ const createRole = async (
                 },
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createRole | Message: Role created successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -137,6 +149,7 @@ const createRole = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createRole")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createRole | Message: Error while createRole.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -164,12 +177,15 @@ const updateRoleById = async (
                 id: param.id,
             },
         })
-        if (!role)
+        if (!role){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createRole | Message: Role not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Bad_Request,
                 "Role not found"
-            )
+                )
+            }
         // Delete all permissions
         await prisma.rolePermission.deleteMany({
             where: {
@@ -197,6 +213,7 @@ const updateRoleById = async (
                 },
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateRoleById | Message: Role updated successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -206,6 +223,8 @@ const updateRoleById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateRoleById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateRoleById | Message: Error while updateRoleById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

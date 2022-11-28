@@ -7,6 +7,9 @@ import * as handler from "../handlers"
 import * as config from "../config"
 import mailer from "../../nodemailer"
 import moment from "moment"
+import logger from "../logs"
+import path from "path"
+
 const { log, httpStatus } = helper
 
 const getAllAgents = async (take:any,skip:any): Promise<helper.IResponseObject> => {
@@ -45,14 +48,17 @@ const getAllAgents = async (take:any,skip:any): Promise<helper.IResponseObject> 
             email: agent.UserId.UserLogin?.email,
             contactNo: agent.UserId.UserLogin?.contactNo,
         }))
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getAllData |  Message: Data Fetched Successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getAllAgents")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getAllData |  Message: Error while getAllAgents`)
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
             "Agents not found"
         )
+
     }
 }
 
@@ -127,9 +133,11 @@ const getAgentById = async (id: number): Promise<helper.IResponseObject> => {
         const { UserId, ...otherInAgent } = agent
         const { UserLogin, ...otherInUserId } = UserId
         const result = { ...otherInAgent, ...otherInUserId, ...UserLogin }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getAgentById |  Message: Agent Fetched by Id Successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getAgentById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getAgentById |  Message: Error while getAgentById.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -299,15 +307,17 @@ const createAgent = async (
                 "Fieldhero - Agent - Account Created Successfully"
             )
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createAgent |  Message: Agent Created Successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
             "Agent created successfully",
             agent
         )
+        
     } catch (error: any) {
         log.error(error.message, "Error while createAgent")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createAgent |  Message: Error while createAgent.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -423,7 +433,7 @@ const updateAgent = async (
             userUpdate,
             agentUpdate,
         ])
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateAgent |  Message: Agent Updated Successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -432,6 +442,7 @@ const updateAgent = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateAgent")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateAgent |  Message: Error While updateAgent.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

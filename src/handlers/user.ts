@@ -9,6 +9,8 @@ import { emailTemplate } from "../handlers/mjml"
 import mailer from "../../nodemailer"
 import * as config from "../config"
 import prisma from "../prisma"
+import logger from "../logs"
+import path from "path"
 
 const { log, passwordfunction, httpStatus } = helper
 
@@ -57,18 +59,24 @@ const createUser = async (
             },
         })
         if (userFound) {
-            if (userFound.email === param.email)
+            if (userFound.email === param.email){
+                logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createUser | Message: Email already exist.`);
+
                 return helper.getHandlerResponseObject(
                     false,
                     httpStatus.Conflict,
                     "Email already exist"
-                )
-            if (userFound.contactNo === param.contactNo)
+                    )
+                }
+            if (userFound.contactNo === param.contactNo){
+                logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createUser | Message: Contact no is already used.`);
+
                 return helper.getHandlerResponseObject(
                     false,
                     httpStatus.Conflict,
                     "Contact no is already used"
-                )
+                    )
+                }
         }
 
         const autoPassword = Math.random().toString(36).slice(-8)
@@ -125,6 +133,7 @@ const createUser = async (
             param.email,
             "Fieldhero Admin - Your Password"
         )
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createUser | Message: User created successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -134,6 +143,8 @@ const createUser = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createUser")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createUser | Message: Error while createUser.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -196,10 +207,13 @@ const getUsers = async (all: string,take:any,skip:any): Promise<helper.IResponse
             email: user.UserLogin?.email,
             role: user.UserLogin?.Role.name,
         }))
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getUsers | Message: Get All User Details successfully.`);
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
     } catch (error: any) {
         log.error(error.message, "Error while getUsers")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getUsers | Message: Error while getUsers.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -246,12 +260,15 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
                 },
             },
         })
-        if (!user)
+        if (!user){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getUserById | Message: User not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "User not found"
-            )
+                )
+            }
         const { UserLogin, ...rest } = user
         const result = {
             ...rest,
@@ -259,10 +276,13 @@ const getUserById = async (id: number): Promise<helper.IResponseObject> => {
             roleId: UserLogin?.roleId,
             contactNo: UserLogin?.contactNo,
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getUserById | Message: Get All User Details successfully.`);
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while getUserById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getUserById | Message: Error while getUserById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -309,12 +329,15 @@ const updateUserById = async (
                 id: param.id,
             },
         })
-        if (!userFound)
+        if (!userFound){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateUserById | Message: User not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "User not found"
-            )
+                )
+            }
 
         const user = await prisma.user.update({
             where: {
@@ -358,6 +381,8 @@ const updateUserById = async (
         const { UserLogin, ...rest } = user
         const result = { ...rest, ...UserLogin }
 
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateUserById | Message: User updated successfully.`);
+
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -366,6 +391,8 @@ const updateUserById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateUserById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateUserById | Message: Error while updateUserById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -382,11 +409,15 @@ const createResetPasswordToken = async (
             where: { email },
         })
         if (!userLoginFound)
+        {
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : createResetPasswordToken | Message: Email not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Email not found"
-            )
+                )
+            }
 
         const token = crypto.randomBytes(32).toString("hex")
         const userLogin = await prisma.userLogin.update({
@@ -420,6 +451,7 @@ const createResetPasswordToken = async (
             userLogin.email,
             "Fieldhero Admin - Reset Password Request"
         )
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createResetPasswordToken | Message: Password reset request has been sent on your email.`);
 
         return helper.getHandlerResponseObject(
             false,
@@ -428,6 +460,8 @@ const createResetPasswordToken = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createResetPasswordToken")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createResetPasswordToken | Message: Error while createResetPasswordToken.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -453,29 +487,39 @@ const resetPasswordForUser = async (
                 },
             },
         })
-        if (!userLoginFound)
+        if (!userLoginFound){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : resetPasswordForUser | Message: Email not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Email not found"
-            )
+                )
+            }
 
         if (userLoginFound.resetToken !== token)
+        {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : resetPasswordForUser | Message: Token mismatch.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Bad_Request,
                 "Token mismatch"
-            )
+                )
+            }
 
         const isTokenValid = moment(userLoginFound.resetExpires).isAfter(
             moment()
         )
-        if (!isTokenValid)
+        if (!isTokenValid){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : resetPasswordForUser | Message: Token expired. Please request reset password again..`);
+
             return {
                 status: false,
                 code: httpStatus.Bad_Request,
                 message: "Token expired. Please request reset password again.",
             }
+        }
 
         const newPassword = generator.generate({
             excludeSimilarCharacters: true,
@@ -514,6 +558,7 @@ const resetPasswordForUser = async (
             userLogin.email,
             "Fieldhero Admin - Password Reset Successfully"
         )
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : resetPasswordForUser | Message: Password reset successfully. New password has been sent on your email.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -522,6 +567,8 @@ const resetPasswordForUser = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while resetPasswordForUser")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : resetPasswordForUser | Message: Error while resetPasswordForUser.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -541,23 +588,30 @@ const changePassword = async (
                 id: userLoginId,
             },
         })
-        if (!userLoginFound)
+        if (!userLoginFound){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : changePassword | Message: User not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "User not found"
-            )
-
+                )
+            }
+                
         const isPasswordSame = await passwordfunction.verifyPassword(
             oldPassword,
             userLoginFound.passwordHash
         )
         if (!isPasswordSame)
+        {
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : changePassword | Message: Old password is wrong.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Bad_Request,
                 "Old password is wrong"
-            )
+                )
+            }
 
         const newEncPassword = await passwordfunction.encryptPassword(
             newPassword
@@ -571,6 +625,7 @@ const changePassword = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : changePassword | Message: Password changed successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -579,6 +634,8 @@ const changePassword = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while changePassword")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : changePassword | Message: Error while changePassword.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

@@ -1,5 +1,7 @@
 // local imports
 import { Prisma } from ".prisma/client"
+import path from "path"
+import logger from "../logs"
 import * as helper from "../helper"
 
 import prisma from "../prisma"
@@ -29,10 +31,13 @@ const getSkills = async (all: string,take:any,skip:any): Promise<helper.IRespons
                 title: "asc",
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSkills | Message: Role updated successfully.`);
 
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {skills,count})
     } catch (error: any) {
         log.error(error.message, "Error while getSkills")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getSkills | Message: Error while getSkills.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -49,16 +54,21 @@ const getSkillById = async (id: number): Promise<helper.IResponseObject> => {
         const skill = await prisma.skill.findFirst({
             where: { id },
         })
-        if (!skill)
+        if (!skill){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSkillById | Message: Skill not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Skill not found"
-            )
-
+                )
+            }
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSkillById | Message: Skill fetched by id successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", skill)
     } catch (error: any) {
         log.error(error.message, "Error while getSkillById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getSkillById | Message: Error while getSkillById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -85,12 +95,15 @@ const createSkill = async (
                 title: param.title,
             },
         })
-        if (skillFound)
+        if (skillFound){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createSkill | Message: Skill already exist.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
                 "Skill already exist"
-            )
+                )
+            }
 
         const skill = await prisma.skill.create({
             data: {
@@ -101,6 +114,7 @@ const createSkill = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createSkill | Message: Skill created successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -110,6 +124,8 @@ const createSkill = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createSkill")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createSkill | Message: Error while createSkill.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -135,12 +151,15 @@ const updateSkillById = async (
         const skillFound = await prisma.skill.findFirst({
             where: { id: param.id },
         })
-        if (!skillFound)
+        if (!skillFound){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Skill not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Skill not found"
-            )
+                )
+            }
 
         const skill = await prisma.skill.update({
             where: {
@@ -153,6 +172,7 @@ const updateSkillById = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Skill updated successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -162,6 +182,8 @@ const updateSkillById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updateSkillById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Error while updateSkillById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

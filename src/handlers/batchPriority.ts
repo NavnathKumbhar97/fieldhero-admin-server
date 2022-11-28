@@ -6,6 +6,8 @@ import {
     getHandlerResponseObject,
     permissions,
 } from "../helper"
+import logger from "../logs"
+import path from "path"
 
 type IUpdateParam = {
     batchId: number
@@ -42,6 +44,7 @@ const update = async (
                 })),
             }),
         ])
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : update |  Message: Batch priority updated successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.OK,
@@ -49,6 +52,7 @@ const update = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while update batch priority")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : update |  Message: Error while update batch priority.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -101,10 +105,11 @@ const fetchAll = async (): Promise<IResponseObject> => {
                     ],
                 })
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Batch priority fetched successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while fetch all batch priority")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Error while fetch all batch priority.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -175,13 +180,14 @@ const passiveCreate = async (): Promise<IResponseObject> => {
                 }
             }),
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : passiveCreate |  Message: Batch priority passive create fetched successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(
             error.message,
             "Error while fetch passive create for batch priority"
         )
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : passiveCreate |  Message: Error while fetch passive create for batch priority.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -235,10 +241,11 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
                 id: batch.AssignedTo.id,
             })
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchById |  Message: Batch priority fetched by Id successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while fetch batch priority by id")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchById |  Message: Error while fetch batch priority by id.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

@@ -14,6 +14,9 @@ import {
     batch,
 } from "../helper"
 
+import logger from "../logs"
+import path from "path"
+
 type IFetchAllQueryParam = {
     page?: string
     limit?: string
@@ -63,7 +66,7 @@ const fetchAll = async (
                 ...rest,
             }
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Candidate upload batches fetched successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
             ..._paginate,
             result,count
@@ -73,6 +76,7 @@ const fetchAll = async (
             error.message,
             "Error while fetchAll candidate upload batches"
         )
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAll |  Message: Error while fetchAll candidate upload batches.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -359,7 +363,7 @@ const changeAgentPricingTemplate = async (
                 modifiedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : changeAgentPricingTemplate |  Message: Pricing template changed successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -368,6 +372,7 @@ const changeAgentPricingTemplate = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while change agent pricing template")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : changeAgentPricingTemplate |  Message: Error while change agent pricing template.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -414,11 +419,13 @@ const fetchAdminPassiveCreate = async () => {
         })
 
         //
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAdminPassiveCreate |  Message: Data created successfully.`);
         return helper.getHandlerResponseObject(true, httpStatus.OK, "", {
             users: result,
         })
     } catch (error: any) {
         log.error(error.message, "Error while fetchAdminPassiveCreate")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAdminPassiveCreate |  Message: Error while fetchAdminPassiveCreate.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -613,10 +620,11 @@ const fetchStatsById = async (
             role: batchFound.CreatedBy?.Role.name,
             uploadedAt: batchFound.createdOn,
         }
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchStatsById |  Message: Fetch batch stats by id successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while fetch batch stats by id")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchStatsById |  Message: Error while fetch batch stats by id.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

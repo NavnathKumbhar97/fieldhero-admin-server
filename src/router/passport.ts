@@ -6,6 +6,8 @@ import "../auth/passport"
 import * as config from "../config"
 import { httpStatus } from "../helper"
 import * as handler from "../handlers"
+import logger from "../logs"
+import path from "path"
 
 const LoginRouter = Router()
 LoginRouter.use(passport.initialize())
@@ -33,6 +35,7 @@ LoginRouter.post(
                     res.status(httpStatus.Bad_Request).send({
                         message: info.message,
                     })
+                    logger.warn(`File Name: ${path.basename(__filename)} | Method Name : Login |  Message: Email address not found`)
                 } else if (user) {
                     try {
                         const dataStoredInToken = {
@@ -54,8 +57,11 @@ LoginRouter.post(
                             },
                             message: "User logged in successfully",
                         })
+                        // logger.log('info','working fine! Now')
+                        logger.info(`File Name: ${path.basename(__filename)} | Method Name : Login |  Message: User Logged In Successful`);
                     } catch (error: any) {
                         handler.express.handleRouterError(res, error)
+                        logger.error(new Error(`File Name: ${path.basename(__filename)} | Method Name : Login |  Message: Catch Error`))
                     }
                 }
             }
@@ -72,6 +78,7 @@ LoginRouter.post(
                     code: httpStatus.Bad_Request,
                     error: "Email is required",
                 })
+                logger.warn(`File Name: ${path.basename(__filename)} | Method Name : Forgot-Password |  Message: Email address not found`)
             } else {
                 const response = await handler.User.createResetPasswordToken(
                     req.body.email
@@ -88,14 +95,17 @@ LoginRouter.post(
                             message,
                         })
                     }
+                    logger.info(`File Name: ${path.basename(__filename)} | Method Name : Forgot-Password |  Message: Email Sent Successfully.`);
                 } else {
                     res.status(httpStatus.Bad_Request).json({
                         code: httpStatus.Bad_Request,
                     })
+                    
                 }
             }
         } catch (error: any) {
             handler.express.handleRouterError(res, error)
+            logger.error(new Error(`File Name: ${path.basename(__filename)} | Method Name : Forgot-Password |  Message: Catch Error`))
         }
     }
 )

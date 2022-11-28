@@ -1,4 +1,6 @@
 // local imports
+import path from "path"
+import logger from "../logs"
 import * as helper from "../helper"
 import prisma from "../prisma"
 
@@ -40,6 +42,7 @@ const getSubscriptions = async (
                 planName: "asc",
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Get Subscriptions fetched successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -49,6 +52,7 @@ const getSubscriptions = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getSubscriptions")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Error while getSubscriptions.`);
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -70,11 +74,17 @@ const getSubscriptionById = async (
             },
         })
         if (!subscripition)
+        {
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSubscriptionById | Message: Industry not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Industry not found"
-            )
+                )
+            }
+
+         logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSubscriptionById | Message: Get Subscription By Id successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -84,6 +94,8 @@ const getSubscriptionById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while getSubscriptionById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getSubscriptionById | Message: Error while getSubscriptionById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -115,11 +127,15 @@ const createSubscripition = async (
             },
         })
         if (subscriptionFound)
+        {
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : createSubscripition | Message: Plan name already exist.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
                 "Plan name already exist"
-            )
+                )
+            }
 
         const subscripition = await prisma.subscription.create({
             data: {
@@ -133,6 +149,7 @@ const createSubscripition = async (
                 modifiedBy: userLoginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : createSubscripition | Message: Subscription created successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -142,6 +159,8 @@ const createSubscripition = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while createSubscripition")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : createSubscripition | Message: Error while createSubscripition.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -169,12 +188,15 @@ const updatedSubscriptionById = async (
                 id: param.id,
             },
         })
-        if (!subscriptionFound)
+        if (!subscriptionFound){
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : updatedSubscriptionById | Message: Subscription not found.`);
+
             return helper.getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Subscription not found"
-            )
+                )
+            }
 
         const subscripition = await prisma.subscription.update({
             where: {
@@ -185,6 +207,7 @@ const updatedSubscriptionById = async (
                 isActive: "isActive" in param ? param.isActive : undefined,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updatedSubscriptionById | Message: Subscription updated successfully.`);
 
         return helper.getHandlerResponseObject(
             true,
@@ -194,6 +217,8 @@ const updatedSubscriptionById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while updatedSubscriptionById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updatedSubscriptionById | Message: Error while updatedSubscriptionById.`);
+
         return helper.getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,

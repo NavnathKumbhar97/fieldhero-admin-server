@@ -6,6 +6,8 @@ import {
     getHandlerResponseObject,
     IResponseObject,
 } from "../helper"
+import logger from "../logs"
+import path from "path"
 
 //* fetch all categories
 const fetchAll = async (all:any,take:any,skip:any): Promise<IResponseObject> => {
@@ -31,9 +33,13 @@ const fetchAll = async (all:any,take:any,skip:any): Promise<IResponseObject> => 
             },
             orderBy: { title: "asc" },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAll | Message: Categories fetched successfully.`);
+
         return getHandlerResponseObject(true, httpStatus.OK, "", {categories,count})
     } catch (error: any) {
         log.error(error.message, "Error while fetch all categories")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAll | Message: Error while fetch all categories.`);
+
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -67,21 +73,25 @@ const fetchById = async (id: number): Promise<IResponseObject> => {
                 },
             },
         })
-        if (!category)
+        if (!category){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: Category not found.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Category not found"
             )
+        }
         const { CreatedBy, ModifiedBy, ...other } = category
         const result = {
             ...other,
             CreatedBy: CreatedBy?.User.fullName,
             ModifiedBy: ModifiedBy?.User.fullName,
         }
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: Category fetched by id successfully.`);
         return getHandlerResponseObject(true, httpStatus.OK, "", result)
     } catch (error: any) {
         log.error(error.message, "Error while fetch category by id")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: Error while fetch category by id.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -100,23 +110,25 @@ const create = async (
     param: ICreateParam
 ): Promise<IResponseObject> => {
     try {
-        if (!param.title)
+        if (!param.title){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : create | Message: Title is required.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
                 "Title is required"
-            )
+            )}
         const categoryFound = await prisma.category.findFirst({
             where: {
                 title: param.title.toUpperCase(),
             },
         })
-        if (categoryFound)
+        if (categoryFound){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : create | Message: Category already exist.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
                 "Category already exist"
-            )
+            )}
 
         const category = await prisma.category.create({
             data: {
@@ -127,6 +139,7 @@ const create = async (
                 modifiedBy: userloginId,
             },
         })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : create | Message: Category created successfully.`);
 
         return getHandlerResponseObject(
             true,
@@ -136,6 +149,7 @@ const create = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while create category")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : create | Message: Error while create category.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
@@ -160,18 +174,21 @@ const updateById = async (
                 id: param.id,
             },
         })
-        if (!categoryFound)
+        if (!categoryFound){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Category not found.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Not_Found,
                 "Category not found"
-            )
-        if (!param.title)
+            )}
+        if (!param.title){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Title is required.`);
             return getHandlerResponseObject(
                 false,
                 httpStatus.Conflict,
                 "Title is required"
-            )
+                )
+            }
         const category = await prisma.category.update({
             where: {
                 id: param.id,
@@ -183,7 +200,7 @@ const updateById = async (
                 modifiedBy: userLoginId,
             },
         })
-
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Category updated successfully.`);
         return getHandlerResponseObject(
             true,
             httpStatus.No_Content,
@@ -192,6 +209,7 @@ const updateById = async (
         )
     } catch (error: any) {
         log.error(error.message, "Error while update category by id")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Error while update category by id.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
