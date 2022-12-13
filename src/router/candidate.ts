@@ -180,7 +180,7 @@ CandidateRouter.post(
                 helper.getUserLoginId(req.user),
                 {
                     ...req.body,
-                    candidate: req.params.id,
+                    candidate: parseInt(req.params.id),
                 }
             )
             const { code, data, message } = result
