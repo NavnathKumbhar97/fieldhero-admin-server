@@ -626,17 +626,17 @@ const updateCandidateVerificationById = async (
                 })
             )
 
-            requests.push(
-                prisma.candidateIndustry.createMany({
-                    data: param.industries.map((industry) => ({
-                        candidateId: candidateFound.id,
-                        industryId: industry.id,
-                        title: industry.title && industry.title.toUpperCase(),
-                        createdBy: userLoginId,
-                        modifiedBy: userLoginId,
-                    })),
-                })
-            )
+            // requests.push(
+            //     prisma.candidateIndustry.createMany({
+            //         data: param.industries.map((industry) => ({
+            //             candidateId: candidateFound.id,
+            //             industryId: industry.id,
+            //             title: industry.title && industry.title.toUpperCase(),
+            //             createdBy: userLoginId,
+            //             modifiedBy: userLoginId,
+            //         })),
+            //     })
+            // )
 
             requests.push(
                 prisma.candidateCategory.deleteMany({
@@ -646,17 +646,17 @@ const updateCandidateVerificationById = async (
                 })
             )
 
-            requests.push(
-                prisma.candidateCategory.createMany({
-                    data: param.categories.map((category) => ({
-                        candidateId: candidateFound.id,
-                        categoryId: category.id,
-                        title: category.title && category.title.toUpperCase(),
-                        createdBy: userLoginId,
-                        modifiedBy: userLoginId,
-                    })),
-                })
-            )
+            // requests.push(
+            //     prisma.candidateCategory.createMany({
+            //         data: param.categories.map((category) => ({
+            //             candidateId: candidateFound.id,
+            //             categoryId: category.id,
+            //             title: category.title && category.title.toUpperCase(),
+            //             createdBy: userLoginId,
+            //             modifiedBy: userLoginId,
+            //         })),
+            //     })
+            // )
 
             requests.push(
                 prisma.candidateWorkHistory.deleteMany({
@@ -666,29 +666,29 @@ const updateCandidateVerificationById = async (
                 })
             )
 
-            requests.push(
-                prisma.candidateWorkHistory.createMany({
-                    data: param.workExps.map((workExp) => ({
-                        candidateId: candidateFound.id,
-                        company:
-                            workExp.company && workExp.company.toUpperCase(),
-                        industryId: workExp.industry,
-                        industryTitle:
-                            workExp.industryTitle &&
-                            workExp.industryTitle.toUpperCase(),
-                        categoryId: workExp.category,
-                        categoryTitle:
-                            workExp.categoryTitle &&
-                            workExp.categoryTitle.toUpperCase(),
-                        startDate: workExp.startDate,
-                        endDate: workExp.endDate,
-                        description: workExp.description,
-                        isEmployed: workExp.isEmployed,
-                        createdBy: userLoginId,
-                        modifiedBy: userLoginId,
-                    })),
-                })
-            )
+            // requests.push(
+            //     prisma.candidateWorkHistory.createMany({
+            //         data: param.workExps.map((workExp) => ({
+            //             candidateId: candidateFound.id,
+            //             company:
+            //                 workExp.company && workExp.company.toUpperCase(),
+            //             industryId: workExp.industry,
+            //             industryTitle:
+            //                 workExp.industryTitle &&
+            //                 workExp.industryTitle.toUpperCase(),
+            //             categoryId: workExp.category,
+            //             categoryTitle:
+            //                 workExp.categoryTitle &&
+            //                 workExp.categoryTitle.toUpperCase(),
+            //             startDate: workExp.startDate,
+            //             endDate: workExp.endDate,
+            //             description: workExp.description,
+            //             isEmployed: workExp.isEmployed,
+            //             createdBy: userLoginId,
+            //             modifiedBy: userLoginId,
+            //         })),
+            //     })
+            // )
         }
 
         requests.push(
