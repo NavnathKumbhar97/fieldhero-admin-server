@@ -13,6 +13,7 @@ const UploadRouter = Router()
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
         const p = `public/uploads/candidates/${req.params.id}/profile_image`
+        // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
         }
@@ -25,8 +26,13 @@ const storage = multer.diskStorage({
         }-${datetimestamp}${path.extname(file.originalname)}`
         cb(null, newFilename)
     },
+    // destination: function (req, file, cb) {
+    //     cb(null, '../assets');
+    //  },
+    //  filename: function (req, file, cb) {
+    //     cb(null, Date.now() + '-' + file.originalname);
+    //  }
 })
-
 const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
     if (
         file.mimetype == "image/jpeg" ||
@@ -39,37 +45,39 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
     }
 }
 
+
 const upload = multer({ storage: storage, fileFilter: fileFilter })
 
 //Upload route
 
-// UploadRouter.post(
-//     "/upload-profile/:id",
-//     middleware.permission(
-//         helper.permissions.candidate_basic_upload_profile_image
-//     ),
-//     upload.single("image"),
-//     async (req: Request, res: Response) => {
-//         try {
-//             const file = req.file
-//             if (!file)
-//                 return res.status(httpStatus.Not_Found).json({
-//                     code: httpStatus.Not_Found,
-//                     message: "File not found",
-//                     data: null,
-//                 })
+UploadRouter.post(
+    "/upload-profile/:id",
+    middleware.permission(
+        helper.permissions.candidate_basic_upload_profile_image
+    ),
+    upload.single("image"),
+    async (req: Request, res: Response) => {
+        try {
+            const file = req.file
+            if (!file)
+                return res.status(httpStatus.Not_Found).json({
+                    code: httpStatus.Not_Found,
+                    message: "File not found",
+                    data: null,
+                })
 
-//             const path = file.destination + "/" + file.filename
-//             const result = await handler.UploadImage.updateCandidateProfileById(
-//                 parseInt(req.params.id),
-//                 path
-//             )
-//             const { code, data, message } = result
-//             res.status(code).json({ code, message, data })
-//         } catch (error) {
-//             handler.express.handleRouterError(res, error)
-//         }
-//     }
-// )
+            const path = file.destination + "/" + file.filename
+            const results = await handler.UploadImage.apiResponse(
+                {message: 'File uploaded successfully.', path},
+            )
+            // const { code, data, message } = results
+            res.send({results,path})
+        } catch (error:any) {
+            // handler.express.handleRouterError(res, error)
+            console.log("error",error);
+            
+        }
+    }
+)
 
 export { UploadRouter }

@@ -190,7 +190,7 @@ const approval = async (
                         costToAgent: total,
                         status: "APPROVED",
                         modifiedBy: userLoginId,
-                        passwordHash: pwdHash,
+                        // passwordHash: pwdHash,
                     },
                 })
             )

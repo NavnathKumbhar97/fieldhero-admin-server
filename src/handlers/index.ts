@@ -16,6 +16,7 @@ import { Category } from "./category"
 import { Admin } from "./admin"
 import { AgentPricingTemplate } from "./agentPricingTemplate"
 import { BatchPriority } from "./batchPriority"
+import { UploadImage } from "./UploadImage"
 
 export {
     Candidate,
@@ -36,6 +37,7 @@ export {
     Admin,
     AgentPricingTemplate,
     BatchPriority,
+    UploadImage
 }
 
 export default {
@@ -57,4 +59,5 @@ export default {
     Admin,
     AgentPricingTemplate,
     BatchPriority,
+    UploadImage
 }
