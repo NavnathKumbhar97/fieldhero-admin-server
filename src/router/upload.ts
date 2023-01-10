@@ -67,7 +67,7 @@ UploadRouter.post(
                 })
 
             const path = file.destination + "/" + file.filename
-            const results = await handler.UploadImage.apiResponse(
+            const results = await handler.UploadImage.UploadImgCandidate(
                 {message: 'File uploaded successfully.', path},
             )
             // const { code, data, message } = results

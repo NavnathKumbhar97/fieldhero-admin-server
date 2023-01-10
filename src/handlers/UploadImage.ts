@@ -1,10 +1,10 @@
-function apiResponse(results:any){
+function UploadImgCandidate(results:any){
     return JSON.stringify({code: "200",
         message: "File uploaded",
         data: null});
 }
 
 const UploadImage = {
-    apiResponse
+    UploadImgCandidate
 }
 export {UploadImage}
