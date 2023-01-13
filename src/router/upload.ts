@@ -1,4 +1,4 @@
-import { Router, Request, Response, Express } from "express"
+import { Router, Request, Response, Express, response } from "express"
 import multer from "multer"
 import path from "path"
 import fs from "fs"
@@ -68,14 +68,13 @@ UploadRouter.post(
 
             const path = file.destination + "/" + file.filename
             const results = await handler.UploadImage.UploadImgCandidate(
-                {message: 'File uploaded successfully.', path},
-            )
+            path)
             // const { code, data, message } = results
-            res.send({results,path})
+            res.send(results)
         } catch (error:any) {
-            // handler.express.handleRouterError(res, error)
-            console.log("error",error);
-            
+            handler.express.handleRouterError(res, error)
+            console.log("got an error ",error);
+            res.send(error)
         }
     }
 )
