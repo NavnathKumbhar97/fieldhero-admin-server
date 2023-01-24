@@ -592,6 +592,7 @@ model Candidate {
   preferLocation2            String?                      @db.VarChar(80)
   skill1                     String?                      @db.VarChar(45)
   skill2                     String?                      @db.VarChar(45)
+  profImgPath                String?                      @db.VarChar(500)
   primaryLanguage            Language?
   secondaryLanguage          Language?
   thirdLanguage              String?                      @db.VarChar(30)
