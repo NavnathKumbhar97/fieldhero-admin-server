@@ -10,6 +10,7 @@ const { httpStatus } = helper
 const UploadRouter = Router()
 
 // configure storage for multer
+// upload Profile image for candidate master module 
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
         const p = `public/uploads/candidates/${req.params.id}/profile_image`
@@ -44,12 +45,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
         return cb(new Error("Only image files are allowed!"), false)
     }
 }
-
-
 const upload = multer({ storage: storage, fileFilter: fileFilter })
-
-//Upload route
-
 
 UploadRouter.post(
     "/upload-profile/:id",
@@ -80,6 +76,7 @@ UploadRouter.post(
     }
 )
 
+// upload multiple documents for agent master module 
 const storageFile = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
         const p = `public/uploads/Agent-Master/${req.params.id}/docs`
@@ -113,7 +110,6 @@ const fileFilterFile = (req: Request, file: Express.Multer.File, cb: any) => {
     // }
 }
 
-
 const uploadFile = multer({ storage: storageFile, fileFilter: fileFilterFile })
 
 UploadRouter.post(
@@ -122,6 +118,72 @@ UploadRouter.post(
         helper.permissions.candidate_basic_upload_profile_image
     ),
     uploadFile.array("file"),
+    async (req: Request, res: Response) => {
+        try {
+            const file = req.file
+            if (!file)
+                return res.status(httpStatus.Not_Found).json({
+                    code: httpStatus.Not_Found,
+                    message: "File not found",
+                    data: null,
+                })
+
+            const path = file.destination + "/" + file.filename
+            const results = await handler.UploadImage.UploadImgCandidate(
+            path)
+            // const { code, data, message } = results
+            res.send(results)
+        } catch (error:any) {
+            handler.express.handleRouterError(res, error)
+            console.log("got an error ",error);
+            res.send(error)
+        }
+    }
+)
+
+// upload documents for admin candidate batch 
+const storageAdminCnd = multer.diskStorage({
+    destination: (req: Request, file: Express.Multer.File, cb) => {
+        const p = `public/uploads/Admin-candidate-upload-batch/${req.params.id}/docs`
+        // `.../public/${req.params.id}/profile_image`
+        if (!fs.existsSync(p)) {
+            fs.mkdirSync(p, { recursive: true })
+        }
+        cb(null, p)
+    },
+    filename: (req: Request, file: Express.Multer.File, cb) => {
+        const datetimestamp = Date.now()
+        const newFilename = `${file.fieldname}-${
+            req.params.id
+        }-${datetimestamp}${path.extname(file.originalname)}`
+        cb(null, newFilename)
+    },
+    // destination: function (req, file, cb) {
+    //     cb(null, '../assets');
+    //  },
+    //  filename: function (req, file, cb) {
+    //     cb(null, Date.now() + '-' + file.originalname);
+    //  }
+})
+const fileFilterAdminCnd = (req: Request, file: Express.Multer.File, cb: any) => {
+    //  if (
+    //     file.mimetype == "xlsx"
+    // ) {
+        return cb(null, true)
+    // } else {
+    //     return cb(new Error("Only xlsx files are allowed!"), false)
+    // }
+}
+
+
+const uploadAdminCnd = multer({ storage: storageAdminCnd, fileFilter: fileFilterAdminCnd })
+
+UploadRouter.post(
+    "/upload-admin-candidate-uploadBatch/:id",
+    middleware.permission(
+        helper.permissions.candidate_basic_upload_profile_image
+    ),
+    uploadAdminCnd.single("file"),
     async (req: Request, res: Response) => {
         try {
             const file = req.file
