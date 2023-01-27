@@ -144,7 +144,7 @@ UploadRouter.post(
 // upload documents for admin candidate batch 
 const storageAdminCnd = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/Admin-candidate-upload-batch/${req.params.id}/docs`
+        const p = `public/uploads/Admin-candidate-upload-batch/Bulk-Data`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -154,7 +154,7 @@ const storageAdminCnd = multer.diskStorage({
     filename: (req: Request, file: Express.Multer.File, cb) => {
         const datetimestamp = Date.now()
         const newFilename = `${file.fieldname}-${
-            req.params.id
+            "bulk-data"
         }-${datetimestamp}${path.extname(file.originalname)}`
         cb(null, newFilename)
     },
@@ -179,7 +179,7 @@ const fileFilterAdminCnd = (req: Request, file: Express.Multer.File, cb: any) =>
 const uploadAdminCnd = multer({ storage: storageAdminCnd, fileFilter: fileFilterAdminCnd })
 
 UploadRouter.post(
-    "/upload-admin-candidate-uploadBatch/:id",
+    "/upload-admin-candidate-uploadBatch",
     middleware.permission(
         helper.permissions.candidate_basic_upload_profile_image
     ),
