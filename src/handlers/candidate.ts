@@ -438,6 +438,7 @@ const createCandidateRaw = async (
     try {
         const data = param
             .map((p, i: number) => {
+                
                 try {
                     return {
                         industry: `${handleString(p["industry"])}`,

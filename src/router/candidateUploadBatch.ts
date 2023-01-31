@@ -77,7 +77,7 @@ CandidateUploadBatchRouter.post(
             const result = await handler.Candidate.createCandidateRaw(
                 helper.getUserLoginId(req.user),
                 req.body.user,
-                req.body.data
+                req.body,
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
