@@ -74,8 +74,6 @@ CandidateUploadBatchRouter.post(
     middleware.permission(helper.permissions.candidate_upload_batch_create),
     async (req: Request, res: Response) => {
         try {
-            console.log("Data from router:",req.body,);
-            
             const result = await handler.Candidate.createCandidateRaw(
                 helper.getUserLoginId(req.user),
                 req.body.user,

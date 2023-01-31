@@ -436,7 +436,6 @@ const createCandidateRaw = async (
     param: Array<any>
 ): Promise<helper.IResponseObject> => {
     try {
-        console.log("data :",param);
         const data = param
             .map((p, i: number) => {
                 
