@@ -66,7 +66,7 @@ CandidateUploadBatchRouter.post(
     }
 )
 
-// * create cabdidate upload batch for any user by admin
+// * create candidate upload batch for any user by admin
 CandidateUploadBatchRouter.post(
     "/admin/candidate-upload-batches",
     // 50mb
