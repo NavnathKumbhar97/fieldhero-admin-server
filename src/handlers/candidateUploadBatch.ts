@@ -33,11 +33,14 @@ const fetchAll = async (
     userLoginId?: number | null
 ): Promise<helper.IResponseObject> => {
     try {
+        console.log("test2",userLoginId);
+        
         const page = qParam && qParam.page ? parseInt(qParam.page) : 1
         const limit = qParam && qParam.limit ? parseInt(qParam.limit) : 10
         const count = await prisma.candidateUploadBatch.count({
             where: {
-                createdBy: userLoginId || undefined,
+                modifiedBy: userLoginId || undefined,
+                //createdBy:userLoginId || undefined
             },
         }) 
         const _paginate = paginate(count, page, limit)
@@ -51,7 +54,8 @@ const fetchAll = async (
                 rejectedCount: true,
             },
             where: {
-                createdBy: userLoginId || undefined,
+                modifiedBy: userLoginId || undefined,
+                 //createdBy:userLoginId || undefined
             },
             take: limit,
             skip: _paginate.startIndex >= 0 ? _paginate.startIndex : 0,
