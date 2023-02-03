@@ -110,7 +110,7 @@ const filterRecords = async (
             param.contact ||
             param.id ||
             param.industry ||
-            param.category 
+            param.category || undefined
 
         const count = await prisma.candidate.count({
             where: {
@@ -122,10 +122,20 @@ const filterRecords = async (
 
         const candidates = await prisma.candidate.findMany({
             where: {
+                OR:[
+                    {
+                        fullName:{
+                            endsWith:param.fullName
+                        },
+                    },
+                    {contactNo1:param.contact,},
+                    {isActive:whereCondition,},
+
+                ],
                 id,
-                isActive:whereCondition,
-                fullName:param.fullName,
-                contactNo1:param.contact,
+                // fullName:{
+                //     endsWith:param.fullName
+                // },
 
             },
             select: {
