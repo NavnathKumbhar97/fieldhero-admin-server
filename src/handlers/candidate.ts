@@ -129,9 +129,9 @@ const filterRecords = async (
                         },
                     },
                     {contactNo1:param.contact,},
-                    {isActive:whereCondition,},
-
+                    
                 ],
+                isActive:whereCondition,
                 id,
                 // fullName:{
                 //     endsWith:param.fullName
