@@ -55,6 +55,50 @@ const getRoles = async (all: string,take:any,skip:any): Promise<helper.IResponse
         )
     }
 }
+const getRolesForFilter = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.role.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const roles = await prisma.role.findMany({
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                isActive: true,
+                isSystemGenerated: true,
+            },
+            where: {
+                isActive: whereCondition,
+                id: {
+                    notIn: whereCondition ? [1, 3] : [3],
+                },
+            },
+            orderBy: { name: "asc" },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getRoles | Message: Role fetched successfully.`);
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {roles,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getRoles")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getRoles | Message: Error while getRoles.`);
+
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getRoles"
+        )
+    }
+}
 
 /**
  * Get Role By Id
@@ -238,5 +282,6 @@ const Role = {
     getRoleById,
     createRole,
     updateRoleById,
+    getRolesForFilter,
 }
 export { Role }

@@ -22,6 +22,23 @@ RoleRouter.get(
         }
     }
 )
+//* Fetch all Roles for filter
+RoleRouter.get(
+    "/all-roles",
+    middleware.permission(helper.permissions.role_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Role.getRolesForFilter(req.query.all as string
+                ,Number(req.query.take),
+                Number(req.query.skip)
+                )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 //* Fetch Role By Id
 RoleRouter.get(

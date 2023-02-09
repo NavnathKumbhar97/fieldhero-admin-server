@@ -25,6 +25,24 @@ IndustryRouter.get(
         }
     }
 )
+//* Fetch all Industry for filter
+IndustryRouter.get(
+    "/all-industries",
+    middleware.permission(helper.permissions.industry_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Industry.getIndustriesForFilter(
+                req.query.all as string,
+                Number(req.query.take),
+                Number(req.query.skip),
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 //* Fetch Industry By Id
 IndustryRouter.get(
