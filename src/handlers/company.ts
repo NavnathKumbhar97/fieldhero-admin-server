@@ -54,6 +54,54 @@ const getCompanies = async (all: string,take:any,skip:any): Promise<helper.IResp
         )
     }
 }
+//* get All Companies Details for filter
+const getCompaniesForFilter = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.company.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const companies = await prisma.company.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            include: {
+                IndustryId: {
+                    select: {
+                        title: true,
+                    },
+                },
+            },
+            orderBy: {
+                companyName: "asc",
+            },
+        })
+
+        const result = companies.map((comp) => ({
+            id: comp.id,
+            companyName: comp.companyName,
+            isActive: comp.isActive,
+            industry: comp.IndustryId?.title,
+        }))
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCompanies | Message: Comapny fetched successfully.`);
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getCompanies")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCompanies | Message: Error while getCompanies.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCompanies"
+        )
+    }
+}
 
 /*
  * get Compnay Details By details
@@ -245,6 +293,7 @@ const Company = {
     getCompanyById,
     createCompany,
     updatedCompanyById,
+    getCompaniesForFilter
 }
 
 export { Company }

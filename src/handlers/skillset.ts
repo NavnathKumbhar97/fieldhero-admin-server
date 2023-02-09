@@ -45,6 +45,42 @@ const getSkills = async (all: string,take:any,skip:any): Promise<helper.IRespons
         )
     }
 }
+const getSkillsForFilter = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.skill.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const skills = await prisma.skill.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: {
+                title: "asc",
+            },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getSkills | Message: Role updated successfully.`);
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {skills,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getSkills")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getSkills | Message: Error while getSkills.`);
+
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSkills"
+        )
+    }
+}
 
 /*
  * Get Skill Details By Id
@@ -197,6 +233,7 @@ const SkillSet = {
     getSkillById,
     createSkill,
     updateSkillById,
+    getSkillsForFilter,
     // deleteSkillSetById,
 }
 

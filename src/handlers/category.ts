@@ -23,7 +23,49 @@ const fetchAll = async (all:any,take:any,skip:any): Promise<IResponseObject> => 
             },
         })
 
-        const categories = await prisma.category.findMany({take:limit,skip:page,
+        const categories = await prisma.category.findMany({
+            take:limit,
+            skip:page,
+            where: { isActive: whereCondition },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                isActive: true,
+            },
+            orderBy: { title: "asc" },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchAll | Message: Categories fetched successfully.`);
+
+        return getHandlerResponseObject(true, httpStatus.OK, "", {categories,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while fetch all categories")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchAll | Message: Error while fetch all categories.`);
+
+        return getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while fetch all categories"
+        )
+    }
+}
+//* fetch all categories
+const fetchAllForFilter = async (all:any,take:any,skip:any): Promise<IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all === "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.category.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const categories = await prisma.category.findMany({
+            // take:limit,
+            // skip:page,
             where: { isActive: whereCondition },
             select: {
                 id: true,
@@ -223,6 +265,7 @@ const Category = {
     fetchById,
     create,
     updateById,
+    fetchAllForFilter
 }
 
 export { Category }

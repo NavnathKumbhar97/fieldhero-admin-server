@@ -45,6 +45,45 @@ const getIndustries = async (all: string,take:any,skip:any): Promise<helper.IRes
         )
     }
 }
+// * get All Industries Details for filter
+const getIndustriesForFilter = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.industry.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+        const industries = await prisma.industry.findMany({
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: { title: "asc" },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Industries fetched successfully.`);
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            {industries,count}
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while getIndustries")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getIndustries | Message: Error while getIndustries.`);
+
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getIndustries"
+        )
+    }
+}
 
 //* get Industry Details By Id
 const getIndustryById = async (id: number): Promise<helper.IResponseObject> => {
@@ -217,5 +256,6 @@ const Industry = {
     createIndustry,
     updateIndustryById,
     // deleteIndustryById,
+    getIndustriesForFilter
 }
 export { Industry }

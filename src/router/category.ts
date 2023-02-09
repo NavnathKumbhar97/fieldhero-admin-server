@@ -24,6 +24,23 @@ CategoryRouter.get(
         }
     }
 )
+CategoryRouter.get(
+    "/all-categories",
+    middleware.permission(helper.permissions.category_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Category.fetchAllForFilter(
+                req.query.all as string,
+                Number(req.query.take),
+                Number(req.query.skip)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 //* fetch category by id
 CategoryRouter.get(
