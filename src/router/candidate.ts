@@ -28,12 +28,11 @@ CandidateRouter.get(
     middleware.permission(helper.permissions.candidate_read_all),
     async (req: Request, res: Response) => {
         try {
-            console.log(req.query)
             const result = await handler.Candidate.filterRecords(
                 req.query as any,
+                parseInt(req.params.id),
                 req.params.fullName,
                 req.params.contact,
-                req.params as any,
                 
             )
             const { code, data, message } = result

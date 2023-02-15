@@ -97,14 +97,12 @@ const getCandidates = async (
 const filterRecords = async (
     
     param: IGetCandidatesParam,
+    id:number,
     fullName:String,
     contact:String,
-    id:number
 ): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
-        
-
         const isNotUndefined =
             param.fullName ||
             param.contact ||
@@ -125,14 +123,14 @@ const filterRecords = async (
                 OR:[
                     {
                         fullName:{
-                            endsWith:param.fullName
+                            startsWith:param.fullName,
                         },
                     },
                     {contactNo1:param.contact,},
                     
                 ],
                 isActive:whereCondition,
-                id,
+                // id:param.id,
                 // fullName:{
                 //     endsWith:param.fullName
                 // },
