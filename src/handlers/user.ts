@@ -171,7 +171,77 @@ const getUsers = async (all: string,take:any,skip:any): Promise<helper.IResponse
         })
 
 
-        const users = await prisma.user.findMany({take: limit, skip:page,
+        const users = await prisma.user.findMany({
+            take: limit, skip:page,
+            select: {
+                id: true,
+                fullName: true,
+                isActive: true,
+                UserLogin: {
+                    select: {
+                        email: true,
+                        Role: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+                },
+            },
+            where: {
+                isActive: whereCondition,
+                UserLogin: {
+                    roleId: {
+                        not: 3,
+                    },
+                },
+            },
+            orderBy: {
+                fullName: "asc",
+            },
+        })
+
+        const result = users.map((user) => ({
+            id: user.id,
+            fullName: user.fullName,
+            isActive: user.isActive,
+            email: user.UserLogin?.email,
+            role: user.UserLogin?.Role.name,
+        }))
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getUsers | Message: Get All User Details successfully.`);
+
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getUsers")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getUsers | Message: Error while getUsers.`);
+
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getUsers"
+        )
+    }
+}
+
+/**
+ * Get All User Details
+ * @param all
+ */
+const getUsersForFilter = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.user.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const users = await prisma.user.findMany({
             select: {
                 id: true,
                 fullName: true,
@@ -652,5 +722,6 @@ const User = {
     createResetPasswordToken,
     resetPasswordForUser,
     changePassword,
+    getUsersForFilter,
 }
 export { User }

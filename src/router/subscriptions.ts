@@ -23,6 +23,23 @@ SubscriptionRouter.get(
         }
     }
 )
+//* Fetch All Subscription List for filter
+SubscriptionRouter.get(
+    "/all-subscriptions",
+    middleware.permission(helper.permissions.subscription_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Subscription.getSubscriptionsForFilter(
+                req.query.all as string ,Number(req.query.take),
+                Number(req.query.skip)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
 
 //* Fetch Subscription By Id
 SubscriptionRouter.get(

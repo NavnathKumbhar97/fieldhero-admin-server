@@ -60,6 +60,60 @@ const getSubscriptions = async (
         )
     }
 }
+/*
+ * get All Subscription Plan Details for filter
+ */
+const getSubscriptionsForFilter = async (
+    all: string,take:any,skip:any
+): Promise<helper.IResponseObject> => {
+    try {
+        let whereCondition: true | undefined = true
+        if (all == "*") whereCondition = undefined
+        const page = ""?1:parseInt(skip)
+        const limit = ""?10:parseInt(take)
+
+        const count = await prisma.subscription.count({
+            where: {
+                id: undefined,
+            },
+        })
+
+
+        const subscriptions = await prisma.subscription.findMany({
+            select: {
+                id: true,
+                planName: true,
+                dataCount: true,
+                durationMonths: true,
+                price: true,
+                note: true,
+                isActive: true,
+            },
+            where: {
+                isActive: whereCondition,
+            },
+            orderBy: {
+                planName: "asc",
+            },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Get Subscriptions fetched successfully.`);
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            {subscriptions,count}
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while getSubscriptions")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Error while getSubscriptions.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getSubscriptions"
+        )
+    }
+}
 
 /*
  * get All Subscription Plans By Id
@@ -232,5 +286,6 @@ const Subscription = {
     createSubscripition,
     getSubscriptionById,
     updatedSubscriptionById,
+    getSubscriptionsForFilter,
 }
 export { Subscription }
