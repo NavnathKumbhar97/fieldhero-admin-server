@@ -61,7 +61,7 @@ CandidateVerificationRouter.get(
     }
 )
 
-//
+//get passive update
 CandidateVerificationRouter.get(
     "/candidate-verifications/passive-update",
     middleware.permission(helper.permissions.candidate_verification_update),
