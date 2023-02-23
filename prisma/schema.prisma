@@ -289,6 +289,10 @@ model UserLogin {
   CandidateInquiryModifiedBy            CandidateInquiry[]            @relation("modifiedByCandidateInquiry")
   EmailTemplateCreatedBy                EmailTemplate[]               @relation("createdByEmailTemplate")
   EmailTemplateModifiedBy               EmailTemplate[]               @relation("modifiedByEmailTemplate")
+  CandidateTrainingCreatedBy            CandidateTraining[]           @relation("createdByCandidateTraining")
+  CandidateTrainingModifiedBy           CandidateTraining[]           @relation("modifiedByCandidateTraining")
+
+  CandidateTraining CandidateTraining[]
 }
 
 model RolePermission {
@@ -333,6 +337,7 @@ model Skill {
   modifiedBy           Int?
   ModifiedBy           UserLogin?                    @relation("modifiedBySkillToUserLogin", fields: [modifiedBy], references: [id])
   CandidateWorkHistory SkillOnCandidateWorkHistory[]
+  CandidateTraining    CandidateTraining[]
 }
 
 model Subscription {
@@ -565,7 +570,7 @@ model CandidateCallCentreHistory {
 
 model Candidate {
   id                         Int                          @id @default(autoincrement())
-  candidateRawid             Int?
+  candidateRawid             Int?                         @unique
   CandidateRawId             CandidateRaw?                @relation(fields: [candidateRawid], references: [id])
   fullName                   String                       @db.VarChar(100)
   dob                        DateTime?                    @db.Date
@@ -616,6 +621,7 @@ model Candidate {
   CandidateCategory          CandidateCategory[]
   CandidateCallCentreHistory CandidateCallCentreHistory[]
   CandidateVerification      CandidateVerification?
+  CandidateTraining          CandidateTraining?
 }
 
 model CandidateIndustry {
@@ -665,7 +671,7 @@ model Category {
 
 model Agent {
   id                 Int          @id @default(autoincrement())
-  userId             Int
+  userId             Int          @unique
   UserId             User         @relation(fields: [userId], references: [id])
   agentNo            String?      @db.VarChar(15)
   professionalStatus String?      @db.VarChar(40)
@@ -719,7 +725,7 @@ model Customer {
 
 model CustomerLogin {
   id            Int            @id @default(autoincrement())
-  customerId    Int
+  customerId    Int            @unique
   CustomerId    Customer       @relation(fields: [customerId], references: [id])
   email         String         @unique @db.VarChar(80)
   passwordHash  String         @db.VarChar(200)
@@ -806,6 +812,27 @@ model CandidateWorkHistory {
   ModifiedBy    UserLogin? @relation("modifiedByCandidateWorkHistory", fields: [modifiedBy], references: [id])
 }
 
+model CandidateTraining {
+  id          Int        @id @default(autoincrement())
+  skillId     Int
+  SkillId     Skill?     @relation(fields: [skillId], references: [id])
+  candidateId Int        @unique
+  CandidateId Candidate  @relation(fields: [candidateId], references: [id])
+  type        String?    @db.VarChar(80)
+  title        String?    @db.VarChar(80)
+  issueDate   DateTime?  @db.Date
+  issuedBy    String?    @db.VarChar(80)
+  description String?    @db.VarChar(200)
+  createdOn   DateTime   @default(now())
+  modifiedOn  DateTime   @updatedAt
+  createdBy   Int?
+  CreatedBy   UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByCandidateTraining")
+  modifiedBy  Int?
+  ModifiedBy  UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByCandidateTraining")
+  UserLogin   UserLogin? @relation(fields: [userLoginId], references: [id])
+  userLoginId Int?
+}
+
 model SkillOnCandidateWorkHistory {
   id         Int        @id @default(autoincrement())
   skillId    Int
@@ -867,7 +894,7 @@ model SMSLog {
 
 model CandidateVerification {
   id                Int        @id @default(autoincrement())
-  candidateId       Int
+  candidateId       Int        @unique
   CandidateId       Candidate  @relation(fields: [candidateId], references: [id])
   industry          Boolean?
   category          Boolean?

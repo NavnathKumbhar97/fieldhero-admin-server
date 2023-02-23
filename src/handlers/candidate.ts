@@ -1231,6 +1231,82 @@ const addCandidateWorkHistory = async (
         )
     }
 }
+
+interface createCandidateTraining {
+    issueDate: Date
+    description: string
+    title: string
+    type: string
+    candidateId: number
+    skillId: any
+    issuedBy: any
+    candidate: number
+}
+const addCandidateTraining = async (
+    userLoginId: number,
+    param: createCandidateTraining
+): Promise<helper.IResponseObject> => {
+    try {
+        // let skillsSetArray = []
+        // const skills: number[] = []
+        // const newSkills: string[] = []
+
+        // skillsSetArray = param.skillId
+        // skillsSetArray.forEach((items: any) => {
+        //     if (typeof items == "number") {
+        //         skills.push(items)
+        //     } else {
+        //         newSkills.push(items)
+        //     }
+        // })
+
+        // await prisma.skill.createMany({
+        //     data: newSkills.map((x) => ({
+        //         title: x,
+        //         createdBy: userLoginId,
+        //         modifiedBy: userLoginId,
+        //     })),
+        //     skipDuplicates: true,
+        // })
+
+        // const skillsCreated = await prisma.candidateTraining.findMany({
+        //     where: {
+        //         title: null
+        //     },
+        // })
+
+        // const allSkillsIds = [...skills, ...skillsCreated.map((x) => x.id)]
+
+        const candidateWorkHistory = await prisma.candidateTraining.create({
+            data: {
+                issueDate: param.issueDate,
+                issuedBy: param.issuedBy,
+                skillId: param.skillId,
+                title:param.title,
+                type:param.type,
+                description: param.description,
+                candidateId: param.candidateId,
+                createdBy: userLoginId,
+                modifiedBy: userLoginId,
+            },
+        })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : addCandidateTraining |  Message: Candidate Training created successfully.`);
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Candidate training created successfully",
+            candidateWorkHistory
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while addCandidateTraining")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : addCandidateTraining |  Message: Error while addCandidateTrainig.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while addCandidateTraining"
+        )
+    }
+}
 /*
  * update Candidate workHistory By Id
  */
@@ -1399,7 +1475,8 @@ const Candidate = {
     getCandidateWorkHistoryById,
     createCandidateRaw,
     fetchAllPassive,
-    filterRecords
+    filterRecords,
+    addCandidateTraining
 }
 
 export { Candidate }
