@@ -190,6 +190,27 @@ CandidateRouter.post(
     }
 )
 
+//* Create Candiate Work History
+CandidateRouter.post(
+    "/candidates/:id/training",
+    middleware.permission(helper.permissions.candidate_work_history_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.addCandidateTraining(
+                helper.getUserLoginId(req.user),
+                {
+                    ...req.body,
+                    candidate: parseInt(req.params.id),
+                }
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 //* Update Candiate WorkHistory
 CandidateRouter.put(
     "/candidates/:id/work-history/:workId",
