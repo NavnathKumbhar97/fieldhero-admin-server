@@ -1285,16 +1285,16 @@ const addCandidateTraining = async (
                 title:param.title,
                 type:param.type,
                 description: param.description,
-                candidateId: param.candidateId,
+                candidateId: param.candidate,
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
             },
         })
-        logger.info(`File Name: ${path.basename(__filename)} | Method Name : addCandidateTraining |  Message: Candidate Training created successfully.`);
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : addCandidateTraining |  Message: Candidate Training/certificate added successfully.`);
         return helper.getHandlerResponseObject(
             true,
             httpStatus.Created,
-            "Candidate training created successfully",
+            "Candidate training/certificate added successfully",
             candidateWorkHistory
         )
     } catch (error: any) {
@@ -1304,6 +1304,75 @@ const addCandidateTraining = async (
             false,
             httpStatus.Bad_Request,
             "Error while addCandidateTraining"
+        )
+    }
+}
+
+/*
+ * get Candidate workHistory By Id
+ */
+const getCandidateTrainingCertHistoryById = async (
+    id: number,
+    trainingCertId: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTrainingCertHistory =
+            await prisma.candidateTraining.findFirst({
+                where: {
+                    id: trainingCertId,
+                    candidateId: id,
+                },
+            })
+        if (!candidateTrainingCertHistory)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate Training/Certificate history not found"
+            )
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidateTrainingCertHistoryById |  Message: Candidate training/certificate history fetched by Id successfully.`);
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidateTrainingCertHistory
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while getCandidateTrainingCertHistoryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidateTrainingCertHistoryById |  Message: Error while getCandidateTrainingCertHistoryById.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidateTrainingCertHistoryById"
+        )
+    }
+}
+/*
+ * get Candidate training/certificate
+ */
+const getCandidatesTrainingCert = async (
+    id: number
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidatesTrainingCertHistories =
+            await prisma.candidateTraining.findMany({
+                where: {
+                    candidateId: id,
+                },
+            })
+            logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCandidatesWorkHistory |  Message: Candidate work history fetched by id successfully.`);
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.OK,
+            "",
+            candidatesTrainingCertHistories
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while getCandidatesWorkHistory")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCandidatesWorkHistory |  Message: Error while getCandidatesWorkHistory.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCandidatesWorkHistory"
         )
     }
 }
@@ -1476,7 +1545,9 @@ const Candidate = {
     createCandidateRaw,
     fetchAllPassive,
     filterRecords,
-    addCandidateTraining
+    addCandidateTraining,
+    getCandidatesTrainingCert,
+    getCandidateTrainingCertHistoryById
 }
 
 export { Candidate }
