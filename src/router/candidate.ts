@@ -150,22 +150,6 @@ CandidateRouter.get(
         }
     }
 )
-//* get Candidate training/certificate history
-CandidateRouter.get(
-    "/candidates/:id/training-history",
-    middleware.permission(helper.permissions.candidate_work_history_read_all),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.getCandidatesTrainingCert(
-                parseInt(req.params.id)
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error: any) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
 
 //* get Candiate  work History By Id
 CandidateRouter.get(
@@ -185,24 +169,6 @@ CandidateRouter.get(
     }
 )
 
-//* get Candiate  training/certificate History By Id
-CandidateRouter.get(
-    "/candidates/:id/training-history/:trainingCertId",
-    middleware.permission(helper.permissions.candidate_work_history_read),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.getCandidateTrainingCertHistoryById(
-                parseInt(req.params.id),
-                parseInt(req.params.trainingCertId)
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error: any) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
 //* Create Candiate Work History
 CandidateRouter.post(
     "/candidates/:id/work-history",
@@ -210,27 +176,6 @@ CandidateRouter.post(
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Candidate.addCandidateWorkHistory(
-                helper.getUserLoginId(req.user),
-                {
-                    ...req.body,
-                    candidate: parseInt(req.params.id),
-                }
-            )
-            const { code, data, message } = result
-            res.status(code).json({ code, message, data })
-        } catch (error: any) {
-            handler.express.handleRouterError(res, error)
-        }
-    }
-)
-
-//* Create Candiate Work History
-CandidateRouter.post(
-    "/candidates/:id/training-cert",
-    middleware.permission(helper.permissions.candidate_work_history_create),
-    async (req: Request, res: Response) => {
-        try {
-            const result = await handler.Candidate.addCandidateTraining(
                 helper.getUserLoginId(req.user),
                 {
                     ...req.body,
@@ -283,5 +228,102 @@ CandidateRouter.delete(
         }
     }
 )
+
+//* get Candidate training/certificate history
+CandidateRouter.get(
+    "/candidates/:id/training-history",
+    middleware.permission(helper.permissions.candidate_work_history_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.getCandidatesTrainingCert(
+                parseInt(req.params.id)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+//* get Candiate  training/certificate History By Id
+CandidateRouter.get(
+    "/candidates/:id/training-history/:trainingCertId",
+    middleware.permission(helper.permissions.candidate_work_history_read),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.getCandidateTrainingCertHistoryById(
+                parseInt(req.params.id),
+                parseInt(req.params.trainingCertId)
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+//* Create Candiate training/certificate History
+CandidateRouter.post(
+    "/candidates/:id/training-cert",
+    middleware.permission(helper.permissions.candidate_work_history_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.addCandidateTraining(
+                helper.getUserLoginId(req.user),
+                {
+                    ...req.body,
+                    candidate: parseInt(req.params.id),
+                }
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+
+//* Update Candiate training/certificate history
+CandidateRouter.put(
+    "/candidates/:id/training-history/:trainingCertId",
+    middleware.permission(helper.permissions.candidate_work_history_update),
+    async (req: Request, res: Response) => {
+        try {
+            const result =
+                await handler.Candidate.updateCandidateTrainingCertHistoryById(
+                    helper.getUserLoginId(req.user),
+                    {
+                        id: parseInt(req.params.trainingCertId),
+                        candidate: req.params.id,
+                        ...req.body,
+                    }
+                )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+//* Delete Candidate training/certificate History
+CandidateRouter.delete(
+    "/candidates/:id/training-history/:trainingCertId",
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Candidate.removeCandidateTrainingCertHistory({
+                id: parseInt(req.params.trainingCertId),
+            })
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 
 export { CandidateRouter }
