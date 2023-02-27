@@ -1376,6 +1376,138 @@ const getCandidatesTrainingCert = async (
         )
     }
 }
+
+/*
+ * update Candidate trainingCertHistory By Id
+ */
+interface updateCandidateTrainingCertHistoryParam {
+    id:number
+    issueDate: Date
+    description: string
+    title: string
+    type: string
+    candidateId: number
+    skillId: any
+    issuedBy: any
+    candidate: number
+}
+
+const updateCandidateTrainingCertHistoryById = async (
+    userLoginId: number,
+    param: updateCandidateTrainingCertHistoryParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const candidateTrainingHistoryFound =
+            await prisma.candidateTraining.findFirst({
+                where: { id: param.id },
+            })
+        if (!candidateTrainingHistoryFound)
+            return helper.getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "Candidate training/certificate history not found"
+            )
+
+        // let skillsSetArray = []
+        // const skills: number[] = []
+        // const newSkills: string[] = []
+
+        // skillsSetArray = param.skillId
+        // skillsSetArray.forEach((items: any) => {
+        //     if (typeof items == "number") {
+        //         skills.push(items)
+        //     } else {
+        //         newSkills.push(items)
+        //     }
+        // })
+
+        // await prisma.skill.createMany({
+        //     data: newSkills.map((x) => ({
+        //         title: x,
+        //         createdBy: userLoginId,
+        //         modifiedBy: userLoginId,
+        //     })),
+        //     skipDuplicates: true,
+        // })
+
+        // const skillsCreated = await prisma.skill.findMany({
+        //     where: {
+        //         title: {
+        //             in: newSkills,
+        //         },
+        //     },
+        // })
+
+        // const allSkillsIds = [...skills, ...skillsCreated.map((x) => x.id)]
+
+        const updateCTCH = prisma.candidateTraining.update({
+            where: {
+                id: param.id,
+            },
+            data: {
+                issueDate: param.issueDate,
+                issuedBy: param.issuedBy,
+                title: param.title,
+                candidateId: param.candidateId,
+                skillId: param.skillId,
+                description: param.description,
+                modifiedBy: userLoginId,
+            },
+        })
+
+        const [candidateTrainingCertHistory] = await prisma.$transaction([updateCTCH])
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateTrainingCertHistoryById |  Message: Candidate training/certificate history updated successfully.`);
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate training/certificate history updated successfully",
+            candidateTrainingCertHistory
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while updateCandidateTrainingCertHistoryById")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateTrainingCertHistoryById |  Message: Error while updateCandidateTrainingCertHistoryById.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while updateCandidateTrainingCertHistoryById"
+        )
+    }
+}
+
+/*
+ * remove Candidate trainingCertHistory By Id
+ */
+interface removeCandidateTrainingCertHistoryParam {
+    id: number
+}
+const removeCandidateTrainingCertHistory = async (
+    param: removeCandidateTrainingCertHistoryParam
+): Promise<helper.IResponseObject> => {
+    try {
+        const deleteCTCH = prisma.candidateTraining.delete({
+            where: {
+                id: param.id,
+            },
+        })
+
+        await prisma.$transaction([deleteCTCH])
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : removeCandidateTrainingCertHistory |  Message: Candidate Training/certificate history deleted successfully.`);
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.No_Content,
+            "Candidate Training/certificate history deleted successfully"
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while removeCandidateTrainingCertHistory")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : removeCandidateTrainingCertHistory |  Message: Error while removeCandidateTrainingCertHistory.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while removeCandidateTrainingCertHistory"
+        )
+    }
+}
+
 /*
  * update Candidate workHistory By Id
  */
@@ -1547,7 +1679,9 @@ const Candidate = {
     filterRecords,
     addCandidateTraining,
     getCandidatesTrainingCert,
-    getCandidateTrainingCertHistoryById
+    getCandidateTrainingCertHistoryById,
+    updateCandidateTrainingCertHistoryById,
+    removeCandidateTrainingCertHistory,
 }
 
 export { Candidate }
