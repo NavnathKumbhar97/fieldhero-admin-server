@@ -1448,6 +1448,7 @@ const updateCandidateTrainingCertHistoryById = async (
                 issueDate: param.issueDate,
                 issuedBy: param.issuedBy,
                 title: param.title,
+                type:param.type,
                 candidateId: param.candidateId,
                 skillId: param.skillId,
                 description: param.description,
