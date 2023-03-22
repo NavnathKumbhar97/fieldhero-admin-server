@@ -291,8 +291,11 @@ model UserLogin {
   EmailTemplateModifiedBy               EmailTemplate[]               @relation("modifiedByEmailTemplate")
   CandidateTrainingCreatedBy            CandidateTraining[]           @relation("createdByCandidateTraining")
   CandidateTrainingModifiedBy           CandidateTraining[]           @relation("modifiedByCandidateTraining")
+  AuditLogCreatedBy                     AuditLog[]                    @relation("createdByUserLogin")
+  AuditLogModifiedBy                    AuditLog[]                    @relation("modifiedByUserLogin")
 
   CandidateTraining CandidateTraining[]
+  AuditLog          AuditLog[]
 }
 
 model RolePermission {
@@ -819,7 +822,7 @@ model CandidateTraining {
   candidateId Int        @unique
   CandidateId Candidate  @relation(fields: [candidateId], references: [id])
   type        String?    @db.VarChar(80)
-  title        String?    @db.VarChar(80)
+  title       String?    @db.VarChar(80)
   issueDate   DateTime?  @db.Date
   issuedBy    String?    @db.VarChar(80)
   description String?    @db.VarChar(200)
@@ -831,6 +834,25 @@ model CandidateTraining {
   ModifiedBy  UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByCandidateTraining")
   UserLogin   UserLogin? @relation(fields: [userLoginId], references: [id])
   userLoginId Int?
+}
+
+model AuditLog {
+  id            Int        @id @default(autoincrement())
+  userName      String?    @db.VarChar(100)
+  email         String?    @db.VarChar(100)
+  contactNumber String?    @db.VarChar(100)
+  updatedFiled  String?    @db.VarChar(1000)
+  operationName String?    @db.VarChar(100)
+  sectionNameId Int        
+  sectionDataId Int        
+  createdOn     DateTime   @default(now())
+  modifiedOn    DateTime   @updatedAt
+  createdBy     Int?
+  CreatedBy     UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByUserLogin")
+  modifiedBy    Int?
+  ModifiedBy    UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByUserLogin")
+  userLoginId   Int?
+  UserLogin     UserLogin? @relation(fields: [userLoginId], references: [id])
 }
 
 model SkillOnCandidateWorkHistory {
