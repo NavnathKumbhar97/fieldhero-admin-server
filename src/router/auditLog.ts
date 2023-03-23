@@ -49,24 +49,24 @@ AuditLogRouter.get(
  * Get Sigle Audit log 
  */
 
-// AuditLogRouter.get(
-//     "/audit-log/:id",
-//     (req: Request<any>, res: Response, next: NextFunction) => {
-//         AuditLog.getAuditLogById(req.params.id)
-//             .then((audit) => {
-//                 if (audit == null) {
-//                     res.sendStatus(httpStatus.No_Content)
-//                 } else {
-//                     res.status(httpStatus.OK).json(audit)
-//                 }
-//             })
-//             .catch((err) =>
-//                 res.status(httpStatus.Bad_Request).json({
-//                     code: httpStatus.Bad_Request,
-//                     error: err,
-//                 })
-//             )
-//     }
-// )
+AuditLogRouter.get(
+    "/audit-log/:id",
+    (req: Request<any>, res: Response, next: NextFunction) => {
+        AuditLog.getAuditLogById(parseInt(req.params.id))
+            .then((audit) => {
+                if (audit == null) {
+                    res.sendStatus(httpStatus.No_Content)
+                } else {
+                    res.status(httpStatus.OK).json(audit)
+                }
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
+    }
+)
 
 export { AuditLogRouter }
