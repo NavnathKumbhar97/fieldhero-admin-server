@@ -82,33 +82,26 @@ const getAllAuditLog = async (sectionId: number, dataId: number) => {
 }
 
 
-// const getAuditLogById = async (id: number) => {
-//     const auditLog = await CasaDB.AuditLog.findOne({
-//         attributes: [
-//             "id",
-//             "userName",
-//             "email",
-//             "contactNumber",
-//             "updatedFiled",
-//             "operationName",
-//             "sectionNameId",
-//             "sectionDataId",
-//             "createdOn",
-//             "modifiedOn"
-//         ],
-//         where: {
-//             id,
-//         },
-//     }).catch((err: any) => {
-//         log.error(err, "Error while getAuditLogById")
-//         throw err
-//     })
-//     return auditLog
-// }
+const getAuditLogById = async (id: number) => {
+    const auditLog = await prisma.auditLog.findFirst({
+        where: {
+            id,
+        },
+    }).catch((err: any) => {
+        log.error(err, "Error while getAuditLogById")
+        // throw err
+        return getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getAllAuditLogById"
+        )
+    })
+    return auditLog
+}
 
 const AuditLog = {
     createAuditLog,
     getAllAuditLog,
-    // getAuditLogById,
+    getAuditLogById,
 }
 export { AuditLog }
