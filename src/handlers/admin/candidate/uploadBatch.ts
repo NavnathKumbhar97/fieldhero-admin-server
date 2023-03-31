@@ -245,7 +245,8 @@ const approval = async (
         return getHandlerResponseObject(
             true,
             httpStatus.OK,
-            "Batch approval done successful"
+            "Batch approval done successful",
+            approved
         )
     } catch (error: any) {
         log.error(
