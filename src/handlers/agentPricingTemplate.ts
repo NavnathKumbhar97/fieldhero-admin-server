@@ -211,7 +211,7 @@ const create = async (
                 skill2: param.secondarySkill,
                 lastCompany: param.lastCompanyName,
                 designation: param.designation,
-                totalAmount: total,
+                totalAmount: 0,
                 createdBy: userLoginId,
                 modifiedBy: userLoginId,
             },
