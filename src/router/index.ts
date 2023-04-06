@@ -23,6 +23,7 @@ import { AgentPricingTemplateRouter } from "./agentPricingTemplate"
 import { BatchPriorityRouter } from "./batchPriority"
 import { UploadRouter } from "./upload"
 import { AuditLogRouter } from "./auditLog"
+import { userLoginHistory } from "./loginHistory"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -50,6 +51,8 @@ router.use(AgentPricingTemplateRouter)
 router.use(BatchPriorityRouter)
 router.use(UploadRouter)
 router.use(AuditLogRouter)
+router.use(userLoginHistory)
+
 
 // Bad Request
 router.all("*", (req: Request, res: Response) => {

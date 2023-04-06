@@ -294,8 +294,11 @@ model UserLogin {
   AuditLogCreatedBy                     AuditLog[]                    @relation("createdByUserLogin")
   AuditLogModifiedBy                    AuditLog[]                    @relation("modifiedByUserLogin")
 
-  CandidateTraining CandidateTraining[]
-  AuditLog          AuditLog[]
+  CandidateTraining     CandidateTraining[]
+  AuditLog              AuditLog[]
+  LoginHistoryCreatedBy LoginHistory[]      @relation("createdByLoginHistory")
+
+  LoginHistory LoginHistory[]
 }
 
 model RolePermission {
@@ -843,8 +846,8 @@ model AuditLog {
   contactNumber String?    @db.VarChar(100)
   updatedFiled  String?    @db.VarChar(1000)
   operationName String?    @db.VarChar(100)
-  sectionNameId Int        
-  sectionDataId Int        
+  sectionNameId Int
+  sectionDataId Int
   createdOn     DateTime   @default(now())
   modifiedOn    DateTime   @updatedAt
   createdBy     Int?
@@ -853,6 +856,18 @@ model AuditLog {
   ModifiedBy    UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByUserLogin")
   userLoginId   Int?
   UserLogin     UserLogin? @relation(fields: [userLoginId], references: [id])
+}
+
+model LoginHistory {
+  id           Int        @id @default(autoincrement())
+  userName     String?    @db.VarChar(100)
+  email        String?    @db.VarChar(100)
+  loggedInTime DateTime?  @default(now())
+  createdOn    DateTime   @default(now())
+  createdBy    Int?
+  CreatedBy    UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByLoginHistory")
+  userLoginId  Int?
+  UserLogin    UserLogin? @relation(fields: [userLoginId], references: [id])
 }
 
 model SkillOnCandidateWorkHistory {
