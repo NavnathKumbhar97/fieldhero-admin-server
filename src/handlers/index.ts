@@ -17,6 +17,7 @@ import { Admin } from "./admin"
 import { AgentPricingTemplate } from "./agentPricingTemplate"
 import { BatchPriority } from "./batchPriority"
 import { UploadImage } from "./UploadImage"
+import { loginHistory } from "./loginHistory"
 
 export {
     Candidate,
@@ -37,7 +38,8 @@ export {
     Admin,
     AgentPricingTemplate,
     BatchPriority,
-    UploadImage
+    UploadImage,
+    loginHistory
 }
 
 export default {
@@ -59,5 +61,6 @@ export default {
     Admin,
     AgentPricingTemplate,
     BatchPriority,
-    UploadImage
+    UploadImage,
+    loginHistory,
 }
