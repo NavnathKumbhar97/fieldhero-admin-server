@@ -13,12 +13,13 @@ import path from "path"
 const { log, httpStatus } = helper
 
 // * Get all customers
-const getCustomers = async (all: string,take:any,skip:any): Promise<helper.IResponseObject> => {
+const getCustomers = async (all: string,take:any,skip:any):
+ Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
-        const page = ""?1:parseInt(skip)
-        const limit = ""?10:parseInt(take)
+        // const page = ""?1:parseInt(skip)
+        // const limit = ""?10:parseInt(take)
 
         const count = await prisma.customer.count({
             where: {
@@ -27,36 +28,22 @@ const getCustomers = async (all: string,take:any,skip:any): Promise<helper.IResp
         })
 
 
-        const customers = await prisma.customer.findMany({take:limit,skip:page,
+        const customers = await prisma.customer.findMany({
+            // take:limit,skip:page,
             where: {
                 isActive: whereCondition,
             },
-            select: {
-                id: true,
-                fullName: true,
-                companyName: true,
-                dob: true,
-                gender: true,
-                state: true,
-                country: true,
-                profileImage: true,
-                isActive: true,
-                CustomerLogin: {
-                    select: {
-                        email: true,
-                    },
-                },
-            },
+
             orderBy: {
                 fullName: "asc",
             },
         })
-        const result = customers.map((cust) => {
-            const { CustomerLogin, ...rest } = cust
-            return { ...rest, email: CustomerLogin?.email }
-        })
+        // const result = customers.map((cust) => {
+        //     const { CustomerLogin, ...rest } = cust
+        //     return { ...rest, email: CustomerLogin?.email }
+        // })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Customer fetched successfully.`);
-        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {result,count})
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {customers,count})
     } catch (error: any) {
         log.error(error.message, "Error while getCustomers")
         logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Error while getCustomers.`);
@@ -235,6 +222,53 @@ const createCustomerSubscription = async (
             httpStatus.Created,
             "Customer subscription created successfully",
             customerSubscription
+        )
+    } catch (error: any) {
+        log.error(error.message, "Error while createCustomerSubscription")
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while createCustomerSubscription"
+        )
+    }
+}
+
+interface ICustomerParam {
+    fullName:string,
+    companyName:string,
+    dob:Date,
+    gender: "MALE" | "FEMALE" | "OTHER" | null,
+    state:string,
+    country:string,
+    profileImage:string,
+    isActive:boolean,
+
+}
+
+//create customer
+const createCustomer = async (
+    param: ICustomerParam
+): Promise<helper.IResponseObject> => {
+    try {
+
+        const customer = await prisma.customer.create({
+            data: {
+                fullName:param.fullName,
+                companyName:param.companyName,
+                dob:param.dob,
+                gender:param.gender,
+                state:param.state,
+                country:param.country,
+                profileImage:param.profileImage,
+                isActive:param.isActive
+            },
+        })
+
+        return helper.getHandlerResponseObject(
+            true,
+            httpStatus.Created,
+            "Customer created successfully",
+            customer
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCustomerSubscription")
@@ -460,7 +494,7 @@ const Customer = {
     getCustomerSubscriptionsById,
     updateCustomerSubscriptionsById,
     resetLoginPasswordForCustomer,
-    updateCustomer,
+    updateCustomer,createCustomer
 }
 
 export { Customer }
