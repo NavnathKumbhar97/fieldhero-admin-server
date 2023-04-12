@@ -101,6 +101,25 @@ CustomerRouter.post(
     }
 )
 
+// * Create customer
+CustomerRouter.post(
+    "/customer",
+    middleware.permission(helper.permissions.customer_subscription_create),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Customer.createCustomer(
+                {
+                    ...req.body,
+                }
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 // * fetch customer subscriptions By Subscrition Id
 CustomerRouter.get(
     "/customers/:id/subscription/:subId",
