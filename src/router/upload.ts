@@ -13,7 +13,7 @@ const UploadRouter = Router()
 // upload Profile image for candidate master module 
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/candidates/${req.params.id}/profile_image`
+        const p = `public/uploads/candidates/profile_image`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -22,9 +22,7 @@ const storage = multer.diskStorage({
     },
     filename: (req: Request, file: Express.Multer.File, cb) => {
         const datetimestamp = Date.now()
-        const newFilename = `${file.fieldname}-${
-            req.params.id
-        }-${datetimestamp}${path.extname(file.originalname)}`
+        const newFilename = `${file.fieldname}-${datetimestamp}${path.extname(file.originalname)}`
         cb(null, newFilename)
     },
     // destination: function (req, file, cb) {
@@ -48,7 +46,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: any) => {
 const upload = multer({ storage: storage, fileFilter: fileFilter })
 
 UploadRouter.post(
-    "/upload-profile/:id",
+    "/upload-profile",
     middleware.permission(
         helper.permissions.candidate_basic_upload_profile_image
     ),
@@ -250,6 +248,72 @@ UploadRouter.post(
         helper.permissions.candidate_basic_upload_profile_image
     ),
     uploadCndBatch.single("file"),
+    async (req: Request, res: Response) => {
+        try {
+            const file = req.file
+            if (!file)
+                return res.status(httpStatus.Not_Found).json({
+                    code: httpStatus.Not_Found,
+                    message: "File not found",
+                    data: null,
+                })
+
+            const path = file.destination + "/" + file.filename
+            const results = await handler.UploadImage.UploadImgCandidate(
+            path)
+            // const { code, data, message } = results
+            res.send(results)
+        } catch (error:any) {
+            handler.express.handleRouterError(res, error)
+            console.log("got an error ",error);
+            res.send(error)
+        }
+    }
+)
+
+// upload documents for customer
+const storageCustomer = multer.diskStorage({
+    destination: (req: Request, file: Express.Multer.File, cb) => {
+        const p = `public/uploads/Customer-Profile-Images`
+        // `.../public/${req.params.id}/profile_image`
+        if (!fs.existsSync(p)) {
+            fs.mkdirSync(p, { recursive: true })
+        }
+        cb(null, p)
+    },
+    filename: (req: Request, file: Express.Multer.File, cb) => {
+        const datetimestamp = Date.now()
+        const newFilename = `${file.fieldname}-${
+            "bulk-data"
+        }-${datetimestamp}${path.extname(file.originalname)}`
+        cb(null, newFilename)
+    },
+    // destination: function (req, file, cb) {
+    //     cb(null, '../assets');
+    //  },
+    //  filename: function (req, file, cb) {
+    //     cb(null, Date.now() + '-' + file.originalname);
+    //  }
+})
+const fileFilterCustomer = (req: Request, file: Express.Multer.File, cb: any) => {
+    //  if (
+    //     file.mimetype == "xlsx"
+    // ) {
+        return cb(null, true)
+    // } else {
+    //     return cb(new Error("Only xlsx files are allowed!"), false)
+    // }
+}
+
+
+const customer = multer({ storage: storageCustomer, fileFilter: fileFilterCustomer })
+
+UploadRouter.post(
+    "/upload-customer-profile",
+    middleware.permission(
+        helper.permissions.candidate_basic_upload_profile_image
+    ),
+    customer.single("image"),
     async (req: Request, res: Response) => {
         try {
             const file = req.file

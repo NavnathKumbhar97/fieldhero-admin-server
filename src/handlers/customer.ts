@@ -18,8 +18,6 @@ const getCustomers = async (all: string,take:any,skip:any):
     try {
         let whereCondition: true | undefined = true
         if (all == "*") whereCondition = undefined
-        // const page = ""?1:parseInt(skip)
-        // const limit = ""?10:parseInt(take)
 
         const count = await prisma.customer.count({
             where: {
@@ -29,13 +27,13 @@ const getCustomers = async (all: string,take:any,skip:any):
 
 
         const customers = await prisma.customer.findMany({
-            // take:limit,skip:page,
+            take:take,skip:skip,
             where: {
                 isActive: whereCondition,
             },
 
             orderBy: {
-                fullName: "asc",
+                fullName: "desc",
             },
         })
         // const result = customers.map((cust) => {
@@ -55,6 +53,43 @@ const getCustomers = async (all: string,take:any,skip:any):
     }
 }
 
+// * Get all customers
+const getCustomersFilter = async ():
+ Promise<helper.IResponseObject> => {
+    try {
+        
+        const count = await prisma.customer.count({
+            where: {
+                createdBy: undefined,
+            },
+        })
+
+
+        const customers = await prisma.customer.findMany({
+            where: {
+                isActive: true,
+            },
+
+            orderBy: {
+                fullName: "desc",
+            },
+        })
+        // const result = customers.map((cust) => {
+        //     const { CustomerLogin, ...rest } = cust
+        //     return { ...rest, email: CustomerLogin?.email }
+        // })
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Customer fetched successfully.`);
+        return helper.getHandlerResponseObject(true, httpStatus.OK, "", {customers,count})
+    } catch (error: any) {
+        log.error(error.message, "Error while getCustomers")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : getCustomers | Message: Error while getCustomers.`);
+        return helper.getHandlerResponseObject(
+            false,
+            httpStatus.Bad_Request,
+            "Error while getCustomers"
+        )
+    }
+}
 // * Get customer by id
 const getCustomerById = async (id: number): Promise<helper.IResponseObject> => {
     try {
@@ -494,7 +529,7 @@ const Customer = {
     getCustomerSubscriptionsById,
     updateCustomerSubscriptionsById,
     resetLoginPasswordForCustomer,
-    updateCustomer,createCustomer
+    updateCustomer,createCustomer,getCustomersFilter
 }
 
 export { Customer }

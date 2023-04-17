@@ -25,6 +25,21 @@ CustomerRouter.get(
     }
 )
 
+// * Fetch all customers
+CustomerRouter.get(
+    "/all-customers",
+    middleware.permission(helper.permissions.customer_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Customer.getCustomersFilter()
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
 // * fetch customer by id
 CustomerRouter.get(
     "/customers/:id",
