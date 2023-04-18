@@ -90,10 +90,14 @@ import path from "path"
 //     }
 // }
 
-const fetchById = async (userLoginId: any): Promise<IResponseObject> => {
+const fetchById = async (userLoginId: any,take:any,skip:any): Promise<IResponseObject> => {
     try {
         const loginUser = await prisma.loginHistory.findMany({
+            take:take,skip:skip,
             where: { userLoginId },
+            orderBy: {
+                loggedInTime: "desc",
+            },
             
         })
         if (!loginUser){
