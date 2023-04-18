@@ -299,6 +299,9 @@ model UserLogin {
   LoginHistoryCreatedBy LoginHistory[]      @relation("createdByLoginHistory")
 
   LoginHistory LoginHistory[]
+  UserActivityCreatedBy UserActivity[]  @relation("createdByUserActivity")
+  UserActivityModifiedBy UserActivity[] @relation("modifiedByUserActivity")
+  UserActivity UserActivity[]
 }
 
 model RolePermission {
@@ -854,6 +857,24 @@ model AuditLog {
   CreatedBy     UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByUserLogin")
   modifiedBy    Int?
   ModifiedBy    UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByUserLogin")
+  userLoginId   Int?
+  UserLogin     UserLogin? @relation(fields: [userLoginId], references: [id])
+}
+
+model UserActivity {
+  id            Int        @id @default(autoincrement())
+  userName      String?    @db.VarChar(100)
+  email         String?    @db.VarChar(100)
+  UserActivity  String?    @db.VarChar(10000)
+  operationName String?    @db.VarChar(100)
+  sectionNameId Int
+  dataId        Int
+  createdOn     DateTime   @default(now())
+  modifiedOn    DateTime   @updatedAt
+  createdBy     Int?
+  CreatedBy     UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByUserActivity")
+  modifiedBy    Int?
+  ModifiedBy    UserLogin? @relation(fields: [modifiedBy], references: [id], name: "modifiedByUserActivity")
   userLoginId   Int?
   UserLogin     UserLogin? @relation(fields: [userLoginId], references: [id])
 }
