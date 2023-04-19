@@ -18,6 +18,7 @@ import { AgentPricingTemplate } from "./agentPricingTemplate"
 import { BatchPriority } from "./batchPriority"
 import { UploadImage } from "./UploadImage"
 import { loginHistory } from "./loginHistory"
+import { UserActivity } from "./userActivity"
 
 export {
     Candidate,
@@ -39,7 +40,8 @@ export {
     AgentPricingTemplate,
     BatchPriority,
     UploadImage,
-    loginHistory
+    loginHistory,
+    UserActivity
 }
 
 export default {
@@ -63,4 +65,5 @@ export default {
     BatchPriority,
     UploadImage,
     loginHistory,
+    UserActivity
 }

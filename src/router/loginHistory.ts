@@ -15,8 +15,8 @@ userLoginHistory.get(
         try {
             const result = await handler.loginHistory.fetchById(
                 parseInt(req.params.userLoginId),
-                Number(req.query.take),
-                Number(req.query.skip),
+                // Number(req.query.take),
+                // Number(req.query.skip),
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
@@ -25,6 +25,7 @@ userLoginHistory.get(
         }
     }
 )
+
 
 //* Create Category
 userLoginHistory.post(
