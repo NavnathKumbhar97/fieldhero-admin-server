@@ -24,6 +24,7 @@ import { BatchPriorityRouter } from "./batchPriority"
 import { UploadRouter } from "./upload"
 import { AuditLogRouter } from "./auditLog"
 import { userLoginHistory } from "./loginHistory"
+import { UserActivityRouter } from "./userActivity"
 
 const router = Router()
 router.use("/public", express.static(path.join(process.cwd(), "public")))
@@ -52,6 +53,7 @@ router.use(BatchPriorityRouter)
 router.use(UploadRouter)
 router.use(AuditLogRouter)
 router.use(userLoginHistory)
+router.use(UserActivityRouter)
 
 
 // Bad Request
