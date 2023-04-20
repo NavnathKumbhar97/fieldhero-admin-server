@@ -16,7 +16,7 @@ interface createUserActivityParam {
     userName: string
     email: string
     contactNumber: string
-    UserActivity: string
+    userActivity: string
     operationName: string
     sectionId: number
     dataId: number
@@ -28,7 +28,7 @@ const createUserActivity = async (param: createUserActivityParam, sectionId: num
            data: {
             userName: param.userName,
             email: param.email,
-            UserActivity: param.UserActivity,
+            userActivity: param.userActivity,
             operationName: param.operationName,
             sectionId: sectionId,
             dataId: param.dataId,

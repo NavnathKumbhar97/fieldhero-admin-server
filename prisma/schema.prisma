@@ -865,7 +865,7 @@ model UserActivity {
   id            Int        @id @default(autoincrement())
   userName      String?    @db.VarChar(100)
   email         String?    @db.VarChar(100)
-  UserActivity  String?    @db.VarChar(10000)
+  userActivity  String?    @db.VarChar(10000)
   operationName String?    @db.VarChar(100)
   sectionId Int
   dataId        Int
