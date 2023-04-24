@@ -8,7 +8,7 @@ const UserActivityRouter = Router()
 
 // Add UserActivity
 UserActivityRouter.post(
-    "/:sectionId/user-activity/:userLoginId",
+    "/user-activity/:sectionId",
     (req: Request<any>, res: Response, next: NextFunction) => 
     {
         UserActivity.createUserActivity(

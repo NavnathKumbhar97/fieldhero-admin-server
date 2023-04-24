@@ -869,6 +869,7 @@ model UserActivity {
   operationName String?    @db.VarChar(100)
   sectionId Int
   dataId        Int
+  createdOn     DateTime   @default(now())
   createdBy     Int?
   CreatedBy     UserLogin? @relation(fields: [createdBy], references: [id], name: "createdByUserActivity")
   modifiedBy    Int?

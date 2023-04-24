@@ -21,6 +21,7 @@ interface createUserActivityParam {
     sectionId: number
     dataId: number
     userLoginId:number,
+    createdOn:any
 }
 const createUserActivity = async (param: createUserActivityParam, sectionId: number) => {
     try {
@@ -66,7 +67,7 @@ const getAllUserActivity = async () => {
     const userActivityData = await prisma.userActivity.findMany({
         
         orderBy:{
-            createdBy:"desc"
+            createdOn:"desc"
         }
     }).catch((err: any) => {
         log.error(err, "Error while getAllUserActivity")
@@ -81,25 +82,34 @@ const getAllUserActivity = async () => {
 }
 
 const getUserActivityById = async (userId: number) => {
-
-    const userActivityData = await prisma.userActivity.findMany({
-        where: {
-            // sectionId: sectionId,
-            userLoginId: userId
-        },
-        orderBy:{
-            createdBy:"desc"
+    try {
+        const userActivity = await prisma.userActivity.findMany({
+            // take:take,skip:skip,
+            where: { userLoginId:userId },
+            orderBy:{
+                createdOn:"desc"
+            }
+            
+        })
+        if (!userActivity){
+            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: User activity not found.`);
+            return getHandlerResponseObject(
+                false,
+                httpStatus.Not_Found,
+                "User activity not found"
+            )
         }
-    }).catch((err: any) => {
-        log.error(err, "Error while getAllUserActivity")
-        // throw err
+        logger.info(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: User Activity fetched by id successfully.`);
+        return getHandlerResponseObject(true, httpStatus.OK, "", userActivity)
+    } catch (error: any) {
+        log.error(error.message, "Error while fetch user activity by id")
+        logger.error(`File Name: ${path.basename(__filename)} | Method Name : fetchById | Message: Error while fetch user activity by id.`);
         return getHandlerResponseObject(
             false,
             httpStatus.Bad_Request,
-            "Error while getAllUserActivity"
+            "Error while fetch user activity by id"
         )
-    })
-    return userActivityData
+    }
 }
 
 
