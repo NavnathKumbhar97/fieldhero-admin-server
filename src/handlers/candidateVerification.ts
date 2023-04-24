@@ -168,7 +168,8 @@ const createCandidateVerification = async (
         return getHandlerResponseObject(
             true,
             httpStatus.Created,
-            "Candidate verification created successfully"
+            "Candidate verification created successfully",
+            assignedCandidate
         )
     } catch (error: any) {
         log.error(error.message, "Error while createCandidateVerification")
