@@ -28,7 +28,7 @@ UserActivityRouter.post(
 )
 
 /**
- * All Audit Section
+ * All user activity
  */
 UserActivityRouter.get(
     "/all-userActivity",
@@ -50,7 +50,7 @@ UserActivityRouter.get(
     }
 )
 /**
- * Get Sigle Audit log 
+ * Get Sigle user activity log 
  */
 
 UserActivityRouter.get(
