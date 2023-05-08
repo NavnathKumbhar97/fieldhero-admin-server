@@ -69,6 +69,7 @@ const getCandidates = async (
                 contactNo1: true,
                 status: true,
                 isActive: true,
+                profImgPath:true,
                 
             },
             take: limit,
@@ -142,6 +143,7 @@ const filterRecords = async (
                 contactNo1: true,
                 status: true,
                 isActive: true,
+                profImgPath:true
                 
             },
             orderBy: {
@@ -218,29 +220,30 @@ const getCandidateById = async (
     try {
         const candidate = await prisma.candidate.findFirst({
             where: { id },
-            select:{
-                id: true,
-                fullName: true,
-                contactNo1: true,
-                status: true,
-                isActive: true,
-                dob: true,
-                gender: true,
-                permAddress: true,
-                permCity:true,
-                permState: true,
-                permCountry: true,
-                permZip: true,
-                currAddress: true,
-                currCity:true,
-                currState:true,
-                currCountry:true,
-                currZip:true,
-                email1:true,
-                email2: true,
-                contactNo2:true,
-                aadharNo: true,
-            }
+            // select:{
+            //     id: true,
+            //     fullName: true,
+            //     contactNo1: true,
+            //     status: true,
+            //     isActive: true,
+            //     dob: true,
+            //     gender: true,
+            //     permAddress: true,
+            //     permCity:true,
+            //     permState: true,
+            //     permCountry: true,
+            //     permZip: true,
+            //     currAddress: true,
+            //     currCity:true,
+            //     currState:true,
+            //     currCountry:true,
+            //     currZip:true,
+            //     email1:true,
+            //     email2: true,
+            //     contactNo2:true,
+            //     aadharNo: true,
+            //     profImgPath:true
+            // }
         })
         if (!candidate)
             return helper.getHandlerResponseObject(
@@ -290,7 +293,8 @@ interface createCandidateParam {
     totalExpMonths: number
     totalExpYears: number
     registrationStatus: string
-    candidateId: number
+    candidateId: number,
+    profImgPath:string
 }
 
 const createCandidate = async (
@@ -318,6 +322,7 @@ const createCandidate = async (
                 contactNo1: param.contactNo1,
                 contactNo2: param.contactNo2,
                 aadharNo: param.aadharNo,
+                profImgPath:param.profImgPath,
                 // candidateRawid: userLoginId, // ! wrong value
                 isActive: param.isActive,
                 // approvedOn: moment().utc().format(),
@@ -370,7 +375,8 @@ interface updateCandidateParam {
     totalExpMonths: number
     totalExpYears: number
     registrationStatus: string
-    candidateId: number
+    candidateId: number,
+    profImgPath:string
 }
 
 const updateCandidateById = async (
@@ -413,6 +419,7 @@ const updateCandidateById = async (
                 contactNo1: param.contactNo1,
                 contactNo2: param.contactNo2,
                 aadharNo: param.aadharNo,
+                profImgPath:param.profImgPath,
                 isActive: param.isActive,
                 approvedOn: moment().utc().format(),
                 modifiedBy: userLoginId,
