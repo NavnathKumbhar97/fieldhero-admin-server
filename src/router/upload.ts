@@ -13,7 +13,7 @@ const UploadRouter = Router()
 // upload Profile image for candidate master module 
 const storage = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/candidates/profile_image`
+        const p = `/Users/navnath/Desktop/Apexa/Projects/fieldhero-admin-server/public/uploads/candidates/profile_image`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -77,7 +77,7 @@ UploadRouter.post(
 // upload multiple documents for agent master module 
 const storageFile = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/Agent-Master/${req.params.id}/docs`
+        const p = `/Users/navnath/Desktop/Apexa/Projects/fieldhero-admin-server/public/uploads/Agent-Master/${req.params.id}/docs`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -115,18 +115,19 @@ UploadRouter.post(
     middleware.permission(
         helper.permissions.candidate_basic_upload_profile_image
     ),
-    uploadFile.array("file"),
+    uploadFile.single("file"),
     async (req: Request, res: Response) => {
         try {
-            const file = req.file
-            if (!file)
+            const files = req.file
+            if (!files){
                 return res.status(httpStatus.Not_Found).json({
                     code: httpStatus.Not_Found,
                     message: "File not found",
                     data: null,
                 })
+            }
 
-            const path = file.destination + "/" + file.filename
+            const path = files.destination + "/" + files.filename
             const results = await handler.UploadImage.UploadImgCandidate(
             path)
             // const { code, data, message } = results
@@ -142,7 +143,7 @@ UploadRouter.post(
 // upload documents for admin candidate batch 
 const storageAdminCnd = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/Admin-candidate-upload-batch/Bulk-Data`
+        const p = `/Users/navnath/Desktop/Apexa/Projects/fieldhero-admin-server/public/uploads/Admin-candidate-upload-batch/Bulk-Data`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -208,7 +209,7 @@ UploadRouter.post(
 // upload documents for candidate upload batch 
 const storageCndBacth = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/Candidate-upload-batch/Bulk-Data`
+        const p = `/Users/navnath/Desktop/Apexa/Projects/fieldhero-admin-server/public/uploads/Candidate-upload-batch/Bulk-Data`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })
@@ -274,7 +275,7 @@ UploadRouter.post(
 // upload documents for customer
 const storageCustomer = multer.diskStorage({
     destination: (req: Request, file: Express.Multer.File, cb) => {
-        const p = `public/uploads/Customer-Profile-Images`
+        const p = `/Users/navnath/Desktop/Apexa/Projects/fieldhero-admin-server/public/uploads/Customer-Profile-Images`
         // `.../public/${req.params.id}/profile_image`
         if (!fs.existsSync(p)) {
             fs.mkdirSync(p, { recursive: true })

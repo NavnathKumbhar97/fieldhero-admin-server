@@ -179,7 +179,17 @@ interface ICreateAgentParam {
     bankAcType?: string
     workLocation1?: string
     workLocation2?: string
-    status?: "PENDING" | "REGISTERED" | null
+    status?: "PENDING" | "REGISTERED" | null,
+    panCardPath:string,
+    docPoitype:string,
+    docPoiValue:string,
+    docPoiPath:string,
+    docPoatype:string,
+    docPoaValue:string,
+    docPoaPath:string,
+    docBanktype:string,
+    docBankValue:string,
+    docBankPath:string
 }
 
 const createAgent = async (
@@ -286,6 +296,16 @@ const createAgent = async (
                         workLocation1: param.workLocation1 || undefined,
                         workLocation2: param.workLocation2 || undefined,
                         status: param.status || undefined,
+                        panCardPath: param.panCardPath || undefined,
+                        docPoiPath: param.docPoiPath || undefined,
+                        docPoitype:param.docPoitype || undefined,
+                        docPoiValue:param.docPoiValue || undefined,
+                        docBankPath:param.docBankPath || undefined,
+                        docBanktype:param.docBanktype || undefined,
+                        docBankValue:param.docBankValue || undefined,
+                        docPoaPath:param.docPoaPath || undefined,
+                        docPoaValue:param.docPoaValue || undefined,
+                        docPoatype:param.docPoatype || undefined,
                         createdBy: userLoginId,
                         modifiedBy: userLoginId,
                     },
@@ -356,7 +376,17 @@ interface IUpdateAgentParam {
     bankIfsc?: string
     bankAcType?: string
     workLocation1?: string
-    workLocation2?: string
+    workLocation2?: string,
+    panCardPath:string,
+    docPoitype:string,
+    docPoiValue:string,
+    docPoiPath:string,
+    docPoatype:string,
+    docPoaValue:string,
+    docPoaPath:string,
+    docBanktype:string,
+    docBankValue:string,
+    docBankPath:string
 }
 
 const updateAgent = async (
@@ -424,6 +454,16 @@ const updateAgent = async (
                 bankAcType: param.bankAcType,
                 workLocation1: param.workLocation1,
                 workLocation2: param.workLocation2,
+                panCardPath: param.panCardPath || undefined,
+                        docPoiPath: param.docPoiPath || undefined,
+                        docPoitype:param.docPoitype || undefined,
+                        docPoiValue:param.docPoiValue || undefined,
+                        docBankPath:param.docBankPath || undefined,
+                        docBanktype:param.docBanktype || undefined,
+                        docBankValue:param.docBankValue || undefined,
+                        docPoaPath:param.docPoaPath || undefined,
+                        docPoaValue:param.docPoaValue || undefined,
+                        docPoatype:param.docPoatype || undefined,
                 modifiedBy: userLoginId,
             },
         })
