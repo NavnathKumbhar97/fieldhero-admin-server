@@ -10,6 +10,7 @@ const BatchPriorityRouter = Router()
 BatchPriorityRouter.post(
     "/batch-priorities",
     middleware.permission(helper.permissions.batch_priority_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.BatchPriority.update(
@@ -28,6 +29,7 @@ BatchPriorityRouter.post(
 BatchPriorityRouter.get(
     "/batch-priorities",
     middleware.permission(helper.permissions.batch_priority_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.BatchPriority.fetchAll()
@@ -43,6 +45,7 @@ BatchPriorityRouter.get(
 BatchPriorityRouter.get(
     "/batch-priorities/passive-create",
     middleware.permission(helper.permissions.batch_priority_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.BatchPriority.passiveCreate()
@@ -58,6 +61,7 @@ BatchPriorityRouter.get(
 BatchPriorityRouter.get(
     "/batch-priorities/:id",
     middleware.permission(helper.permissions.batch_priority_read),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.BatchPriority.fetchById(

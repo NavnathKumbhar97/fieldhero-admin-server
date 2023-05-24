@@ -9,6 +9,7 @@ const CandidateVerificationRouter = Router()
 CandidateVerificationRouter.post(
     "/candidate-verifications",
     middleware.permission(helper.permissions.candidate_verification_create),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -27,6 +28,7 @@ CandidateVerificationRouter.post(
 CandidateVerificationRouter.get(
     "/candidate-verifications",
     middleware.permission(helper.permissions.candidate_verification_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -47,6 +49,7 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.get(
     "/candidate-verifications/dashboard",
     middleware.permission(helper.permissions.candidate_verification_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -65,6 +68,7 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.get(
     "/candidate-verifications/passive-update",
     middleware.permission(helper.permissions.candidate_verification_update),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -81,6 +85,7 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.get(
     "/candidate-verifications/:id",
     middleware.permission(helper.permissions.candidate_verification_read),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -100,6 +105,7 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.put(
     "/candidate-verifications/:id",
     middleware.permission(helper.permissions.candidate_verification_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result =

@@ -11,6 +11,7 @@ const AgentRouter = Router()
 AgentRouter.get(
     "/agents",
     middleware.permission(helper.permissions.agent_read_all),
+
     async (req: Request, res: Response): Promise<void> => {
         try {
             const result = await handler.Agent.getAllAgents(Number(req.query.take),
@@ -27,6 +28,7 @@ AgentRouter.get(
 AgentRouter.get(
     "/agents/:id",
     middleware.permission(helper.permissions.agent_read),
+
     async (req: Request, res: Response): Promise<void> => {
         try {
             const result = await handler.Agent.getAgentById(
@@ -44,6 +46,7 @@ AgentRouter.get(
 AgentRouter.post(
     "/agents",
     middleware.permission(helper.permissions.agent_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Agent.createAgent(
@@ -62,6 +65,7 @@ AgentRouter.post(
 AgentRouter.put(
     "/agents/:id",
     middleware.permission(helper.permissions.agent_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Agent.updateAgent(

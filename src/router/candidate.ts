@@ -232,7 +232,7 @@ CandidateRouter.delete(
 //* get Candidate training/certificate history
 CandidateRouter.get(
     "/candidates/:id/training-history",
-    middleware.permission(helper.permissions.candidate_work_history_read_all),
+    middleware.permission(helper.permissions.candidate_certification_read),
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Candidate.getCandidatesTrainingCert(
@@ -249,7 +249,7 @@ CandidateRouter.get(
 //* get Candiate  training/certificate History By Id
 CandidateRouter.get(
     "/candidates/:id/training-history/:trainingCertId",
-    middleware.permission(helper.permissions.candidate_work_history_read),
+    middleware.permission(helper.permissions.candidate_certification_read_all),
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Candidate.getCandidateTrainingCertHistoryById(
@@ -267,7 +267,7 @@ CandidateRouter.get(
 //* Create Candiate training/certificate History
 CandidateRouter.post(
     "/candidates/:id/training-cert",
-    middleware.permission(helper.permissions.candidate_work_history_create),
+    middleware.permission(helper.permissions.candidate_certification_create),
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Candidate.addCandidateTraining(
@@ -289,7 +289,7 @@ CandidateRouter.post(
 //* Update Candiate training/certificate history
 CandidateRouter.put(
     "/candidates/:id/training-history/:trainingCertId",
-    middleware.permission(helper.permissions.candidate_work_history_update),
+    middleware.permission(helper.permissions.candidate_certification_update),
     async (req: Request, res: Response) => {
         try {
             const result =
