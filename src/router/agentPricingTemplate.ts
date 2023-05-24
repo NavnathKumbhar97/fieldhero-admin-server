@@ -10,6 +10,7 @@ const AgentPricingTemplateRouter = Router()
 AgentPricingTemplateRouter.get(
     "/agent-pricing-templates",
     middleware.permission(helper.permissions.agent_pricing_template_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.AgentPricingTemplate.fetchAll(
@@ -28,6 +29,7 @@ AgentPricingTemplateRouter.get(
 AgentPricingTemplateRouter.get(
     "/agent-pricing-templates/:id",
     middleware.permission(helper.permissions.agent_pricing_template_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.AgentPricingTemplate.fetchById(
@@ -45,6 +47,7 @@ AgentPricingTemplateRouter.get(
 AgentPricingTemplateRouter.post(
     "/agent-pricing-templates",
     middleware.permission(helper.permissions.agent_pricing_template_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.AgentPricingTemplate.create(
@@ -63,6 +66,7 @@ AgentPricingTemplateRouter.post(
 AgentPricingTemplateRouter.post(
     "/agent-pricing-templates/:id/active",
     middleware.permission(helper.permissions.agent_pricing_template_set_active),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.AgentPricingTemplate.setActiveById(

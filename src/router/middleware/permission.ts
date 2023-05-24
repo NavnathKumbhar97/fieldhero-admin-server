@@ -8,9 +8,11 @@ export default (permissionTocheck: number) => {
         req: Request,
         res: Response,
         next: NextFunction
-    ): Promise<void> => {
+    ): Promise<void> => 
+    {
         const _user = req.user as { role: { uuid: string } }
-        try {
+        try 
+        {
             const role = await prisma.role.findFirst({
                 where: {
                     uuid: _user.role.uuid,
@@ -23,21 +25,28 @@ export default (permissionTocheck: number) => {
                     },
                 },
             })
-            if (!role) {
+            if (!role) 
+            {
                 res.status(httpStatus.Forbidden).send("Forbidden")
                 return
             }
 
+
             const permissions = role.RolePermission.map(
                 (perm) => perm.permissionId
             )
+
             const isPermitted = permissions.includes(permissionTocheck)
-            if (!isPermitted) {
+            if (!isPermitted) 
+            {
                 res.status(httpStatus.Forbidden).send("Forbidden")
                 return
             }
+
             next()
-        } catch (error: any) {
+
+        } catch (error: any) 
+        {
             log.error(error.message, "Error in permission middleware")
             res.status(httpStatus.Forbidden).send("Forbidden")
         }

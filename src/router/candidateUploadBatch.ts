@@ -29,7 +29,7 @@ CandidateUploadBatchRouter.get(
 // * fetch all candidate batches (admin)
 CandidateUploadBatchRouter.get(
     "/admin/candidate-upload-batches",
-    middleware.permission(helper.permissions.candidate_upload_batch_read_all),
+    middleware.permission(helper.permissions.admin_candidate_upload_batch_approval),
     async (req: Request, res: Response) => {
         try {
             console.log(req.query);
@@ -45,7 +45,7 @@ CandidateUploadBatchRouter.get(
     }
 )
 
-// * create cabdidate upload batch for the current user
+// * create candidate upload batch for the current user
 CandidateUploadBatchRouter.post(
     "/candidate-upload-batches",
     // 50mb

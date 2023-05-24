@@ -25,6 +25,7 @@ AdminRouter.get(
 AdminRouter.get(
     "/admin/other-industries-categories/passive",
     middleware.permission(permissions.admin_other_industry_category_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -41,6 +42,7 @@ AdminRouter.get(
 AdminRouter.post(
     "/admin/other-industries-categories",
     middleware.permission(permissions.admin_other_industry_category_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Admin.updateOtherIndustriesCategories(
