@@ -63,6 +63,7 @@ CategoryRouter.get(
 CategoryRouter.post(
     "/categories",
     middleware.permission(helper.permissions.category_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Category.create(
@@ -81,6 +82,7 @@ CategoryRouter.post(
 CategoryRouter.put(
     "/categories/:id",
     middleware.permission(helper.permissions.category_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Category.updateById(
