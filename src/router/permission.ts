@@ -40,4 +40,22 @@ PermissionRouter.get(
     }
 )
 
+//* Create Permissions
+PermissionRouter.post(
+    "/permission",
+    middleware.permission(helper.permissions.permission_read_all),
+    async (req: Request, res: Response) => {
+        try {
+            const result = await handler.Permission.create(
+                req.body
+            )
+            const { code, data, message } = result
+            res.status(code).json({ code, message, data })
+        } catch (error: any) {
+            handler.express.handleRouterError(res, error)
+        }
+    }
+)
+
+
 export { PermissionRouter }

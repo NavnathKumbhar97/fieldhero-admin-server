@@ -29,6 +29,7 @@ CustomerRouter.get(
 CustomerRouter.get(
     "/all-customers",
     middleware.permission(helper.permissions.customer_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.getCustomersFilter()
@@ -44,6 +45,7 @@ CustomerRouter.get(
 CustomerRouter.get(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.getCustomerById(
@@ -61,6 +63,7 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_update),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.updateCustomer(
@@ -82,6 +85,7 @@ CustomerRouter.put(
 CustomerRouter.get(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.getCustomerSubscriptions(
@@ -99,6 +103,7 @@ CustomerRouter.get(
 CustomerRouter.post(
     "/customers/:id/subscriptions",
     middleware.permission(helper.permissions.customer_subscription_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.createCustomerSubscription(
@@ -120,6 +125,7 @@ CustomerRouter.post(
 CustomerRouter.post(
     "/customer",
     middleware.permission(helper.permissions.customer_subscription_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.createCustomer(
@@ -139,6 +145,7 @@ CustomerRouter.post(
 CustomerRouter.get(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.getCustomerSubscriptionsById(
@@ -157,6 +164,7 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id/subscription/:subId",
     middleware.permission(helper.permissions.customer_subscription_update),
+
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -180,6 +188,7 @@ CustomerRouter.put(
 CustomerRouter.post(
     "/customers/:id/reset-password",
     middleware.permission(helper.permissions.customer_reset_password),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Customer.resetLoginPasswordForCustomer(

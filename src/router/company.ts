@@ -10,6 +10,7 @@ const CompanyRouter = Router()
 CompanyRouter.get(
     "/companies",
     middleware.permission(helper.permissions.company_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Company.getCompanies(
@@ -27,6 +28,7 @@ CompanyRouter.get(
 CompanyRouter.get(
     "/all-companies",
     middleware.permission(helper.permissions.company_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Company.getCompaniesForFilter(
@@ -46,6 +48,7 @@ CompanyRouter.get(
 CompanyRouter.get(
     "/companies/:id",
     middleware.permission(helper.permissions.company_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Company.getCompanyById(
@@ -63,6 +66,7 @@ CompanyRouter.get(
 CompanyRouter.post(
     "/companies",
     middleware.permission(helper.permissions.company_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Company.createCompany(
@@ -81,6 +85,7 @@ CompanyRouter.post(
 CompanyRouter.put(
     "/companies/:id",
     middleware.permission(helper.permissions.company_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Company.updatedCompanyById(

@@ -11,6 +11,7 @@ const IndustryRouter = Router()
 IndustryRouter.get(
     "/industries",
     middleware.permission(helper.permissions.industry_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Industry.getIndustries(
@@ -29,6 +30,7 @@ IndustryRouter.get(
 IndustryRouter.get(
     "/all-industries",
     middleware.permission(helper.permissions.industry_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Industry.getIndustriesForFilter(
@@ -48,6 +50,7 @@ IndustryRouter.get(
 IndustryRouter.get(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Industry.getIndustryById(
@@ -65,6 +68,7 @@ IndustryRouter.get(
 IndustryRouter.post(
     "/industries",
     middleware.permission(helper.permissions.industry_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Industry.createIndustry(
@@ -83,6 +87,7 @@ IndustryRouter.post(
 IndustryRouter.put(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Industry.updateIndustryById(

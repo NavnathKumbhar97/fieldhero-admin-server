@@ -2,6 +2,7 @@ import { Router, Request, Response, NextFunction } from "express"
 import { UserActivity } from "../handlers/userActivity"
 
 import helper, { httpStatus, permissions } from "../helper/"
+import middleware from "./middleware"
 // import * as middleware from "./middleware"
 
 const UserActivityRouter = Router()
@@ -32,6 +33,7 @@ UserActivityRouter.post(
  */
 UserActivityRouter.get(
     "/all-userActivity",
+    middleware.permission(helper.permissions.admin_user_activity_read_all),
     (req: Request<any>, res: Response, next: NextFunction) => {
         UserActivity.getAllUserActivity()
             .then((audit) => {
@@ -55,6 +57,30 @@ UserActivityRouter.get(
 
 UserActivityRouter.get(
     "/userActivity/:userId",
+    middleware.permission(helper.permissions.user_activity_read),
+
+    (req: Request<any>, res: Response, next: NextFunction) => {
+        UserActivity.getUserActivityById(parseInt(req.params.userId))
+            .then((audit) => {
+                if (audit == null) {
+                    res.sendStatus(httpStatus.No_Content)
+                } else {
+                    res.status(httpStatus.OK).json(audit)
+                }
+            })
+            .catch((err) =>
+                res.status(httpStatus.Bad_Request).json({
+                    code: httpStatus.Bad_Request,
+                    error: err,
+                })
+            )
+    }
+)
+
+UserActivityRouter.get(
+    "/admin-userActivity/:userId",
+    middleware.permission(helper.permissions.admin_user_activity_read),
+
     (req: Request<any>, res: Response, next: NextFunction) => {
         UserActivity.getUserActivityById(parseInt(req.params.userId))
             .then((audit) => {

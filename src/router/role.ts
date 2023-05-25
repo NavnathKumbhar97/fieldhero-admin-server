@@ -9,6 +9,7 @@ const RoleRouter = Router()
 RoleRouter.get(
     "/roles",
     middleware.permission(helper.permissions.role_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Role.getRoles(req.query.all as string
@@ -26,6 +27,7 @@ RoleRouter.get(
 RoleRouter.get(
     "/all-roles",
     middleware.permission(helper.permissions.role_read_all),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Role.getRolesForFilter(req.query.all as string
@@ -44,6 +46,7 @@ RoleRouter.get(
 RoleRouter.get(
     "/roles/:id",
     middleware.permission(helper.permissions.role_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Role.getRoleById(
@@ -61,6 +64,7 @@ RoleRouter.get(
 RoleRouter.post(
     "/roles",
     middleware.permission(helper.permissions.role_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Role.createRole(
@@ -79,6 +83,7 @@ RoleRouter.post(
 RoleRouter.put(
     "/roles/:id",
     middleware.permission(helper.permissions.role_update),
+    
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Role.updateRoleById(

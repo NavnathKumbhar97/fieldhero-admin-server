@@ -85,4 +85,11 @@ export default {
     admin_other_industry_category_read_all: 83,
     admin_other_industry_category_update: 84,
     admin_candidate_upload_batch_approval: 85,
+    admin_user_activity_read_all:93,
+    admin_user_activity_read:94,
+    admin_user_login_activity_read:95,
+    admin_user_login_activity_read_all:96,
+    user_login_activity_read:97,
+    user_activity_read:98,
+
 }
