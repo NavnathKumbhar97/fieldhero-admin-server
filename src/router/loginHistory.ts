@@ -10,7 +10,7 @@ const userLoginHistory = Router()
 //* fetch category by id
 userLoginHistory.get(
     "/user-history/:userLoginId",
-    middleware.permission(helper.permissions.user_login_activity_read),
+    // middleware.permission(helper.permissions.user_login_activity_read),
     async (req: Request, res: Response) => {
         try {
             const result = await handler.loginHistory.fetchById(

@@ -9,7 +9,7 @@ const SubscriptionRouter = Router()
 //* Fetch All Subscription List
 SubscriptionRouter.get(
     "/subscriptions",
-    middleware.permission(helper.permissions.subscription_read_all),
+    middleware.permission(helper.permissions.subscription_read_all) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Subscription.getSubscriptions(
@@ -79,7 +79,7 @@ SubscriptionRouter.post(
 // * Update subscription
 SubscriptionRouter.put(
     "/subscriptions/:id",
-    middleware.permission(helper.permissions.subscription_update),
+    middleware.permission(helper.permissions.subscription_update) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.Subscription.updatedSubscriptionById(

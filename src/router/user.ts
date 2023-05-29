@@ -64,7 +64,7 @@ UserRouter.get(
 // * Get users for filter
 UserRouter.get(
     "/all-users",
-    middleware.permission(helper.permissions.user_read_all),
+    middleware.permission(helper.permissions.user_read_all) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.User.getUsersForFilter(req.query.all as string ,Number(req.query.take),
@@ -80,14 +80,14 @@ UserRouter.get(
 // * Get logged in user dashboard
 UserRouter.get(
     "/users/dashboard",
-    middleware.permission(helper.permissions.none),
+    middleware.permission(helper.permissions.none) ,
     controller.User.getDashboard
 )
 
 //* Fetch User By Id
 UserRouter.get(
     "/users/:id",
-    middleware.permission(helper.permissions.user_read),
+    middleware.permission(helper.permissions.user_read) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.User.getUserById(
@@ -104,7 +104,7 @@ UserRouter.get(
 //* User self - change password
 UserRouter.post(
     "/users/change-password",
-    middleware.permission(helper.permissions.user_self_change_password),
+    middleware.permission(helper.permissions.user_self_change_password) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.User.changePassword(
