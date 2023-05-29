@@ -47,6 +47,7 @@ SkillRouter.get(
 SkillRouter.get(
     "/skills/:id",
     middleware.permission(helper.permissions.skill_read),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.SkillSet.getSkillById(
@@ -64,6 +65,7 @@ SkillRouter.get(
 SkillRouter.post(
     "/skills",
     middleware.permission(helper.permissions.skill_create),
+
     async (req: Request, res: Response) => {
         try {
             const result = await handler.SkillSet.createSkill(
@@ -81,7 +83,8 @@ SkillRouter.post(
 // * Update skills Set Recored
 SkillRouter.put(
     "/skills/:id",
-    middleware.permission(helper.permissions.skill_update),
+
+    middleware.permission(helper.permissions.skill_update) ,
     async (req: Request, res: Response) => {
         try {
             const result = await handler.SkillSet.updateSkillById(
