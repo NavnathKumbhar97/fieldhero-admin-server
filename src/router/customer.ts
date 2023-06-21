@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
+import { body, validationResult } from "express-validator"
 
 const CustomerRouter = Router()
 
@@ -63,9 +64,16 @@ CustomerRouter.get(
 CustomerRouter.put(
     "/customers/:id",
     middleware.permission(helper.permissions.customer_update),
-
+    body("companyName").notEmpty().withMessage("Company Name is required"),
+    body("industryId").notEmpty().withMessage("industry Name is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Customer.updateCustomer(
                 helper.getUserLoginId(req.user),
                 {

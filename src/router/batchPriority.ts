@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import helper from "../helper"
 import handler from "../handlers"
 import middleware from "./middleware"
+import { body, validationResult } from "express-validator"
 
 const BatchPriorityRouter = Router()
 
@@ -10,9 +11,17 @@ const BatchPriorityRouter = Router()
 BatchPriorityRouter.post(
     "/batch-priorities",
     middleware.permission(helper.permissions.batch_priority_create),
+    body("assignedTo").notEmpty().withMessage("assignedTo is required"),
+    body("batchId").notEmpty().withMessage("batchId is required"),
 
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.BatchPriority.update(
                 helper.getUserLoginId(req.user),
                 req.body

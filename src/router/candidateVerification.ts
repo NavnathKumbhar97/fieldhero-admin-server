@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
+import { body, check, validationResult } from "express-validator"
 
 const CandidateVerificationRouter = Router()
 
@@ -9,7 +10,6 @@ const CandidateVerificationRouter = Router()
 CandidateVerificationRouter.post(
     "/candidate-verifications",
     middleware.permission(helper.permissions.candidate_verification_create),
-
     async (req: Request, res: Response) => {
         try {
             const result =
@@ -31,6 +31,7 @@ CandidateVerificationRouter.get(
 
     async (req: Request, res: Response) => {
         try {
+
             const result =
                 await handler.CandidateVerification.getCandidateVerifications(
                     helper.getUserLoginId(req.user),
@@ -105,9 +106,16 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.put(
     "/candidate-verifications/:id",
     middleware.permission(helper.permissions.candidate_verification_update),
-    
+    body("candidateConsent").notEmpty().withMessage("Candidate Consent is required"),
+    body("callStatus").notEmpty().withMessage("Call Status is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result =
                 await handler.CandidateVerification.updateCandidateVerificationById(
                     helper.getUserLoginId(req.user),

@@ -101,6 +101,8 @@ const filterRecords = async (
     id:number,
     fullName:String,
     contact:String,
+    // status:boolean,
+
 ): Promise<helper.IResponseObject> => {
     try {
         let whereCondition: true | undefined = true
@@ -121,13 +123,15 @@ const filterRecords = async (
 
         const candidates = await prisma.candidate.findMany({
             where: {
-                OR:[
+                AND:[
                     {
                         fullName:{
                             startsWith:param.fullName,
                         },
                     },
-                    {contactNo1:param.contact,},
+                    {contactNo1:param.contact},
+                    {id:param.id},
+                    // {isActive:status},
                     
                 ],
                 isActive:whereCondition,

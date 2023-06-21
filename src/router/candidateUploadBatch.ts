@@ -3,6 +3,7 @@ import { Router, Request, Response, json as bodyParserJson } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
+import { body, check, validationResult } from "express-validator"
 
 const CandidateUploadBatchRouter = Router()
 
@@ -51,8 +52,15 @@ CandidateUploadBatchRouter.post(
     // 50mb
     bodyParserJson({ limit: 1024 * 1024 * 50 }),
     middleware.permission(helper.permissions.candidate_upload_batch_create),
+    body("file").notEmpty().withMessage("file is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Candidate.createCandidateRaw(
                 helper.getUserLoginId(req.user),
                 helper.getUserLoginId(req.user),
@@ -72,8 +80,15 @@ CandidateUploadBatchRouter.post(
     // 50mb
     bodyParserJson({ limit: 1024 * 1024 * 50 }),
     middleware.permission(helper.permissions.candidate_upload_batch_create),
+    body("file").notEmpty().withMessage("file is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Candidate.createCandidateRaw(
                 helper.getUserLoginId(req.user),
                 req.body.user,
@@ -132,8 +147,16 @@ CandidateUploadBatchRouter.put(
     middleware.permission(
         helper.permissions.admin_candidate_upload_batch_change_pricing_template
     ),
+    body("templateId").notEmpty().withMessage("template Name is required"),
+
     async (req: Request, res: Response) => {
         try {
+             // Check for validation errors
+             const errors = validationResult(req);
+                
+             if (!errors.isEmpty()) {
+                 return res.status(400).json({ errors: errors.array() });
+             }
             const result =
                 await handler.CandidateUploadBatch.changeAgentPricingTemplate(
                     helper.getUserLoginId(req.user),
