@@ -3,6 +3,7 @@ import { Router, Request, Response, json as bodyParserJson } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
+import { body, check, matchedData, param, query, validationResult } from "express-validator"
 
 const CandidateRouter = Router()
 
@@ -26,13 +27,22 @@ CandidateRouter.get(
 CandidateRouter.get(
     "/filter-candidate",
     middleware.permission(helper.permissions.candidate_read_all),
+    check("fullName").notEmpty().withMessage("Full Name is required"),
+    check("contact").notEmpty().withMessage("Contact number is required"),
     async (req: Request, res: Response) => {
         try {
+                  // Check for validation errors
+      const errors = validationResult(req);      
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      } 
             const result = await handler.Candidate.filterRecords(
                 req.query as any,
                 parseInt(req.params.id),
                 req.params.fullName,
                 req.params.contact,
+                // req.params.status,
+                // req.params.id
                 
             )
             const { code, data, message } = result
@@ -61,8 +71,14 @@ CandidateRouter.get(
 CandidateRouter.get(
     "/candidates/:id",
     middleware.permission(helper.permissions.candidate_read),
+    param("id").notEmpty().withMessage("Candidate id required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);      
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.Candidate.getCandidateById(
                 parseInt(req.params.id)
             )
@@ -78,11 +94,23 @@ CandidateRouter.get(
 CandidateRouter.post(
     "/candidates",
     middleware.permission(helper.permissions.candidate_create),
+    body("gender").notEmpty().withMessage("Please select Gender"),
+    body("Full Name").notEmpty().withMessage("Full Name is required"),
+    body("email1").notEmpty().withMessage("Email is required"),
+    body("contactNo1").notEmpty().withMessage("Primary contact is required"),
+    body("aadharNo").notEmpty().withMessage("Aadhar Number is required"),
     async (req: Request, res: Response) => {
         try {
+
+            // Check for validation errors
+      const errors = validationResult(req);      
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }     
             const result = await handler.Candidate.createCandidate(
                 helper.getUserLoginId(req.user),
                 req.body
+                
             )
             const { code, data, message } = result
             res.status(code).json({ code, message, data })
@@ -96,8 +124,20 @@ CandidateRouter.post(
 CandidateRouter.put(
     "/candidates/:id",
     middleware.permission(helper.permissions.candidate_update),
+    body("gender").notEmpty().withMessage("Please select Gender"),
+    body("Full Name").notEmpty().withMessage("Full Name is required"),
+    body("email1").notEmpty().withMessage("Email is required"),
+    body("contactNo1").notEmpty().withMessage("Primary contact is required"),
+    body("aadharNo").notEmpty().withMessage("Aadhar Number is required"),
+    check("id").notEmpty().withMessage("Candidate id required"),
     async (req: Request, res: Response) => {
         try {
+                   // Check for validation errors
+                const errors = validationResult(req);
+                
+                if (!errors.isEmpty()) {
+                    return res.status(400).json({ errors: errors.array() });
+                } 
             const result = await handler.Candidate.updateCandidateById(
                 helper.getUserLoginId(req.user),
                 {
@@ -119,8 +159,19 @@ CandidateRouter.post(
     // 50mb
     bodyParserJson({ limit: 1024 * 1024 * 50 }),
     middleware.permission(helper.permissions.candidate_basic_bulk_create),
+    body("gender").notEmpty().withMessage("Please select Gender"),
+    body("Full Name").notEmpty().withMessage("Full Name is required"),
+    body("email1").notEmpty().withMessage("Email is required"),
+    body("contactNo1").notEmpty().withMessage("Primary contact is required"),
+    body("aadharNo").notEmpty().withMessage("Aadhar Number is required"),
     async (req: Request, res: Response) => {
         try {
+               // Check for validation errors
+               const errors = validationResult(req);
+                
+               if (!errors.isEmpty()) {
+                   return res.status(400).json({ errors: errors.array() });
+               } 
             const result = await handler.Candidate.createCandidateRaw(
                 helper.getUserLoginId(req.user),
                 helper.getUserLoginId(req.user),
@@ -138,8 +189,14 @@ CandidateRouter.post(
 CandidateRouter.get(
     "/candidates/:id/work-history",
     middleware.permission(helper.permissions.candidate_work_history_read_all),
+    param("id").notEmpty().withMessage("Candidate id required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);      
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Candidate.getCandidatesWorkHistory(
                 parseInt(req.params.id)
             )
@@ -155,8 +212,15 @@ CandidateRouter.get(
 CandidateRouter.get(
     "/candidates/:id/work-history/:workId",
     middleware.permission(helper.permissions.candidate_work_history_read),
+    param("id").notEmpty().withMessage("Candidate id required"),
+    param("workId").notEmpty().withMessage("Candidate work id required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);      
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.Candidate.getCandidateWorkHistoryById(
                 parseInt(req.params.id),
                 parseInt(req.params.workId)
@@ -173,8 +237,19 @@ CandidateRouter.get(
 CandidateRouter.post(
     "/candidates/:id/work-history",
     middleware.permission(helper.permissions.candidate_work_history_create),
+    param("id").notEmpty().withMessage("Candidate id required"),
+    body("companyId").notEmpty().withMessage("Company id required"),
+    body("endDate").notEmpty().withMessage("End Date required"),
+    body("skillId").notEmpty().withMessage("Start Date required"),
+    body("startDate").notEmpty().withMessage("Skills required"),
+
     async (req: Request, res: Response) => {
         try {
+               // Check for validation errors
+               const errors = validationResult(req); 
+               if (!errors.isEmpty()) {
+                   return res.status(400).json({ errors: errors.array() });
+               } 
             const result = await handler.Candidate.addCandidateWorkHistory(
                 helper.getUserLoginId(req.user),
                 {
@@ -194,8 +269,20 @@ CandidateRouter.post(
 CandidateRouter.put(
     "/candidates/:id/work-history/:workId",
     middleware.permission(helper.permissions.candidate_work_history_update),
+    param("id").notEmpty().withMessage("Candidate id required"),
+    param("workid").notEmpty().withMessage("Candidate id required"),
+    body("companyId").notEmpty().withMessage("Company id required"),
+    body("endDate").notEmpty().withMessage("End Date required"),
+    body("skillId").notEmpty().withMessage("Start Date required"),
+    body("startDate").notEmpty().withMessage("Skills required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result =
                 await handler.Candidate.updateCandidateWorkHistoryById(
                     helper.getUserLoginId(req.user),
@@ -268,8 +355,16 @@ CandidateRouter.get(
 CandidateRouter.post(
     "/candidates/:id/training-cert",
     middleware.permission(helper.permissions.candidate_certification_create),
+    body("issuedBy").notEmpty().withMessage("Please select Issued By"),
+    body("title").notEmpty().withMessage("Title is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.Candidate.addCandidateTraining(
                 helper.getUserLoginId(req.user),
                 {
@@ -290,8 +385,16 @@ CandidateRouter.post(
 CandidateRouter.put(
     "/candidates/:id/training-history/:trainingCertId",
     middleware.permission(helper.permissions.candidate_certification_update),
+    body("issuedBy").notEmpty().withMessage("Please select Issued By"),
+    body("title").notEmpty().withMessage("Title is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result =
                 await handler.Candidate.updateCandidateTrainingCertHistoryById(
                     helper.getUserLoginId(req.user),

@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as helper from "../helper"
 import middleware from "./middleware"
+import { body, validationResult } from "express-validator"
 
 const CategoryRouter = Router()
 
@@ -63,9 +64,15 @@ CategoryRouter.get(
 CategoryRouter.post(
     "/categories",
     middleware.permission(helper.permissions.category_create),
-
+    body("title").notEmpty().withMessage("title is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.Category.create(
                 helper.getUserLoginId(req.user),
                 req.body
@@ -82,9 +89,15 @@ CategoryRouter.post(
 CategoryRouter.put(
     "/categories/:id",
     middleware.permission(helper.permissions.category_update),
-    
+    body("title").notEmpty().withMessage("title is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Category.updateById(
                 helper.getUserLoginId(req.user),
                 {

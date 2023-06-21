@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as middleware from "./middleware"
 import * as handler from "../handlers"
 import * as helper from "../helper"
+import { body, validationResult } from "express-validator"
 const CompanyRouter = Router()
 
 // Company
@@ -66,9 +67,17 @@ CompanyRouter.get(
 CompanyRouter.post(
     "/companies",
     middleware.permission(helper.permissions.company_create),
+    body("companyName").notEmpty().withMessage("Company Name is required"),
+    body("industryId").notEmpty().withMessage("industry Name is required"),
 
     async (req: Request, res: Response) => {
         try {
+             // Check for validation errors
+             const errors = validationResult(req);
+                
+             if (!errors.isEmpty()) {
+                 return res.status(400).json({ errors: errors.array() });
+             }
             const result = await handler.Company.createCompany(
                 helper.getUserLoginId(req.user),
                 req.body
@@ -85,9 +94,17 @@ CompanyRouter.post(
 CompanyRouter.put(
     "/companies/:id",
     middleware.permission(helper.permissions.company_update),
-    
+    body("companyName").notEmpty().withMessage("Company Name is required"),
+    body("industryId").notEmpty().withMessage("industry Name is required"),
+
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Company.updatedCompanyById(
                 helper.getUserLoginId(req.user),
                 {

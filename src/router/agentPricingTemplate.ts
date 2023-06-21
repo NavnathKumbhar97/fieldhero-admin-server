@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as helper from "../helper"
 import middleware from "./middleware"
+import { body, validationResult } from "express-validator"
 
 const AgentPricingTemplateRouter = Router()
 
@@ -47,9 +48,16 @@ AgentPricingTemplateRouter.get(
 AgentPricingTemplateRouter.post(
     "/agent-pricing-templates",
     middleware.permission(helper.permissions.agent_pricing_template_create),
+    body("templateName").notEmpty().withMessage("Template Name is required"),
 
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            } 
             const result = await handler.AgentPricingTemplate.create(
                 helper.getUserLoginId(req.user),
                 req.body
