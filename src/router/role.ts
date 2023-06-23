@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as helper from "../helper"
 import * as middleware from "./middleware"
+import { body, validationResult } from "express-validator"
 const RoleRouter = Router()
 
 //* Fetch all Roles
@@ -64,9 +65,16 @@ RoleRouter.get(
 RoleRouter.post(
     "/roles",
     middleware.permission(helper.permissions.role_create),
+    body("name").notEmpty().withMessage("Role Name is required"),
 
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Role.createRole(
                 helper.getUserLoginId(req.user),
                 req.body
@@ -83,9 +91,16 @@ RoleRouter.post(
 RoleRouter.put(
     "/roles/:id",
     middleware.permission(helper.permissions.role_update),
-    
+    body("name").notEmpty().withMessage("Role Name is required"),
+
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Role.updateRoleById(
                 helper.getUserLoginId(req.user),
                 {

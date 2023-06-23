@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
+import { body, validationResult } from "express-validator"
 
 const SubscriptionRouter = Router()
 
@@ -62,8 +63,16 @@ SubscriptionRouter.get(
 SubscriptionRouter.post(
     "/subscriptions",
     middleware.permission(helper.permissions.subscription_create),
+    body("planName").notEmpty().withMessage("Plan Name is required"),
+
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Subscription.createSubscripition(
                 helper.getUserLoginId(req.user),
                 req.body
@@ -80,8 +89,16 @@ SubscriptionRouter.post(
 SubscriptionRouter.put(
     "/subscriptions/:id",
     middleware.permission(helper.permissions.subscription_update) ,
+    body("planName").notEmpty().withMessage("Plan Name is required"),
+
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Subscription.updatedSubscriptionById(
                 helper.getUserLoginId(req.user),
                 {
