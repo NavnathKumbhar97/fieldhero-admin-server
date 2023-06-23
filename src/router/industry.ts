@@ -3,6 +3,7 @@ import { Router, Request, Response } from "express"
 import * as handler from "../handlers"
 import * as middleware from "./middleware"
 import * as helper from "../helper"
+import { body, validationResult } from "express-validator"
 
 const IndustryRouter = Router()
 // Industry
@@ -68,9 +69,15 @@ IndustryRouter.get(
 IndustryRouter.post(
     "/industries",
     middleware.permission(helper.permissions.industry_create),
-
+    body("title").notEmpty().withMessage("Industry Name is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Industry.createIndustry(
                 helper.getUserLoginId(req.user),
                 req.body
@@ -87,9 +94,15 @@ IndustryRouter.post(
 IndustryRouter.put(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_update),
-    
+    body("title").notEmpty().withMessage("Indutry Name is required"),
     async (req: Request, res: Response) => {
         try {
+            // Check for validation errors
+            const errors = validationResult(req);
+                
+            if (!errors.isEmpty()) {
+                return res.status(400).json({ errors: errors.array() });
+            }
             const result = await handler.Industry.updateIndustryById(
                 helper.getUserLoginId(req.user),
                 {
