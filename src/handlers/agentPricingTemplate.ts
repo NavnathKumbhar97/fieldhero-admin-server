@@ -184,9 +184,9 @@ const create = async (
                 null
             )
         const { templateName, description, isActive, ...other } = param
-        const total: number = Object.values(other).reduce(
-            (prev: number, curr: number) => prev + curr,0
-        )
+        // const total: number = Object.values(other).reduce(
+        //     (prev: number, curr: number) => prev + curr,0
+        // )
         const template = await prisma.agentPricingTemplate.create({
             data: {
                 templateName: param.templateName,

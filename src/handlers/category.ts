@@ -200,6 +200,39 @@ const create = async (
     }
 }
 
+// import { Request, Response } from 'express';
+// import { Types } from 'mongoose';
+// import { User, UserDocument } from '../models/User'; // Assuming you have a User model defined
+
+// export const updateUser = async (req: Request, res: Response): Promise<void> => {
+//   const { id } = req.params;
+//   const updateData = req.body;
+
+//   if (!Types.ObjectId.isValid(id)) {
+//     res.status(400).json({ error: 'Invalid user ID' });
+//     return;
+//   }
+
+//   try {
+//     const existingUser: UserDocument | null = await User.findById(id);
+//     if (!existingUser) {
+//       res.status(404).json({ error: 'User not found' });
+//       return;
+//     }
+
+//     // Update only the provided fields
+//     Object.keys(updateData).forEach((key) => {
+//       existingUser[key] = updateData[key];
+//     });
+
+//     const updatedUser: UserDocument = await existingUser.save();
+
+//     res.status(200).json(updatedUser);
+//   } catch (error) {
+//     res.status(500).json({ error: 'Server error' });
+//   }
+// };
+
 interface IUpdateParam {
     id: number
     title: string
@@ -208,10 +241,10 @@ interface IUpdateParam {
 }
 const updateById = async (
     userLoginId: number,
-    param: IUpdateParam
+    param: any
 ): Promise<IResponseObject> => {
     try {
-        const categoryFound = await prisma.category.findFirst({
+        const categoryFound:any = await prisma.category.findFirst({
             where: {
                 id: param.id,
             },
@@ -223,24 +256,30 @@ const updateById = async (
                 httpStatus.Not_Found,
                 "Category not found"
             )}
-        if (!param.title){
-            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Title is required.`);
-            return getHandlerResponseObject(
-                false,
-                httpStatus.Conflict,
-                "Title is required"
-                )
+        // if (!param.title){
+        //     logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Title is required.`);
+        //     return getHandlerResponseObject(
+        //         false,
+        //         httpStatus.Conflict,
+        //         "Title is required"
+        //         )
+        //     }
+
+        const updatedData = Object.keys(param).reduce((acc:any, key) => {
+            if (param[key]) {
+              acc[key] = param[key];
             }
+            return acc;
+          }, {});
+          
+          console.log("updatedData", updatedData);
+          
+
         const category = await prisma.category.update({
             where: {
                 id: param.id,
             },
-            data: {
-                title: param.title.toUpperCase(),
-                description: param.description || undefined,
-                isActive: "isActive" in param ? param.isActive : undefined,
-                modifiedBy: userLoginId,
-            },
+            data:updatedData
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateById | Message: Category updated successfully.`);
         return getHandlerResponseObject(

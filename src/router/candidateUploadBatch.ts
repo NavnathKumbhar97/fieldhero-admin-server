@@ -52,7 +52,7 @@ CandidateUploadBatchRouter.post(
     // 50mb
     bodyParserJson({ limit: 1024 * 1024 * 50 }),
     middleware.permission(helper.permissions.candidate_upload_batch_create),
-    body("file").notEmpty().withMessage("file is required"),
+    // body("file").notEmpty().withMessage("file is required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors
@@ -147,7 +147,7 @@ CandidateUploadBatchRouter.put(
     middleware.permission(
         helper.permissions.admin_candidate_upload_batch_change_pricing_template
     ),
-    body("templateId").notEmpty().withMessage("template Name is required"),
+    // body("templateId").notEmpty().withMessage("template Name is required"),
 
     async (req: Request, res: Response) => {
         try {
