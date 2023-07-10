@@ -89,7 +89,7 @@ CategoryRouter.post(
 CategoryRouter.put(
     "/categories/:id",
     middleware.permission(helper.permissions.category_update),
-    body("title").notEmpty().withMessage("title is required"),
+    // body("title").notEmpty().withMessage("title is required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors
