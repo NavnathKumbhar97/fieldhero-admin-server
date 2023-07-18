@@ -270,10 +270,7 @@ const updateById = async (
               acc[key] = param[key];
             }
             return acc;
-          }, {});
-          
-          console.log("updatedData", updatedData);
-          
+          }, {});          
 
         const category = await prisma.category.update({
             where: {

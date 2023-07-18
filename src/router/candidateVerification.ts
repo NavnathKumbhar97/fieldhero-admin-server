@@ -106,8 +106,8 @@ CandidateVerificationRouter.get(
 CandidateVerificationRouter.put(
     "/candidate-verifications/:id",
     middleware.permission(helper.permissions.candidate_verification_update),
-    body("candidateConsent").notEmpty().withMessage("Candidate Consent is required"),
-    body("callStatus").notEmpty().withMessage("Call Status is required"),
+    // body("candidateConsent").notEmpty().withMessage("Candidate Consent is required"),
+    // body("callStatus").notEmpty().withMessage("Call Status is required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors

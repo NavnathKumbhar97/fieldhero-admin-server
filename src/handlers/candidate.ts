@@ -28,12 +28,14 @@ interface IGetCandidatesParam {
     page: string
     limit: string
     status?: string
-    industry?: string
-    category?: string
+    industry?: any
+    category?: any
     fullName?: string
     contact?: string
-    id?: number,
-    isActive?:boolean
+    id?: any,
+    isActive?:boolean,
+    skill:any,
+
 }
 const getCandidates = async (
     param: IGetCandidatesParam
@@ -58,7 +60,6 @@ const getCandidates = async (
         })
 
         const _paginate = paginate(count, page, limit)
-        console.log(param.industry?.split(",").map((x) => parseInt(x)))
         const candidates = await prisma.candidate.findMany({
             where: {
                 isActive: whereCondition,
@@ -70,6 +71,8 @@ const getCandidates = async (
                 status: true,
                 isActive: true,
                 profImgPath:true,
+                CandidateIndustry:true,
+                CandidateCategory:true
                 
             },
             take: limit,
@@ -98,9 +101,9 @@ const getCandidates = async (
 const filterRecords = async (
     
     param: IGetCandidatesParam,
-    id:number,
-    fullName:String,
-    contact:String,
+    // id:any,
+    // fullName:String,
+    // contact:String,
     // status:boolean,
 
 ): Promise<helper.IResponseObject> => {
@@ -123,23 +126,32 @@ const filterRecords = async (
 
         const candidates = await prisma.candidate.findMany({
             where: {
-                AND:[
+                AND: [
                     {
-                        fullName:{
-                            startsWith:param.fullName,
+                        fullName:  param.fullName,
+                    },
+                    {
+                        contactNo1: {
+                            contains: param.contact,
                         },
                     },
-                    {contactNo1:param.contact},
-                    {id:param.id},
-                    // {isActive:status},
-                    
-                ],
-                isActive:whereCondition,
-                // id:param.id,
-                // fullName:{
-                //     endsWith:param.fullName
-                // },
+                    {
+                        id: parseInt(param.id),
+                    },
+                    {
+                        isActive:param.isActive
+                    },
+                    {
+                        skill1:param.skill || null
+                    },
+                    // {
+                    //     CandidateIndustry:param.industry || null
+                    // },
+                    // {
+                    //     CandidateCategory:param.category || null
+                    // }
 
+                ],
             },
             select: {
                 id: true,
@@ -147,7 +159,7 @@ const filterRecords = async (
                 contactNo1: true,
                 status: true,
                 isActive: true,
-                profImgPath:true
+                profImgPath:true,
                 
             },
             orderBy: {
@@ -385,7 +397,7 @@ interface updateCandidateParam {
 
 const updateCandidateById = async (
     userLoginId: number,
-    param: updateCandidateParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const candidateFound = await prisma.candidate.findFirst({
@@ -399,36 +411,43 @@ const updateCandidateById = async (
                 httpStatus.Not_Found,
                 "Candidate not found"
             )
+            const updatedData = Object.keys(param).reduce((acc:any, key) => {
+                if (param[key]) {
+                  acc[key] = param[key];
+                }
+                return acc;
+              }, {}); 
 
         const candidate = await prisma.candidate.update({
             where: {
                 id: param.id,
             },
-            data: {
-                fullName: param.fullName,
-                dob: param.birthDate,
-                gender: param.gender,
-                permAddress: param.permAddress,
-                permCity: param.permCity,
-                permState: param.permState,
-                permCountry: param.permCountry,
-                permZip: param.permZip,
-                currAddress: param.currAddress,
-                currCity: param.currCity,
-                currState: param.currState,
-                currCountry: param.currCountry,
-                currZip: param.currZip,
-                email1: param.email1,
-                email2: param.email2,
-                contactNo1: param.contactNo1,
-                contactNo2: param.contactNo2,
-                aadharNo: param.aadharNo,
-                profImgPath:param.profImgPath,
-                isActive: param.isActive,
-                approvedOn: moment().utc().format(),
-                modifiedBy: userLoginId,
-                approvedBy: userLoginId,
-            },
+            data: updatedData
+            // {
+            //     fullName: param.fullName,
+            //     dob: param.birthDate,
+            //     gender: param.gender,
+            //     permAddress: param.permAddress,
+            //     permCity: param.permCity,
+            //     permState: param.permState,
+            //     permCountry: param.permCountry,
+            //     permZip: param.permZip,
+            //     currAddress: param.currAddress,
+            //     currCity: param.currCity,
+            //     currState: param.currState,
+            //     currCountry: param.currCountry,
+            //     currZip: param.currZip,
+            //     email1: param.email1,
+            //     email2: param.email2,
+            //     contactNo1: param.contactNo1,
+            //     contactNo2: param.contactNo2,
+            //     aadharNo: param.aadharNo,
+            //     profImgPath:param.profImgPath,
+            //     isActive: param.isActive,
+            //     approvedOn: moment().utc().format(),
+            //     modifiedBy: userLoginId,
+            //     approvedBy: userLoginId,
+            // },
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateCandidateById |  Message: Candidate updated successfully.`);
         return helper.getHandlerResponseObject(
@@ -1405,7 +1424,7 @@ interface updateCandidateTrainingCertHistoryParam {
 
 const updateCandidateTrainingCertHistoryById = async (
     userLoginId: number,
-    param: updateCandidateTrainingCertHistoryParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const candidateTrainingHistoryFound =
@@ -1450,21 +1469,27 @@ const updateCandidateTrainingCertHistoryById = async (
         // })
 
         // const allSkillsIds = [...skills, ...skillsCreated.map((x) => x.id)]
-
+        const updatedData = Object.keys(param).reduce((acc:any, key) => {
+            if (param[key]) {
+              acc[key] = param[key];
+            }
+            return acc;
+          }, {}); 
         const updateCTCH = prisma.candidateTraining.update({
             where: {
                 id: param.id,
             },
-            data: {
-                issueDate: param.issueDate,
-                issuedBy: param.issuedBy,
-                title: param.title,
-                type:param.type,
-                candidateId: param.candidateId,
-                skillId: param.skillId,
-                description: param.description,
-                modifiedBy: userLoginId,
-            },
+            data: updatedData
+            // {
+            //     issueDate: param.issueDate,
+            //     issuedBy: param.issuedBy,
+            //     title: param.title,
+            //     type:param.type,
+            //     candidateId: param.candidateId,
+            //     skillId: param.skillId,
+            //     description: param.description,
+            //     modifiedBy: userLoginId,
+            // },
         })
 
         const [candidateTrainingCertHistory] = await prisma.$transaction([updateCTCH])

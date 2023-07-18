@@ -181,7 +181,7 @@ interface updateSkillSetParam {
 
 const updateSkillById = async (
     userLoginId: number,
-    param: updateSkillSetParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const skillFound = await prisma.skill.findFirst({
@@ -196,17 +196,24 @@ const updateSkillById = async (
                 "Skill not found"
                 )
             }
+            const updatedData = Object.keys(param).reduce((acc:any, key) => {
+                if (param[key]) {
+                  acc[key] = param[key];
+                }
+                return acc;
+              }, {});
 
         const skill = await prisma.skill.update({
             where: {
                 id: param.id,
             },
-            data: {
-                title: param.title,
-                description: param.description,
-                isActive: "isActive" in param ? param.isActive : undefined,
-                modifiedBy: userLoginId,
-            },
+            data: updatedData
+            // {
+            //     title: param.title,
+            //     description: param.description,
+            //     isActive: "isActive" in param ? param.isActive : undefined,
+            //     modifiedBy: userLoginId,
+            // },
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateSkillById | Message: Skill updated successfully.`);
 

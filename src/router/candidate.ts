@@ -24,11 +24,11 @@ CandidateRouter.get(
         }
     }
 )
-CandidateRouter.get(
+CandidateRouter.post(
     "/filter-candidate",
     middleware.permission(helper.permissions.candidate_read_all),
-    check("fullName").notEmpty().withMessage("Full Name is required"),
-    check("contact").notEmpty().withMessage("Contact number is required"),
+    // check("fullName").notEmpty().withMessage("Full Name is required"),
+    // check("contact").notEmpty().withMessage("Contact number is required"),
     async (req: Request, res: Response) => {
         try {
                   // Check for validation errors
@@ -37,10 +37,10 @@ CandidateRouter.get(
         return res.status(400).json({ errors: errors.array() });
       } 
             const result = await handler.Candidate.filterRecords(
-                req.query as any,
-                parseInt(req.params.id),
-                req.params.fullName,
-                req.params.contact,
+                req.body as any,
+                // parseInt(req.params.id),
+                // req.params.fullName,
+                // req.params.contact,
                 // req.params.status,
                 // req.params.id
                 
@@ -124,12 +124,12 @@ CandidateRouter.post(
 CandidateRouter.put(
     "/candidates/:id",
     middleware.permission(helper.permissions.candidate_update),
-    body("gender").notEmpty().withMessage("Please select Gender"),
-    body("fullName").notEmpty().withMessage("Full Name is required"),
-    body("email1").notEmpty().withMessage("Email is required"),
-    body("contactNo1").notEmpty().withMessage("Primary contact is required"),
-    body("aadharNo").notEmpty().withMessage("Aadhar Number is required"),
-    check("id").notEmpty().withMessage("Candidate id required"),
+    // body("gender").notEmpty().withMessage("Please select Gender"),
+    // body("fullName").notEmpty().withMessage("Full Name is required"),
+    // body("email1").notEmpty().withMessage("Email is required"),
+    // body("contactNo1").notEmpty().withMessage("Primary contact is required"),
+    // body("aadharNo").notEmpty().withMessage("Aadhar Number is required"),
+    // check("id").notEmpty().withMessage("Candidate id required"),
     async (req: Request, res: Response) => {
         try {
                    // Check for validation errors
@@ -141,7 +141,7 @@ CandidateRouter.put(
             const result = await handler.Candidate.updateCandidateById(
                 helper.getUserLoginId(req.user),
                 {
-                    id: req.params.id,
+                    id: parseInt(req.params.id),
                     ...req.body,
                 }
             )
@@ -269,12 +269,12 @@ CandidateRouter.post(
 CandidateRouter.put(
     "/candidates/:id/work-history/:workId",
     middleware.permission(helper.permissions.candidate_work_history_update),
-    param("id").notEmpty().withMessage("Candidate id required"),
+    // param("id").notEmpty().withMessage("Candidate id required"),
     // param("workid").notEmpty().withMessage("Candidate id required"),
-    body("companyId").notEmpty().withMessage("Company id required"),
-    body("endDate").notEmpty().withMessage("End Date required"),
-    body("skillId").notEmpty().withMessage("Start Date required"),
-    body("startDate").notEmpty().withMessage("Skills required"),
+    // body("companyId").notEmpty().withMessage("Company id required"),
+    // body("endDate").notEmpty().withMessage("End Date required"),
+    // body("skillId").notEmpty().withMessage("Start Date required"),
+    // body("startDate").notEmpty().withMessage("Skills required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors

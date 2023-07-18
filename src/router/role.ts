@@ -91,7 +91,7 @@ RoleRouter.post(
 RoleRouter.put(
     "/roles/:id",
     middleware.permission(helper.permissions.role_update),
-    body("name").notEmpty().withMessage("Role Name is required"),
+    // body("name").notEmpty().withMessage("Role Name is required"),
 
     async (req: Request, res: Response) => {
         try {
