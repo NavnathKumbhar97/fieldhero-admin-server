@@ -89,7 +89,7 @@ SubscriptionRouter.post(
 SubscriptionRouter.put(
     "/subscriptions/:id",
     middleware.permission(helper.permissions.subscription_update) ,
-    body("planName").notEmpty().withMessage("Plan Name is required"),
+    // body("planName").notEmpty().withMessage("Plan Name is required"),
 
     async (req: Request, res: Response) => {
         try {

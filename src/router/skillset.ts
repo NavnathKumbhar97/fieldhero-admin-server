@@ -93,7 +93,7 @@ SkillRouter.put(
     "/skills/:id",
 
     middleware.permission(helper.permissions.skill_update) ,
-    body("title").notEmpty().withMessage("Skill Name is required"),
+    // body("title").notEmpty().withMessage("Skill Name is required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors

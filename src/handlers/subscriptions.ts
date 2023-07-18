@@ -234,7 +234,7 @@ interface IUpdateSubscriptionParam {
 
 const updatedSubscriptionById = async (
     userLoginId: number,
-    param: IUpdateSubscriptionParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const subscriptionFound = await prisma.subscription.findFirst({
@@ -251,15 +251,22 @@ const updatedSubscriptionById = async (
                 "Subscription not found"
                 )
             }
+            const updatedData = Object.keys(param).reduce((acc:any, key) => {
+                if (param[key]) {
+                  acc[key] = param[key];
+                }
+                return acc;
+              }, {});
 
         const subscripition = await prisma.subscription.update({
             where: {
                 id: param.id,
             },
-            data: {
-                note: param.note,
-                isActive: "isActive" in param ? param.isActive : undefined,
-            },
+            data: updatedData
+            // {
+            //     note: param.note,
+            //     isActive: "isActive" in param ? param.isActive : undefined,
+            // },
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updatedSubscriptionById | Message: Subscription updated successfully.`);
 

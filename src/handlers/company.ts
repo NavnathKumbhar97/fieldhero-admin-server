@@ -227,7 +227,7 @@ interface updateCompnayParam {
 
 const updatedCompanyById = async (
     userLoginId: number,
-    param: updateCompnayParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const companyFound = await prisma.company.findFirst({
@@ -244,12 +244,19 @@ const updatedCompanyById = async (
                 "Company not found"
                 )
             }
+            const updatedData = Object.keys(param).reduce((acc:any, key) => {
+                if (param[key]) {
+                  acc[key] = param[key];
+                }
+                return acc;
+              }, {}); 
 
         let industryId: number | undefined =
             typeof param.industryId !== "string" ? param.industryId : undefined
         if (typeof param.industryId === "string") {
             const _industry = await prisma.industry.create({
-                data: {
+                data: 
+                {
                     title: param.industryId,
                     createdBy: userLoginId,
                     modifiedBy: userLoginId,
@@ -262,13 +269,14 @@ const updatedCompanyById = async (
             where: {
                 id: companyFound.id,
             },
-            data: {
-                companyName: param.companyName,
-                description: param.description,
-                isActive: param.isActive,
-                industryId: industryId,
-                modifiedBy: userLoginId,
-            },
+            data: updatedData
+            // {
+            //     companyName: param.companyName,
+            //     description: param.description,
+            //     isActive: param.isActive,
+            //     industryId: industryId,
+            //     modifiedBy: userLoginId,
+            // },
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updatedCompanyById | Message: Company updated successfully.`);
         return helper.getHandlerResponseObject(

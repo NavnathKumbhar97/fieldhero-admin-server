@@ -94,7 +94,7 @@ IndustryRouter.post(
 IndustryRouter.put(
     "/industries/:id",
     middleware.permission(helper.permissions.industry_update),
-    body("title").notEmpty().withMessage("Indutry Name is required"),
+    // body("title").notEmpty().withMessage("Indutry Name is required"),
     async (req: Request, res: Response) => {
         try {
             // Check for validation errors

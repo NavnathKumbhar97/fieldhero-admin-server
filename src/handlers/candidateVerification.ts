@@ -692,19 +692,19 @@ const updateCandidateVerificationById = async (
             )
         }
 
-        // requests.push(
-        //     prisma.candidateCallCentreHistory.create({
-        //         data: {
-        //             candidateConsent: param.callCentre.candidateConsent,
-        //             comment: param.callCentre.comment,
-        //             callStatus: param.callCentre.callStatus,
-        //             isSubmitted: param.callCentre.isSubmitted,
-        //             candidateId: itemId,
-        //             createdBy: userLoginId,
-        //             modifiedBy: userLoginId,
-        //         },
-        //     })
-        // )
+        requests.push(
+            prisma.candidateCallCentreHistory.create({
+                data: {
+                    candidateConsent: param.callCentre.candidateConsent,
+                    comment: param.callCentre.comment,
+                    callStatus: param.callCentre.callStatus,
+                    isSubmitted: param.callCentre.isSubmitted,
+                    candidateId: itemId,
+                    createdBy: userLoginId,
+                    modifiedBy: userLoginId,
+                },
+            })
+        )
 
         // if submitted
         let isOther = false

@@ -192,7 +192,7 @@ interface updateIndustryParam {
 }
 const updateIndustryById = async (
     userLoginId: number,
-    param: updateIndustryParam
+    param: any
 ): Promise<helper.IResponseObject> => {
     try {
         const industryFound = await prisma.industry.findFirst({
@@ -210,25 +210,33 @@ const updateIndustryById = async (
                 "Industry not found"
             )
         }
-        if (!param.title) {
-            logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Title is required.`);
+        // if (!param.title) {
+        //     logger.warn(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Title is required.`);
 
-            return helper.getHandlerResponseObject(
-                false,
-                httpStatus.Conflict,
-                "Title is required"
-            )
-        }
+        //     return helper.getHandlerResponseObject(
+        //         false,
+        //         httpStatus.Conflict,
+        //         "Title is required"
+        //     )
+        // }
+        const updatedData = Object.keys(param).reduce((acc:any, key) => {
+            if (param[key]) {
+              acc[key] = param[key];
+            }
+            return acc;
+          }, {}); 
+
         const industry = await prisma.industry.update({
             where: {
                 id: param.id,
             },
-            data: {
-                title: param.title.toUpperCase(),
-                description: param.description || undefined,
-                isActive: "isActive" in param ? param.isActive : undefined,
-                modifiedBy: userLoginId,
-            },
+            data: updatedData
+            // {
+            //     title: param.title.toUpperCase(),
+            //     description: param.description || undefined,
+            //     isActive: "isActive" in param ? param.isActive : undefined,
+            //     modifiedBy: userLoginId,
+            // },
         })
         logger.info(`File Name: ${path.basename(__filename)} | Method Name : updateIndustryById | Message: Industry updated successfully.`);
 

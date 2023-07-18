@@ -94,8 +94,8 @@ CompanyRouter.post(
 CompanyRouter.put(
     "/companies/:id",
     middleware.permission(helper.permissions.company_update),
-    body("companyName").notEmpty().withMessage("Company Name is required"),
-    body("industryId").notEmpty().withMessage("industry Name is required"),
+    // body("companyName").notEmpty().withMessage("Company Name is required"),
+    // body("industryId").notEmpty().withMessage("industry Name is required"),
 
     async (req: Request, res: Response) => {
         try {
